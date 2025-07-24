@@ -342,7 +342,6 @@ export default function Home() {
                   weekStartsOn={1}
                   modifiers={requestModifiers}
                   modifiersClassNames={requestModifiersClassNames}
-                  enabledDays={enabledDaysForCatalog}
                 />
               </div>
 
