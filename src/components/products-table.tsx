@@ -227,7 +227,6 @@ export function ProductsTable({ materials, requestData, existingRequests, onSucc
                     </Button>
                     <Button 
                       className="bg-primary hover:bg-primary/90 text-primary-foreground"
-                      variant='outline'
                     >
                       <History className="mr-2 h-4 w-4" />
                       Última solicitud

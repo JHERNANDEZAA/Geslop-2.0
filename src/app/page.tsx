@@ -215,7 +215,7 @@ export default function Home() {
       <main className="flex-grow flex flex-col">
         <Card className="shadow-lg rounded-none border-x-0 border-t-0 border-b-0">
           <CardHeader>
-            <CardTitle>Destinatario y Catálogo</CardTitle>
+            <CardTitle>Destinatario y catálogo</CardTitle>
             <CardDescription>
               Seleccione el centro, almacén y catálogo para realizar su solicitud.
             </CardDescription>
@@ -296,7 +296,7 @@ export default function Home() {
         {isDateSelectionActive && (
           <Card ref={dateSectionRef} className="mt-4 shadow-lg rounded-none border-x-0 border-t-0 border-b-0">
             <CardHeader>
-              <CardTitle>Fecha de Solicitud</CardTitle>
+              <CardTitle>Fecha de solicitud</CardTitle>
               <CardDescription>
                 Seleccione una fecha para su pedido en el calendario.
               </CardDescription>
