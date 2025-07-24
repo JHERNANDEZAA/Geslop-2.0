@@ -35,6 +35,7 @@ export const saveRequest = async (requestData: RequestData) => {
   
         // Add new documents for products with quantity > 0
         const validProducts = products.filter(p => p.quantity > 0);
+        const creationDate = new Date().toISOString();
         validProducts.forEach((product) => {
           const newRequestRef = doc(requestsRef);
           transaction.set(newRequestRef, {
@@ -47,6 +48,7 @@ export const saveRequest = async (requestData: RequestData) => {
             notes: product.notes,
             sentToSap: '', // Always save with an empty string
             user: user,
+            creationDate: creationDate,
           });
         });
       });
@@ -143,6 +145,7 @@ export const getRequestsForDate = async (center: string, warehouseCode: string, 
                 notes: data.notes,
                 sentToSap: data.sentToSap || '',
                 user: data.user,
+                creationDate: data.creationDate
             });
         });
         return requests;

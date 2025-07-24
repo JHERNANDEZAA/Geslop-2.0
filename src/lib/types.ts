@@ -42,6 +42,7 @@ export type ProductRequest = {
   notes: string;
   sentToSap: 'X' | '';
   user?: string;
+  creationDate?: string;
 };
 
 export type StoredRequest = {
@@ -54,6 +55,7 @@ export type StoredRequest = {
   notes: string;
   sentToSap: 'X' | '';
   user: string;
+  creationDate: string;
 }
 
 export type RequestInfo = {
