@@ -297,8 +297,7 @@ export default function Home() {
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col items-center gap-4">
-
-              <div className="border p-4 rounded-md w-full max-w-4xl bg-gray-50/50">
+              <div className="border p-4 rounded-md w-full bg-gray-50/50">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-sm">
                   <div className="flex items-center gap-2">
                     <div className="h-5 w-5 rounded-sm border bg-white"></div>
