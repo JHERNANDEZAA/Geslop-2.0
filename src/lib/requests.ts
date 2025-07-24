@@ -34,21 +34,19 @@ export const saveRequest = async (requestData: RequestData) => {
     });
 
     // Add new documents for products with quantity > 0
-    if (products.length > 0) {
-      const validProducts = products.filter(p => p.quantity > 0);
-      validProducts.forEach((product) => {
-        const newRequestRef = doc(requestsRef);
-        batch.set(newRequestRef, {
-          center,
-          warehouseCode,
-          requestDate,
-          catalog: requestData.catalog,
-          productCode: product.materialCode,
-          quantity: product.quantity,
-          notes: product.notes,
-        });
+    const validProducts = products.filter(p => p.quantity > 0);
+    validProducts.forEach((product) => {
+      const newRequestRef = doc(requestsRef);
+      batch.set(newRequestRef, {
+        center,
+        warehouseCode,
+        requestDate,
+        catalog: requestData.catalog,
+        productCode: product.materialCode,
+        quantity: product.quantity,
+        notes: product.notes,
       });
-    }
+    });
     
     // Commit the batch
     await batch.commit();
@@ -84,3 +82,33 @@ export const getRequestsForPeriod = async (center: string, warehouseCode: string
         return [];
     }
 };
+
+
+export const getRequestsForDate = async (center: string, warehouseCode: string, requestDate: string): Promise<ProductRequest[]> => {
+    if (!center || !warehouseCode || !requestDate) return [];
+    
+    const requestsRef = collection(db, 'requests');
+    const q = query(
+        requestsRef,
+        where('center', '==', center),
+        where('warehouseCode', '==', warehouseCode),
+        where('requestDate', '==', requestDate)
+    );
+
+    try {
+        const querySnapshot = await getDocs(q);
+        const requests: ProductRequest[] = [];
+        querySnapshot.forEach((doc) => {
+            const data = doc.data() as StoredRequest;
+            requests.push({
+                materialCode: data.productCode,
+                quantity: data.quantity,
+                notes: data.notes,
+            });
+        });
+        return requests;
+    } catch (error) {
+        console.error("Error fetching requests for date: ", error);
+        return [];
+    }
+}

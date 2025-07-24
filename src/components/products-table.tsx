@@ -1,7 +1,7 @@
 
 "use client"
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import type { Material, ProductRequest } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -18,12 +18,13 @@ interface ProductsTableProps {
     warehouseCode: string;
     catalog: string;
     requestDate: string;
-  }
+  };
+  existingRequests?: ProductRequest[];
 }
 
 const ITEMS_PER_PAGE = 50;
 
-export function ProductsTable({ materials, requestData }: ProductsTableProps) {
+export function ProductsTable({ materials, requestData, existingRequests }: ProductsTableProps) {
   const { toast } = useToast()
   const [filters, setFilters] = useState({
     materialCode: '',
@@ -34,6 +35,17 @@ export function ProductsTable({ materials, requestData }: ProductsTableProps) {
   const [productRequests, setProductRequests] = useState<Record<string, ProductRequest>>({});
   const [currentPage, setCurrentPage] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    const initialRequests: Record<string, ProductRequest> = {};
+    if (existingRequests) {
+      existingRequests.forEach(req => {
+        initialRequests[req.materialCode] = req;
+      });
+    }
+    setProductRequests(initialRequests);
+  }, [existingRequests]);
+
 
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -82,7 +94,7 @@ export function ProductsTable({ materials, requestData }: ProductsTableProps) {
       ...requestData,
       products: Object.values(productRequests).filter(p => p.quantity > 0)
     };
-    
+
     try {
       await saveRequest(finalRequest);
 

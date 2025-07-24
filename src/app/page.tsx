@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth.tsx';
 import {
@@ -17,9 +17,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Calendar } from '@/components/ui/calendar';
 import { ProductsTable } from '@/components/products-table';
 import { PageHeader } from '@/components/page-header';
-import type { Center, Warehouse, Catalog, EnabledDays, Material } from '@/lib/types';
+import type { Center, Warehouse, Catalog, EnabledDays, Material, ProductRequest } from '@/lib/types';
 import { centers, warehouses, catalogs, enabledDays, materials } from '@/lib/data';
-import { getRequestsForPeriod } from '@/lib/requests';
+import { getRequestsForPeriod, getRequestsForDate } from '@/lib/requests';
 import { addMonths, subMonths, startOfMonth, endOfMonth, parseISO, format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -32,6 +32,7 @@ export default function Home() {
   const [selectedCatalog, setSelectedCatalog] = useState<string>('');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [datesWithRequests, setDatesWithRequests] = useState<Date[]>([]);
+  const [existingRequests, setExistingRequests] = useState<ProductRequest[]>([]);
 
   const [isDateSelectionActive, setDateSelectionActive] = useState(false);
   const [isProductsVisible, setProductsVisible] = useState(false);
@@ -39,8 +40,7 @@ export default function Home() {
   const dateSectionRef = useRef<HTMLDivElement>(null);
   const productsSectionRef = useRef<HTMLDivElement>(null);
 
-  const displayFromMonth = useMemo(() => subMonths(startOfMonth(new Date()), 1), []);
-  const currentMonth = useMemo(() => startOfMonth(new Date()), []);
+  const displayFromMonth = useMemo(() => startOfMonth(new Date()), []);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -112,14 +112,15 @@ export default function Home() {
   useEffect(() => {
     const fetchRequests = async () => {
         if (selectedCenter && selectedWarehouse && isDateSelectionActive) {
-            const startDate = subMonths(currentMonth, 1);
-            const endDate = addMonths(currentMonth, 1);
+            const today = new Date();
+            const startDate = subMonths(startOfMonth(today), 1);
+            const endDate = addMonths(startOfMonth(today), 1);
             const dates = await getRequestsForPeriod(selectedCenter, selectedWarehouse, startDate, endOfMonth(endDate));
             setDatesWithRequests(dates.map(d => parseISO(d)));
         }
     };
     fetchRequests();
-  }, [selectedCenter, selectedWarehouse, isDateSelectionActive, currentMonth]);
+  }, [selectedCenter, selectedWarehouse, isDateSelectionActive]);
 
   const handleShowCalendar = () => {
     setDateSelectionActive(true);
@@ -129,11 +130,15 @@ export default function Home() {
     setProductsVisible(true);
   };
 
-  const handleDateSelect = (date: Date | undefined) => {
+  const handleDateSelect = useCallback(async (date: Date | undefined) => {
     if (date) {
       setSelectedDate(date);
+      setProductsVisible(false); // Hide products while loading new data
+      const formattedDate = format(date, 'yyyy-MM-dd');
+      const requests = await getRequestsForDate(selectedCenter, selectedWarehouse, formattedDate);
+      setExistingRequests(requests);
     }
-  };
+  }, [selectedCenter, selectedWarehouse]);
 
   const isDayDisabled = (day: Date) => {
     const today = new Date();
@@ -284,7 +289,7 @@ export default function Home() {
                 onClick={handleShowProducts} 
                 disabled={!selectedDate}
               >
-                Añadir Productos
+                Añadir / Modificar Productos
               </Button>
             </CardContent>
           </Card>
@@ -298,8 +303,9 @@ export default function Home() {
                 center: selectedCenter,
                 warehouseCode: selectedWarehouse,
                 catalog: selectedCatalog,
-                requestDate: format(selectedDate, 'yyyy-MM-dd', { timeZone: 'UTC' })
+                requestDate: format(selectedDate, 'yyyy-MM-dd')
               }}
+              existingRequests={existingRequests}
             />
           </div>
         )}
