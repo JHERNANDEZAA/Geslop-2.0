@@ -1,3 +1,209 @@
+"use client";
+
+import React, { useState, useEffect, useMemo } from 'react';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Calendar } from '@/components/ui/calendar';
+import { ProductsTable } from '@/components/products-table';
+import { PageHeader } from '@/components/page-header';
+import type { Center, Warehouse, Catalog, EnabledDays, Material } from '@/lib/types';
+import { centers, warehouses, catalogs, enabledDays, materials } from '@/lib/data';
+import { addDays, isPast } from 'date-fns';
+
 export default function Home() {
-  return <></>;
+  const [selectedCenter, setSelectedCenter] = useState<string>('');
+  const [selectedWarehouse, setSelectedWarehouse] = useState<string>('');
+  const [selectedCatalog, setSelectedCatalog] = useState<string>('');
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+
+  const [isCalendarActive, setCalendarActive] = useState(false);
+  const [isProductsVisible, setProductsVisible] = useState(false);
+
+  const availableWarehouses = useMemo(() => {
+    return warehouses.filter((w) => w.centerId === selectedCenter);
+  }, [selectedCenter]);
+
+  const availableCatalogs = useMemo(() => {
+    return catalogs.filter(
+      (c) => c.centerId === selectedCenter && c.warehouseCode === selectedWarehouse
+    );
+  }, [selectedCenter, selectedWarehouse]);
+  
+  const enabledDaysForCatalog = useMemo(() => {
+    if (!selectedCenter || !selectedCatalog) return [];
+    const rule = enabledDays.find(
+      (r) => r.centerId === selectedCenter && r.catalogName === selectedCatalog
+    );
+    return rule ? rule.days : [];
+  }, [selectedCenter, selectedCatalog]);
+
+  const filteredMaterials = useMemo(() => {
+    return materials.filter(m => m.center === selectedCenter && m.catalog === selectedCatalog);
+  }, [selectedCenter, selectedCatalog]);
+
+  useEffect(() => {
+    setSelectedWarehouse('');
+    setSelectedCatalog('');
+    setCalendarActive(false);
+    setProductsVisible(false);
+    setSelectedDate(undefined);
+  }, [selectedCenter]);
+
+  useEffect(() => {
+    setSelectedCatalog('');
+    setCalendarActive(false);
+    setProductsVisible(false);
+    setSelectedDate(undefined);
+  }, [selectedWarehouse]);
+
+  useEffect(() => {
+      setCalendarActive(false);
+      setProductsVisible(false);
+      setSelectedDate(undefined);
+  }, [selectedCatalog]);
+
+
+  const handleDateSelect = (date: Date | undefined) => {
+    if (date) {
+      setSelectedDate(date);
+    }
+  };
+
+  const isDayDisabled = (day: Date) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Set to start of today for comparison
+    // Disable past dates
+    if (day < today) return true;
+    
+    // Disable based on catalog rules
+    const dayOfWeek = day.getDay();
+    return !enabledDaysForCatalog.includes(dayOfWeek);
+  };
+  
+  return (
+    <div className="flex flex-col min-h-screen">
+      <PageHeader />
+      <main className="flex-grow container mx-auto p-4 md:p-8 space-y-6">
+        <Card className="shadow-lg">
+          <CardHeader>
+            <CardTitle>Destinatario y Catálogo</CardTitle>
+            <CardDescription>
+              Seleccione el centro, almacén y catálogo para realizar su solicitud.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="space-y-2">
+                <label htmlFor="center-select" className="text-sm font-medium">Centro</label>
+                <Select value={selectedCenter} onValueChange={setSelectedCenter}>
+                  <SelectTrigger id="center-select" className="bg-white">
+                    <SelectValue placeholder="Seleccione un centro" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {centers.map((center) => (
+                      <SelectItem key={center.id} value={center.id}>
+                        {center.id} - {center.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="warehouse-select" className="text-sm font-medium">Almacén</label>
+                <Select
+                  value={selectedWarehouse}
+                  onValueChange={setSelectedWarehouse}
+                  disabled={!selectedCenter}
+                >
+                  <SelectTrigger id="warehouse-select" className="bg-white">
+                    <SelectValue placeholder="Seleccione un almacén" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableWarehouses.map((wh) => (
+                      <SelectItem key={wh.warehouseCode} value={wh.warehouseCode}>
+                        {wh.warehouseDescription}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="catalog-select" className="text-sm font-medium">Catálogo</label>
+                <Select
+                  value={selectedCatalog}
+                  onValueChange={setSelectedCatalog}
+                  disabled={!selectedWarehouse}
+                >
+                  <SelectTrigger id="catalog-select" className="bg-white">
+                    <SelectValue placeholder="Seleccione un catálogo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableCatalogs.map((cat) => (
+                      <SelectItem key={cat.catalogName} value={cat.catalogName}>
+                        {cat.catalogName}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {selectedCatalog && (
+          <Card className="shadow-lg">
+            <CardHeader>
+              <CardTitle>Fecha de Solicitud</CardTitle>
+              <CardDescription>
+                Active y seleccione una fecha para su pedido en el calendario.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-col items-center gap-4">
+              {!isCalendarActive && (
+                 <Button onClick={() => setCalendarActive(true)} variant="outline">
+                   Activar el calendario para la fecha de solicitud del pedido
+                 </Button>
+              )}
+              {isCalendarActive && (
+                <div className="w-full flex justify-center">
+                  <Calendar
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={handleDateSelect}
+                    numberOfMonths={2}
+                    disabled={isDayDisabled}
+                    className="rounded-md border bg-white"
+                  />
+                </div>
+              )}
+              {selectedDate && (
+                <Button onClick={() => setProductsVisible(true)} className="bg-accent hover:bg-accent/90">
+                  Añadir Productos
+                </Button>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {isProductsVisible && selectedDate && (
+          <ProductsTable 
+            materials={filteredMaterials} 
+            requestData={{
+              center: selectedCenter,
+              warehouseCode: selectedWarehouse,
+              catalog: selectedCatalog,
+              requestDate: selectedDate.toISOString().split('T')[0]
+            }}
+          />
+        )}
+      </main>
+    </div>
+  );
 }
