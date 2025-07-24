@@ -111,7 +111,7 @@ export default function Home() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
               <div className="border p-4 rounded-md md:col-span-3">
                   <h3 className="text-lg font-semibold mb-4">Destinatario</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -152,7 +152,7 @@ export default function Home() {
                   </div>
               </div>
 
-              <div className="border p-4 rounded-md md:col-span-1">
+              <div className="border p-4 rounded-md md:col-span-2">
                   <h3 className="text-lg font-semibold mb-4">Catálogo</h3>
                   <div className="grid grid-cols-1 gap-6">
                     <div className="space-y-2">
