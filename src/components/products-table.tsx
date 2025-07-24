@@ -186,7 +186,7 @@ export function ProductsTable({ materials, requestData, existingRequests, onSucc
             <Input name="familyDescription" placeholder="Descripción de familia" onChange={handleFilterChange} value={filters.familyDescription}/>
           </div>
         </div>
-        <div className="flex justify-start gap-2 mb-6">
+        <div className="flex justify-end gap-2 mb-6">
             <Button onClick={handleSubmit} className="bg-accent hover:bg-accent/90" disabled={isSubmitting}>
               {isSubmitting ? 'Enviando...' : 'Solicitar'}
             </Button>
