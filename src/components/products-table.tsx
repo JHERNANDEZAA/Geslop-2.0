@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from "@/hooks/use-toast"
 import { saveRequest, deleteRequest } from '@/lib/requests';
+import { getFavorites, addFavorite, removeFavorite } from '@/lib/favorites';
 import { Star, History } from 'lucide-react';
 import {
   AlertDialog,
@@ -49,6 +50,7 @@ export function ProductsTable({ materials, requestData, existingRequests, onSucc
   const [productRequests, setProductRequests] = useState<Record<string, ProductRequest>>({});
   const [currentPage, setCurrentPage] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [favorites, setFavorites] = useState<string[]>([]);
 
   useEffect(() => {
     const initialRequests: Record<string, ProductRequest> = {};
@@ -59,6 +61,12 @@ export function ProductsTable({ materials, requestData, existingRequests, onSucc
     }
     setProductRequests(initialRequests);
   }, [existingRequests]);
+  
+  useEffect(() => {
+    if (requestData.user) {
+        getFavorites(requestData.user).then(setFavorites);
+    }
+  }, [requestData.user]);
 
 
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -84,6 +92,17 @@ export function ProductsTable({ materials, requestData, existingRequests, onSucc
       };
     });
   };
+
+  const handleFavoriteToggle = async (materialCode: string) => {
+    const isFavorite = favorites.includes(materialCode);
+    if (isFavorite) {
+        await removeFavorite(requestData.user, materialCode);
+        setFavorites(favs => favs.filter(fav => fav !== materialCode));
+    } else {
+        await addFavorite(requestData.user, materialCode);
+        setFavorites(favs => [...favs, materialCode]);
+    }
+  }
 
   const filteredMaterials = useMemo(() => {
     return materials.filter(m => 
@@ -239,6 +258,7 @@ export function ProductsTable({ materials, requestData, existingRequests, onSucc
                     <Table>
                         <TableHeader>
                             <TableRow>
+                                <TableHead>Favorito</TableHead>
                                 <TableHead>Código material</TableHead>
                                 <TableHead>Descripción material</TableHead>
                                 <TableHead>Ubicación</TableHead>
@@ -253,6 +273,11 @@ export function ProductsTable({ materials, requestData, existingRequests, onSucc
                         <TableBody>
                             {paginatedMaterials.map(material => (
                                 <TableRow key={material.materialCode}>
+                                    <TableCell>
+                                        <button onClick={() => handleFavoriteToggle(material.materialCode)} disabled={isReadOnly} className="disabled:opacity-50">
+                                            <Star className={`h-5 w-5 ${favorites.includes(material.materialCode) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-400'}`} />
+                                        </button>
+                                    </TableCell>
                                     <TableCell>{material.materialCode}</TableCell>
                                     <TableCell>{material.materialDescription}</TableCell>
                                     <TableCell>{material.location}</TableCell>
