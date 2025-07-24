@@ -205,11 +205,15 @@ export function ProductsTable({ materials, requestData, existingRequests, onSucc
             </CardHeader>
             <CardContent className="space-y-4">
                 <div className="flex justify-start gap-2">
-                    <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
+                    <Button 
+                      className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                    >
                       <Star className="mr-2 h-4 w-4" />
                       Favoritos
                     </Button>
-                    <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
+                    <Button 
+                      className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                    >
                       <History className="mr-2 h-4 w-4" />
                       Última solicitud
                     </Button>
@@ -258,9 +262,9 @@ export function ProductsTable({ materials, requestData, existingRequests, onSucc
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead>Favorito</TableHead>
                                 <TableHead>Código material</TableHead>
                                 <TableHead>Descripción material</TableHead>
+                                <TableHead>Favorito</TableHead>
                                 <TableHead>Ubicación</TableHead>
                                 <TableHead>Redondeo</TableHead>
                                 <TableHead>Semáforo</TableHead>
@@ -273,13 +277,13 @@ export function ProductsTable({ materials, requestData, existingRequests, onSucc
                         <TableBody>
                             {paginatedMaterials.map(material => (
                                 <TableRow key={material.materialCode}>
+                                    <TableCell>{material.materialCode}</TableCell>
+                                    <TableCell>{material.materialDescription}</TableCell>
                                     <TableCell>
                                         <button onClick={() => handleFavoriteToggle(material.materialCode)} disabled={isReadOnly} className="disabled:opacity-50">
                                             <Star className={`h-5 w-5 ${favorites.includes(material.materialCode) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-400'}`} />
                                         </button>
                                     </TableCell>
-                                    <TableCell>{material.materialCode}</TableCell>
-                                    <TableCell>{material.materialDescription}</TableCell>
                                     <TableCell>{material.location}</TableCell>
                                     <TableCell>{material.rounding}</TableCell>
                                     <TableCell><TrafficLight color={material.trafficLight} /></TableCell>
