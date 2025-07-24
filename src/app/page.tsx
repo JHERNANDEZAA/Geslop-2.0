@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
@@ -16,7 +17,7 @@ import { ProductsTable } from '@/components/products-table';
 import { PageHeader } from '@/components/page-header';
 import type { Center, Warehouse, Catalog, EnabledDays, Material } from '@/lib/types';
 import { centers, warehouses, catalogs, enabledDays, materials } from '@/lib/data';
-import { addMonths, startOfMonth } from 'date-fns';
+import { addMonths, subMonths, startOfMonth } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 export default function Home() {
@@ -118,7 +119,7 @@ export default function Home() {
   };
 
   const today = new Date();
-  const fromMonth = startOfMonth(today);
+  const fromMonth = startOfMonth(subMonths(today, 1));
   const toMonth = startOfMonth(addMonths(today, 1));
   
   return (
