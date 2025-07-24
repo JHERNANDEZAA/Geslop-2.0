@@ -186,7 +186,7 @@ export default function Home() {
 
   const requestModifiersClassNames = {
     requested: 'bg-orange-300 rounded-md',
-    sentToSap: 'bg-gray-500 text-white rounded-md opacity-70 cursor-not-allowed',
+    sentToSap: 'bg-blue-800 text-white rounded-md cursor-not-allowed',
   };
 
   if (loading || !user) {
@@ -309,7 +309,7 @@ export default function Home() {
                     <span>Día con solicitud modificable</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="h-5 w-5 rounded-sm bg-gray-500 opacity-70"></div>
+                    <div className="h-5 w-5 rounded-sm bg-blue-800"></div>
                     <span>Día con solicitud enviada a SAP (no modificable)</span>
                   </div>
                   <div className="flex items-center gap-2">
@@ -367,5 +367,3 @@ export default function Home() {
     </div>
   );
 }
-
-    
