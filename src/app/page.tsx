@@ -19,7 +19,8 @@ import { ProductsTable } from '@/components/products-table';
 import { PageHeader } from '@/components/page-header';
 import type { Center, Warehouse, Catalog, EnabledDays, Material } from '@/lib/types';
 import { centers, warehouses, catalogs, enabledDays, materials } from '@/lib/data';
-import { addMonths, subMonths, startOfMonth } from 'date-fns';
+import { getRequestsForPeriod } from '@/lib/requests';
+import { addMonths, subMonths, startOfMonth, endOfMonth, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -30,12 +31,15 @@ export default function Home() {
   const [selectedWarehouse, setSelectedWarehouse] = useState<string>('');
   const [selectedCatalog, setSelectedCatalog] = useState<string>('');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [datesWithRequests, setDatesWithRequests] = useState<Date[]>([]);
 
   const [isDateSelectionActive, setDateSelectionActive] = useState(false);
   const [isProductsVisible, setProductsVisible] = useState(false);
   
   const dateSectionRef = useRef<HTMLDivElement>(null);
   const productsSectionRef = useRef<HTMLDivElement>(null);
+
+  const currentMonth = useMemo(() => startOfMonth(new Date()), []);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -71,6 +75,7 @@ export default function Home() {
     setDateSelectionActive(false);
     setProductsVisible(false);
     setSelectedDate(undefined);
+    setDatesWithRequests([]);
   }, [selectedCenter]);
 
   useEffect(() => {
@@ -78,6 +83,7 @@ export default function Home() {
     setDateSelectionActive(false);
     setProductsVisible(false);
     setSelectedDate(undefined);
+    setDatesWithRequests([]);
   }, [selectedWarehouse]);
 
   useEffect(() => {
@@ -101,6 +107,18 @@ export default function Home() {
       productsSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   }, [isProductsVisible]);
+
+  useEffect(() => {
+    const fetchRequests = async () => {
+        if (selectedCenter && selectedWarehouse && isDateSelectionActive) {
+            const startDate = subMonths(currentMonth, 1);
+            const endDate = addMonths(currentMonth, 1);
+            const dates = await getRequestsForPeriod(selectedCenter, selectedWarehouse, startDate, endOfMonth(endDate));
+            setDatesWithRequests(dates.map(d => parseISO(d)));
+        }
+    };
+    fetchRequests();
+  }, [selectedCenter, selectedWarehouse, isDateSelectionActive, currentMonth]);
 
   const handleShowCalendar = () => {
     setDateSelectionActive(true);
@@ -129,8 +147,13 @@ export default function Home() {
     return !enabledDaysForCatalog.includes(dayOfWeek);
   };
 
-  const today = new Date();
-  const defaultMonth = startOfMonth(subMonths(today, 1));
+  const requestModifiers = {
+    requested: datesWithRequests,
+  };
+
+  const requestModifiersClassNames = {
+    requested: 'bg-orange-300',
+  };
 
   if (loading || !user) {
     return (
@@ -236,7 +259,7 @@ export default function Home() {
             <CardHeader>
               <CardTitle>Fecha de Solicitud</CardTitle>
               <CardDescription>
-                Seleccione una fecha para su pedido en el calendario.
+                Seleccione una fecha para su pedido en el calendario. Los días en naranja indican que ya existe una solicitud.
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col items-center gap-4">
@@ -246,12 +269,14 @@ export default function Home() {
                   selected={selectedDate}
                   onSelect={handleDateSelect}
                   numberOfMonths={3}
-                  month={defaultMonth}
+                  month={currentMonth}
                   disableNavigation
                   disabled={isDayDisabled}
                   className="rounded-md border bg-white"
                   locale={es}
                   weekStartsOn={1}
+                  modifiers={requestModifiers}
+                  modifiersClassNames={requestModifiersClassNames}
                 />
               </div>
               <Button 
