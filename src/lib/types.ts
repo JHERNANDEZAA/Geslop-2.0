@@ -53,3 +53,9 @@ export type StoredRequest = {
   notes: string;
   sentToSap: 'X' | '';
 }
+
+export type RequestInfo = {
+  date: string;
+  hasRequest: boolean;
+  sentToSap: boolean;
+}

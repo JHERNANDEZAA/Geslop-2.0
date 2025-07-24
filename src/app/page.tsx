@@ -17,7 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Calendar } from '@/components/ui/calendar';
 import { ProductsTable } from '@/components/products-table';
 import { PageHeader } from '@/components/page-header';
-import type { Center, Warehouse, Catalog, EnabledDays, Material, ProductRequest } from '@/lib/types';
+import type { Center, Warehouse, Catalog, EnabledDays, Material, ProductRequest, RequestInfo } from '@/lib/types';
 import { centers, warehouses, catalogs, enabledDays, materials } from '@/lib/data';
 import { getRequestsForPeriod, getRequestsForDate } from '@/lib/requests';
 import { addMonths, subMonths, startOfMonth, endOfMonth, parseISO, format } from 'date-fns';
@@ -31,7 +31,7 @@ export default function Home() {
   const [selectedWarehouse, setSelectedWarehouse] = useState<string>('');
   const [selectedCatalog, setSelectedCatalog] = useState<string>('');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
-  const [datesWithRequests, setDatesWithRequests] = useState<Date[]>([]);
+  const [requestsInfo, setRequestsInfo] = useState<RequestInfo[]>([]);
   const [existingRequests, setExistingRequests] = useState<ProductRequest[]>([]);
 
   const [isDateSelectionActive, setDateSelectionActive] = useState(false);
@@ -77,8 +77,8 @@ export default function Home() {
         const today = new Date();
         const startDate = subMonths(startOfMonth(today), 1);
         const endDate = addMonths(startOfMonth(today), 1);
-        const dates = await getRequestsForPeriod(selectedCenter, selectedWarehouse, startDate, endOfMonth(endDate));
-        setDatesWithRequests(dates.map(d => parseISO(d)));
+        const requestInfos = await getRequestsForPeriod(selectedCenter, selectedWarehouse, startDate, endOfMonth(endDate));
+        setRequestsInfo(requestInfos);
     }
   }, [selectedCenter, selectedWarehouse]);
 
@@ -88,7 +88,7 @@ export default function Home() {
     setDateSelectionActive(false);
     setProductsVisible(false);
     setSelectedDate(undefined);
-    setDatesWithRequests([]);
+    setRequestsInfo([]);
   }, [selectedCenter]);
 
   useEffect(() => {
@@ -96,7 +96,7 @@ export default function Home() {
     setDateSelectionActive(false);
     setProductsVisible(false);
     setSelectedDate(undefined);
-    setDatesWithRequests([]);
+    setRequestsInfo([]);
   }, [selectedWarehouse]);
 
   useEffect(() => {
@@ -132,6 +132,7 @@ export default function Home() {
 
   const handleDateSelect = useCallback(async (date: Date | undefined) => {
     if (date) {
+      // Create a new Date object in UTC to avoid timezone issues
       const utcDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
       setSelectedDate(utcDate);
       setProductsVisible(false); // Hide products while loading new data
@@ -144,6 +145,13 @@ export default function Home() {
   const isDayDisabled = (day: Date) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0); // Set to start of today for comparison
+
+    const formattedDay = format(day, 'yyyy-MM-dd');
+    const requestInfo = requestsInfo.find(r => r.date === formattedDay);
+    if (requestInfo?.sentToSap) {
+      return true; // Disable if sent to SAP
+    }
+    
     // Disable past dates
     if (day < today) return true;
     
@@ -160,12 +168,25 @@ export default function Home() {
     fetchRequestDates();
   };
 
-  const requestModifiers = {
-    requested: datesWithRequests,
-  };
+  const requestModifiers = useMemo(() => {
+    const requested: Date[] = [];
+    const sentToSap: Date[] = [];
+
+    requestsInfo.forEach(info => {
+        const date = parseISO(info.date);
+        if (info.sentToSap) {
+            sentToSap.push(date);
+        } else {
+            requested.push(date);
+        }
+    });
+
+    return { requested, sentToSap };
+  }, [requestsInfo]);
 
   const requestModifiersClassNames = {
     requested: 'bg-orange-300 rounded-md',
+    sentToSap: 'bg-gray-500 text-white rounded-md opacity-70 cursor-not-allowed',
   };
 
   if (loading || !user) {
@@ -272,7 +293,7 @@ export default function Home() {
             <CardHeader>
               <CardTitle>Fecha de Solicitud</CardTitle>
               <CardDescription>
-                Seleccione una fecha para su pedido en el calendario. Los días en naranja indican que ya existe una solicitud.
+                Seleccione una fecha para su pedido en el calendario.
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col items-center gap-4">
@@ -292,6 +313,31 @@ export default function Home() {
                   modifiersClassNames={requestModifiersClassNames}
                 />
               </div>
+
+              <div className="border p-4 rounded-md mt-4 w-full max-w-4xl bg-gray-50/50">
+                <h4 className="font-semibold mb-3 text-center">Leyenda</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-sm">
+                  <div className="flex items-center gap-2">
+                    <div className="h-5 w-5 rounded-sm border bg-white"></div>
+                    <span>Día disponible para solicitar</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="h-5 w-5 rounded-sm bg-orange-300"></div>
+                    <span>Día con solicitud modificable</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="h-5 w-5 rounded-sm bg-gray-500 opacity-70"></div>
+                    <span>Día con solicitud enviada a SAP (no modificable)</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="h-5 w-5 rounded-sm bg-muted text-muted-foreground line-through flex items-center justify-center">
+                      <span className="text-xs">X</span>
+                    </div>
+                    <span>Día no habilitado para solicitar</span>
+                  </div>
+                </div>
+              </div>
+
               <Button 
                 onClick={handleShowProducts} 
                 disabled={!selectedDate}

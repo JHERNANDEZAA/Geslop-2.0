@@ -1,7 +1,7 @@
 
 import { db } from './firebase';
 import { collection, query, where, getDocs, writeBatch, doc, runTransaction } from 'firebase/firestore';
-import type { ProductRequest, StoredRequest } from './types';
+import type { ProductRequest, StoredRequest, RequestInfo } from './types';
 
 interface RequestData {
   center: string;
@@ -79,7 +79,7 @@ export const deleteRequest = async (center: string, warehouseCode: string, reque
   }
 };
 
-export const getRequestsForPeriod = async (center: string, warehouseCode: string, startDate: Date, endDate: Date): Promise<string[]> => {
+export const getRequestsForPeriod = async (center: string, warehouseCode: string, startDate: Date, endDate: Date): Promise<RequestInfo[]> => {
     if (!center || !warehouseCode) return [];
     
     const requestsRef = collection(db, 'requests');
@@ -93,12 +93,24 @@ export const getRequestsForPeriod = async (center: string, warehouseCode: string
 
     try {
         const querySnapshot = await getDocs(q);
-        const datesWithRequests: Set<string> = new Set();
+        const requestsByDate: Record<string, { sentToSap: boolean }> = {};
+
         querySnapshot.forEach((doc) => {
             const data = doc.data() as StoredRequest;
-            datesWithRequests.add(data.requestDate);
+            if (!requestsByDate[data.requestDate]) {
+                requestsByDate[data.requestDate] = { sentToSap: false };
+            }
+            if (data.sentToSap === 'X') {
+                requestsByDate[data.requestDate].sentToSap = true;
+            }
         });
-        return Array.from(datesWithRequests);
+        
+        return Object.entries(requestsByDate).map(([date, info]) => ({
+            date,
+            hasRequest: true,
+            sentToSap: info.sentToSap,
+        }));
+
     } catch (error) {
         console.error("Error fetching requests for period: ", error);
         return [];
