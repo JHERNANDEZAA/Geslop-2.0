@@ -55,6 +55,30 @@ export const saveRequest = async (requestData: RequestData) => {
     }
 };
 
+export const deleteRequest = async (center: string, warehouseCode: string, requestDate: string) => {
+  const requestsRef = collection(db, 'requests');
+  
+  const q = query(
+    requestsRef,
+    where('center', '==', center),
+    where('warehouseCode', '==', warehouseCode),
+    where('requestDate', '==', requestDate)
+  );
+
+  try {
+      const querySnapshot = await getDocs(q);
+      const batch = writeBatch(db);
+      querySnapshot.forEach((doc) => {
+          batch.delete(doc.ref);
+      });
+      await batch.commit();
+      console.log('Request deleted successfully');
+  } catch (error) {
+      console.error('Error deleting request: ', error);
+      throw error;
+  }
+};
+
 export const getRequestsForPeriod = async (center: string, warehouseCode: string, startDate: Date, endDate: Date): Promise<string[]> => {
     if (!center || !warehouseCode) return [];
     

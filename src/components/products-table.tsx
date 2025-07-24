@@ -9,7 +9,18 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from "@/hooks/use-toast"
-import { saveRequest } from '@/lib/requests';
+import { saveRequest, deleteRequest } from '@/lib/requests';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 interface ProductsTableProps {
   materials: Material[];
@@ -124,6 +135,27 @@ export function ProductsTable({ materials, requestData, existingRequests }: Prod
     }
   };
 
+  const handleDelete = async () => {
+    setIsSubmitting(true);
+    try {
+        await deleteRequest(requestData.center, requestData.warehouseCode, requestData.requestDate);
+        setProductRequests({});
+        toast({
+            title: "Solicitud Eliminada",
+            description: `La solicitud para el ${requestData.requestDate} ha sido eliminada.`,
+            variant: 'default',
+        });
+    } catch (error) {
+        toast({
+            title: "Error al eliminar",
+            description: "No se pudo eliminar la solicitud. Por favor, intente de nuevo.",
+            variant: 'destructive',
+        });
+    } finally {
+        setIsSubmitting(false);
+    }
+  }
+
   const TrafficLight = ({ color }: { color: 'green' | 'yellow' | 'red' }) => {
     const colorClass = {
         green: 'bg-green-500',
@@ -153,6 +185,26 @@ export function ProductsTable({ materials, requestData, existingRequests }: Prod
             <Button onClick={handleSubmit} className="bg-accent hover:bg-accent/90" disabled={isSubmitting}>
               {isSubmitting ? 'Enviando...' : 'Solicitar'}
             </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" disabled={isSubmitting}>Borrar solicitud</Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>¿Está seguro?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Esta acción no se puede deshacer. Se borrará permanentemente la solicitud
+                    para el centro {requestData.center}, almacén {requestData.warehouseCode} en la fecha {requestData.requestDate}.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90">
+                    Borrar
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </div>
         
