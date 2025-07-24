@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useMemo, useEffect } from 'react';
@@ -183,13 +182,11 @@ export function ProductsTable({ materials, requestData, existingRequests, onSucc
                     <Button variant="outline">Favoritos</Button>
                     <Button variant="outline">Última solicitud</Button>
                 </div>
-                <div className="p-4 bg-gray-50/50">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <Input name="materialCode" placeholder="Código de producto" onChange={handleFilterChange} value={filters.materialCode} />
-                        <Input name="materialDescription" placeholder="Descripción de producto" onChange={handleFilterChange} value={filters.materialDescription} />
-                        <Input name="familyCode" placeholder="Código de familia" onChange={handleFilterChange} value={filters.familyCode}/>
-                        <Input name="familyDescription" placeholder="Descripción de familia" onChange={handleFilterChange} value={filters.familyDescription}/>
-                    </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <Input name="materialCode" placeholder="Código de producto" onChange={handleFilterChange} value={filters.materialCode} />
+                    <Input name="materialDescription" placeholder="Descripción de producto" onChange={handleFilterChange} value={filters.materialDescription} />
+                    <Input name="familyCode" placeholder="Código de familia" onChange={handleFilterChange} value={filters.familyCode}/>
+                    <Input name="familyDescription" placeholder="Descripción de familia" onChange={handleFilterChange} value={filters.familyDescription}/>
                 </div>
             </CardContent>
         </Card>
@@ -295,5 +292,3 @@ export function ProductsTable({ materials, requestData, existingRequests, onSucc
     </Card>
   );
 }
-
-    
