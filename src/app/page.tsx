@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   Card,
   CardContent,
@@ -26,6 +26,9 @@ export default function Home() {
 
   const [isDateSelectionActive, setDateSelectionActive] = useState(false);
   const [isProductsVisible, setProductsVisible] = useState(false);
+  
+  const dateSectionRef = useRef<HTMLDivElement>(null);
+  const productsSectionRef = useRef<HTMLDivElement>(null);
 
   const availableWarehouses = useMemo(() => {
     return warehouses.filter((w) => w.centerId === selectedCenter);
@@ -73,9 +76,25 @@ export default function Home() {
         // The user must click the button.
       }
   }, [selectedCatalog]);
+  
+  useEffect(() => {
+    if (isDateSelectionActive && dateSectionRef.current) {
+      dateSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [isDateSelectionActive]);
+
+  useEffect(() => {
+    if (isProductsVisible && productsSectionRef.current) {
+      productsSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [isProductsVisible]);
 
   const handleShowCalendar = () => {
     setDateSelectionActive(true);
+  };
+  
+  const handleShowProducts = () => {
+    setProductsVisible(true);
   };
 
   const handleDateSelect = (date: Date | undefined) => {
@@ -100,10 +119,10 @@ export default function Home() {
   const toMonth = startOfMonth(addMonths(today, 1));
   
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen bg-background">
       <PageHeader />
-      <main className="flex-grow space-y-6">
-        <Card className="shadow-lg rounded-none border-x-0">
+      <main className="flex-grow space-y-0">
+        <Card className="shadow-lg rounded-none border-x-0 border-t-0">
           <CardHeader>
             <CardTitle>Destinatario y Catálogo</CardTitle>
             <CardDescription>
@@ -184,7 +203,7 @@ export default function Home() {
         </Card>
 
         {isDateSelectionActive && (
-          <Card className="shadow-lg rounded-none border-x-0">
+          <Card ref={dateSectionRef} className="shadow-lg rounded-none border-x-0 border-t-0">
             <CardHeader>
               <CardTitle>Fecha de Solicitud</CardTitle>
               <CardDescription>
@@ -206,7 +225,7 @@ export default function Home() {
                 />
               </div>
               <Button 
-                onClick={() => setProductsVisible(true)} 
+                onClick={handleShowProducts} 
                 disabled={!selectedDate}
               >
                 Añadir Productos
@@ -216,15 +235,17 @@ export default function Home() {
         )}
 
         {isProductsVisible && selectedDate && (
-          <ProductsTable 
-            materials={filteredMaterials} 
-            requestData={{
-              center: selectedCenter,
-              warehouseCode: selectedWarehouse,
-              catalog: selectedCatalog,
-              requestDate: selectedDate.toISOString().split('T')[0]
-            }}
-          />
+          <div ref={productsSectionRef}>
+            <ProductsTable 
+              materials={filteredMaterials} 
+              requestData={{
+                center: selectedCenter,
+                warehouseCode: selectedWarehouse,
+                catalog: selectedCatalog,
+                requestDate: selectedDate.toISOString().split('T')[0]
+              }}
+            />
+          </div>
         )}
       </main>
     </div>
