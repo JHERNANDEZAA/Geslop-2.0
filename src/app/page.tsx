@@ -17,6 +17,7 @@ import { PageHeader } from '@/components/page-header';
 import type { Center, Warehouse, Catalog, EnabledDays, Material } from '@/lib/types';
 import { centers, warehouses, catalogs, enabledDays, materials } from '@/lib/data';
 import { addMonths, startOfMonth } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 export default function Home() {
   const [selectedCenter, setSelectedCenter] = useState<string>('');
@@ -111,6 +112,8 @@ export default function Home() {
     
     // Disable based on catalog rules
     const dayOfWeek = day.getDay();
+    // In JS, Sunday is 0, Monday is 1, etc.
+    // The rule uses 0 for Sunday, 1 for Monday...
     return !enabledDaysForCatalog.includes(dayOfWeek);
   };
 
@@ -122,7 +125,7 @@ export default function Home() {
     <div className="flex flex-col min-h-screen bg-background">
       <PageHeader />
       <main className="flex-grow space-y-0">
-        <Card className="shadow-lg rounded-none border-x-0 border-t-0">
+        <Card className="shadow-lg rounded-none border-x-0 border-t-0 border-b-0">
           <CardHeader>
             <CardTitle>Destinatario y Catálogo</CardTitle>
             <CardDescription>
@@ -203,7 +206,7 @@ export default function Home() {
         </Card>
 
         {isDateSelectionActive && (
-          <Card ref={dateSectionRef} className="shadow-lg rounded-none border-x-0 border-t-0">
+          <Card ref={dateSectionRef} className="shadow-lg rounded-none border-x-0 border-t-0 border-b-0">
             <CardHeader>
               <CardTitle>Fecha de Solicitud</CardTitle>
               <CardDescription>
@@ -222,6 +225,8 @@ export default function Home() {
                   disabled={isDayDisabled}
                   disableNavigation
                   className="rounded-md border bg-white"
+                  locale={es}
+                  weekStartsOn={1}
                 />
               </div>
               <Button 
