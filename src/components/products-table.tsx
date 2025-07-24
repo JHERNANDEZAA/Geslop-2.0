@@ -178,14 +178,15 @@ export function ProductsTable({ materials, requestData, existingRequests, onSucc
             <Button variant="outline">Favoritos</Button>
             <Button variant="outline">Última solicitud</Button>
         </div>
-        <div className="p-4 border rounded-lg bg-gray-50/50 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+        <div className="p-4 border rounded-lg bg-gray-50/50 mb-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <Input name="materialCode" placeholder="Código de producto" onChange={handleFilterChange} value={filters.materialCode} />
             <Input name="materialDescription" placeholder="Descripción de producto" onChange={handleFilterChange} value={filters.materialDescription} />
             <Input name="familyCode" placeholder="Código de familia" onChange={handleFilterChange} value={filters.familyCode}/>
             <Input name="familyDescription" placeholder="Descripción de familia" onChange={handleFilterChange} value={filters.familyDescription}/>
           </div>
-          <div className="flex justify-start gap-2">
+        </div>
+        <div className="flex justify-start gap-2 mb-6">
             <Button onClick={handleSubmit} className="bg-accent hover:bg-accent/90" disabled={isSubmitting}>
               {isSubmitting ? 'Enviando...' : 'Solicitar'}
             </Button>
@@ -209,7 +210,6 @@ export function ProductsTable({ materials, requestData, existingRequests, onSucc
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
-          </div>
         </div>
         
         <div className="overflow-x-auto">
