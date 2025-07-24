@@ -5,6 +5,7 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
@@ -23,7 +24,7 @@ export default function Home() {
   const [selectedCatalog, setSelectedCatalog] = useState<string>('');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
 
-  const [isCalendarActive, setCalendarActive] = useState(false);
+  const [isDateSelectionActive, setDateSelectionActive] = useState(false);
   const [isProductsVisible, setProductsVisible] = useState(false);
 
   const availableWarehouses = useMemo(() => {
@@ -51,20 +52,20 @@ export default function Home() {
   useEffect(() => {
     setSelectedWarehouse('');
     setSelectedCatalog('');
-    setCalendarActive(false);
+    setDateSelectionActive(false);
     setProductsVisible(false);
     setSelectedDate(undefined);
   }, [selectedCenter]);
 
   useEffect(() => {
     setSelectedCatalog('');
-    setCalendarActive(false);
+    setDateSelectionActive(false);
     setProductsVisible(false);
     setSelectedDate(undefined);
   }, [selectedWarehouse]);
 
   useEffect(() => {
-      setCalendarActive(false);
+      setDateSelectionActive(false);
       setProductsVisible(false);
       setSelectedDate(undefined);
   }, [selectedCatalog]);
@@ -159,37 +160,37 @@ export default function Home() {
               </div>
             </div>
           </CardContent>
+          {selectedCatalog && (
+            <CardFooter>
+              <Button onClick={() => setDateSelectionActive(true)} disabled={!selectedCenter || !selectedWarehouse || !selectedCatalog}>
+                Activar calendario de solicitud
+              </Button>
+            </CardFooter>
+          )}
         </Card>
 
-        {selectedCatalog && (
+        {isDateSelectionActive && (
           <Card className="shadow-lg">
             <CardHeader>
               <CardTitle>Fecha de Solicitud</CardTitle>
               <CardDescription>
-                Active y seleccione una fecha para su pedido en el calendario.
+                Seleccione una fecha para su pedido en el calendario.
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col items-center gap-4">
-              {!isCalendarActive && (
-                 <Button onClick={() => setCalendarActive(true)} variant="outline">
-                   Activar el calendario para la fecha de solicitud del pedido
-                 </Button>
-              )}
-              {isCalendarActive && (
-                <div className="w-full flex justify-center">
-                  <Calendar
-                    mode="single"
-                    selected={selectedDate}
-                    onSelect={handleDateSelect}
-                    numberOfMonths={2}
-                    fromMonth={fromMonth}
-                    toMonth={toMonth}
-                    disabled={isDayDisabled}
-                    disableNavigation
-                    className="rounded-md border bg-white"
-                  />
-                </div>
-              )}
+              <div className="w-full flex justify-center">
+                <Calendar
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={handleDateSelect}
+                  numberOfMonths={2}
+                  fromMonth={fromMonth}
+                  toMonth={toMonth}
+                  disabled={isDayDisabled}
+                  disableNavigation
+                  className="rounded-md border bg-white"
+                />
+              </div>
               {selectedDate && (
                 <Button onClick={() => setProductsVisible(true)} className="bg-accent hover:bg-accent/90">
                   Añadir Productos
