@@ -51,6 +51,7 @@ export function ProductsTable({ materials, requestData, existingRequests, onSucc
   const [currentPage, setCurrentPage] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [favorites, setFavorites] = useState<string[]>([]);
+  const [showOnlyFavorites, setShowOnlyFavorites] = useState(false);
 
   useEffect(() => {
     const initialRequests: Record<string, ProductRequest> = {};
@@ -104,14 +105,25 @@ export function ProductsTable({ materials, requestData, existingRequests, onSucc
     }
   }
 
+  const handleShowFavorites = () => {
+    setShowOnlyFavorites(prev => !prev);
+    setCurrentPage(0);
+  }
+
   const filteredMaterials = useMemo(() => {
-    return materials.filter(m => 
+    let filtered = materials;
+
+    if (showOnlyFavorites) {
+        filtered = filtered.filter(m => favorites.includes(m.materialCode));
+    }
+
+    return filtered.filter(m => 
       m.materialCode.toLowerCase().includes(filters.materialCode.toLowerCase()) &&
       m.materialDescription.toLowerCase().includes(filters.materialDescription.toLowerCase()) &&
       m.familyCode.toLowerCase().includes(filters.familyCode.toLowerCase()) &&
       m.familyDescription.toLowerCase().includes(filters.familyDescription.toLowerCase())
     );
-  }, [materials, filters]);
+  }, [materials, filters, showOnlyFavorites, favorites]);
 
   const paginatedMaterials = useMemo(() => {
     const start = currentPage * ITEMS_PER_PAGE;
@@ -207,12 +219,15 @@ export function ProductsTable({ materials, requestData, existingRequests, onSucc
                 <div className="flex justify-start gap-2">
                     <Button 
                       className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                      onClick={handleShowFavorites}
+                      variant={showOnlyFavorites ? 'default' : 'outline'}
                     >
                       <Star className="mr-2 h-4 w-4" />
                       Favoritos
                     </Button>
                     <Button 
                       className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                      variant='outline'
                     >
                       <History className="mr-2 h-4 w-4" />
                       Última solicitud
