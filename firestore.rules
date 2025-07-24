@@ -1,19 +1,21 @@
 
 rules_version = '2';
-
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Requests can be read by any authenticated user.
-    // Requests can only be created, updated, or deleted by the user who owns them.
-    match /requests/{requestId} {
-      allow read: if request.auth != null;
-      allow write: if request.auth.token.email == resource.data.user;
+    match /favorites/{favoriteId} {
+      // Users can only read their own favorites
+      allow read: if request.auth != null && resource.data.userId == request.auth.token.email;
+      // Users can only create favorites for themselves
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.token.email;
+      // Users can only delete their own favorites
+      allow delete: if request.auth != null && resource.data.userId == request.auth.token.email;
+      // Grant read access for queries on the 'favorites' collection if the user is authenticated
+      // and the query is filtered by their userId.
+      allow list: if request.auth != null && request.query.resource.data.userId == request.auth.token.email;
     }
 
-    // Users can only manage their own favorites.
-    match /favorites/{favoriteId} {
-      // favoriteId is composed of userEmail_materialCode
-      allow read, write: if request.auth != null && request.auth.token.email == split(favoriteId, '_')[0];
+    match /requests/{requestId} {
+      allow read, write: if request.auth != null;
     }
   }
 }
