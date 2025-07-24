@@ -68,6 +68,9 @@ export default function Home() {
       setDateSelectionActive(false);
       setProductsVisible(false);
       setSelectedDate(undefined);
+      if (selectedCatalog) {
+        setDateSelectionActive(true);
+      }
   }, [selectedCatalog]);
 
 
@@ -107,7 +110,7 @@ export default function Home() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="border p-4 rounded-md">
                   <h3 className="text-lg font-semibold mb-4">Destinatario</h3>
-                  <div className="grid grid-cols-1 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-2">
                           <label htmlFor="center-select" className="text-sm font-medium">Centro</label>
                           <Select value={selectedCenter} onValueChange={setSelectedCenter}>
@@ -202,7 +205,7 @@ export default function Home() {
               </div>
             </CardContent>
             <CardFooter className="flex-col items-center gap-4">
-              <Button onClick={() => setProductsVisible(true)} disabled={!selectedDate} className="bg-primary hover:bg-primary/90 text-primary-foreground">
+              <Button onClick={() => setProductsVisible(true)} disabled={!selectedDate}>
                 Añadir Productos
               </Button>
             </CardFooter>
