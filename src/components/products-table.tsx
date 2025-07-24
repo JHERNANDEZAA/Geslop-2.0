@@ -29,6 +29,7 @@ interface ProductsTableProps {
     warehouseCode: string;
     catalog: string;
     requestDate: string;
+    user: string;
   };
   existingRequests?: ProductRequest[];
   onSuccess: () => void;
@@ -185,11 +186,11 @@ export function ProductsTable({ materials, requestData, existingRequests, onSucc
             </CardHeader>
             <CardContent className="space-y-4">
                 <div className="flex justify-start gap-2">
-                    <Button>
+                    <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
                       <Star className="mr-2 h-4 w-4" />
                       Favoritos
                     </Button>
-                    <Button>
+                    <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
                       <History className="mr-2 h-4 w-4" />
                       Última solicitud
                     </Button>

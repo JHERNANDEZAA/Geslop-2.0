@@ -41,6 +41,7 @@ export type ProductRequest = {
   quantity: number;
   notes: string;
   sentToSap: 'X' | '';
+  user?: string;
 };
 
 export type StoredRequest = {
@@ -52,6 +53,7 @@ export type StoredRequest = {
   quantity: number;
   notes: string;
   sentToSap: 'X' | '';
+  user: string;
 }
 
 export type RequestInfo = {

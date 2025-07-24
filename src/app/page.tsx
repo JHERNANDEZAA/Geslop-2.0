@@ -149,6 +149,13 @@ export default function Home() {
   const isDayDisabled = (day: Date) => {
     const today = startOfDay(new Date());
 
+    // Allow selection of sentToSap days for read-only view
+    const formattedDay = format(day, 'yyyy-MM-dd');
+    const requestInfo = requestsInfo.find(r => r.date === formattedDay);
+    if (requestInfo?.sentToSap) {
+        return false;
+    }
+
     // Disable past dates
     if (day < today) return true;
     
@@ -351,7 +358,7 @@ export default function Home() {
           </Card>
         )}
 
-        {isProductsVisible && selectedDate && (
+        {isProductsVisible && selectedDate && user && (
           <div ref={productsSectionRef} className="mt-4">
             <ProductsTable 
               materials={filteredMaterials} 
@@ -359,7 +366,8 @@ export default function Home() {
                 center: selectedCenter,
                 warehouseCode: selectedWarehouse,
                 catalog: selectedCatalog,
-                requestDate: format(selectedDate, 'yyyy-MM-dd')
+                requestDate: format(selectedDate, 'yyyy-MM-dd'),
+                user: user.email || ''
               }}
               existingRequests={existingRequests}
               onSuccess={handleSuccess}
@@ -371,7 +379,3 @@ export default function Home() {
     </div>
   );
 }
-
-    
-
-    

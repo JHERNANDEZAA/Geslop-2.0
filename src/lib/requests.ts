@@ -8,11 +8,12 @@ interface RequestData {
   warehouseCode: string;
   catalog: string;
   requestDate: string;
+  user: string;
   products: ProductRequest[];
 }
 
 export const saveRequest = async (requestData: RequestData) => {
-    const { center, warehouseCode, requestDate, products } = requestData;
+    const { center, warehouseCode, requestDate, products, user } = requestData;
   
     const requestsRef = collection(db, 'requests');
   
@@ -45,6 +46,7 @@ export const saveRequest = async (requestData: RequestData) => {
             quantity: product.quantity,
             notes: product.notes,
             sentToSap: '', // Always save with an empty string
+            user: user,
           });
         });
       });
@@ -139,7 +141,8 @@ export const getRequestsForDate = async (center: string, warehouseCode: string, 
                 materialCode: data.productCode,
                 quantity: data.quantity,
                 notes: data.notes,
-                sentToSap: data.sentToSap || ''
+                sentToSap: data.sentToSap || '',
+                user: data.user,
             });
         });
         return requests;
@@ -148,5 +151,3 @@ export const getRequestsForDate = async (center: string, warehouseCode: string, 
         return [];
     }
 }
-
-    
