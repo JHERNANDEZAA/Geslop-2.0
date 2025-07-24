@@ -31,11 +31,12 @@ interface ProductsTableProps {
     requestDate: string;
   };
   existingRequests?: ProductRequest[];
+  onSuccess: () => void;
 }
 
 const ITEMS_PER_PAGE = 50;
 
-export function ProductsTable({ materials, requestData, existingRequests }: ProductsTableProps) {
+export function ProductsTable({ materials, requestData, existingRequests, onSuccess }: ProductsTableProps) {
   const { toast } = useToast()
   const [filters, setFilters] = useState({
     materialCode: '',
@@ -123,7 +124,7 @@ export function ProductsTable({ materials, requestData, existingRequests }: Prod
             variant: "default",
         });
       }
-      
+      onSuccess();
     } catch (error) {
       toast({
         title: "Error al procesar la solicitud",
@@ -145,6 +146,7 @@ export function ProductsTable({ materials, requestData, existingRequests }: Prod
             description: `La solicitud para el ${requestData.requestDate} ha sido eliminada.`,
             variant: 'default',
         });
+        onSuccess();
     } catch (error) {
         toast({
             title: "Error al eliminar",

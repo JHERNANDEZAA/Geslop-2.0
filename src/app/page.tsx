@@ -40,7 +40,9 @@ export default function Home() {
   const dateSectionRef = useRef<HTMLDivElement>(null);
   const productsSectionRef = useRef<HTMLDivElement>(null);
 
-  const displayFromMonth = useMemo(() => startOfMonth(new Date()), []);
+  const displayMonth = useMemo(() => {
+    return subMonths(new Date(), 1);
+  }, []);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -69,6 +71,16 @@ export default function Home() {
   const filteredMaterials = useMemo(() => {
     return materials.filter(m => m.center === selectedCenter && m.catalog === selectedCatalog);
   }, [selectedCenter, selectedCatalog]);
+
+  const fetchRequestDates = useCallback(async () => {
+    if (selectedCenter && selectedWarehouse) {
+        const today = new Date();
+        const startDate = subMonths(startOfMonth(today), 1);
+        const endDate = addMonths(startOfMonth(today), 1);
+        const dates = await getRequestsForPeriod(selectedCenter, selectedWarehouse, startDate, endOfMonth(endDate));
+        setDatesWithRequests(dates.map(d => parseISO(d)));
+    }
+  }, [selectedCenter, selectedWarehouse]);
 
   useEffect(() => {
     setSelectedWarehouse('');
@@ -100,27 +112,15 @@ export default function Home() {
   useEffect(() => {
     if (isDateSelectionActive && dateSectionRef.current) {
       dateSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      fetchRequestDates();
     }
-  }, [isDateSelectionActive]);
+  }, [isDateSelectionActive, fetchRequestDates]);
 
   useEffect(() => {
     if (isProductsVisible && productsSectionRef.current) {
       productsSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   }, [isProductsVisible]);
-
-  useEffect(() => {
-    const fetchRequests = async () => {
-        if (selectedCenter && selectedWarehouse && isDateSelectionActive) {
-            const today = new Date();
-            const startDate = subMonths(startOfMonth(today), 1);
-            const endDate = addMonths(startOfMonth(today), 1);
-            const dates = await getRequestsForPeriod(selectedCenter, selectedWarehouse, startDate, endOfMonth(endDate));
-            setDatesWithRequests(dates.map(d => parseISO(d)));
-        }
-    };
-    fetchRequests();
-  }, [selectedCenter, selectedWarehouse, isDateSelectionActive]);
 
   const handleShowCalendar = () => {
     setDateSelectionActive(true);
@@ -132,9 +132,10 @@ export default function Home() {
 
   const handleDateSelect = useCallback(async (date: Date | undefined) => {
     if (date) {
-      setSelectedDate(date);
+      const utcDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+      setSelectedDate(utcDate);
       setProductsVisible(false); // Hide products while loading new data
-      const formattedDate = format(date, 'yyyy-MM-dd');
+      const formattedDate = format(utcDate, 'yyyy-MM-dd');
       const requests = await getRequestsForDate(selectedCenter, selectedWarehouse, formattedDate);
       setExistingRequests(requests);
     }
@@ -153,12 +154,18 @@ export default function Home() {
     return !enabledDaysForCatalog.includes(dayOfWeek);
   };
 
+  const handleSuccess = () => {
+    setProductsVisible(false);
+    setSelectedDate(undefined);
+    fetchRequestDates();
+  };
+
   const requestModifiers = {
     requested: datesWithRequests,
   };
 
   const requestModifiersClassNames = {
-    requested: 'bg-orange-300',
+    requested: 'bg-orange-300 rounded-md',
   };
 
   if (loading || !user) {
@@ -275,7 +282,7 @@ export default function Home() {
                   selected={selectedDate}
                   onSelect={handleDateSelect}
                   numberOfMonths={3}
-                  month={displayFromMonth}
+                  month={displayMonth}
                   disableNavigation
                   disabled={isDayDisabled}
                   className="rounded-md border bg-white"
@@ -306,6 +313,7 @@ export default function Home() {
                 requestDate: format(selectedDate, 'yyyy-MM-dd')
               }}
               existingRequests={existingRequests}
+              onSuccess={handleSuccess}
             />
           </div>
         )}
