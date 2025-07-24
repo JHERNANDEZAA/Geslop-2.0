@@ -4,20 +4,57 @@
 import * as React from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { DayPicker, Head } from "react-day-picker"
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
 
 export type CalendarProps = React.ComponentProps<typeof DayPicker> & {
   disableNavigation?: boolean;
+  enabledDays?: number[];
 };
+
+const CustomHead = (props: React.ComponentProps<typeof Head> & { enabledDays?: number[] }) => {
+  const { weekdays, format: formatWeekday, locale, enabledDays = [] } = props;
+  
+  if (!weekdays) return null;
+
+  // weekStartsOn is 1 (Monday), so the weekdays from react-day-picker are Mon, Tue, ..., Sun
+  // We need to map this to the JS getDay() index: Sun=0, Mon=1, ...
+  const dayIndexMap = [1, 2, 3, 4, 5, 6, 0]; 
+
+  return (
+      <thead className="[&_tr]:border-b">
+          <tr className="flex">
+              {weekdays.map((weekday, i) => {
+                  const jsDay = dayIndexMap[i];
+                  const isEnabled = enabledDays.includes(jsDay);
+                  return (
+                      <th
+                          key={i}
+                          scope="col"
+                          className={cn(
+                            "text-muted-foreground rounded-md w-9 font-normal text-[0.8rem]",
+                            isEnabled && "bg-primary/20"
+                          )}
+                      >
+                          {format(weekday, 'EEEEE', { locale })}
+                      </th>
+                  );
+              })}
+          </tr>
+      </thead>
+  );
+};
+
 
 function Calendar({
   className,
   classNames,
   showOutsideDays = true,
   disableNavigation = false,
-  components,
+  enabledDays,
   ...props
 }: CalendarProps) {
   return (
@@ -37,9 +74,9 @@ function Calendar({
         nav_button_previous: "absolute left-1",
         nav_button_next: "absolute right-1",
         table: "w-full border-collapse space-y-1",
+        head: "hidden", // We hide the default head and use our custom one via components
         head_row: "flex",
-        head_cell:
-          "text-muted-foreground rounded-md w-9 font-normal text-[0.8rem]",
+        head_cell: "text-muted-foreground rounded-md w-9 font-normal text-[0.8rem]",
         row: "flex w-full mt-2",
         cell: "h-9 w-9 text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
         day: cn(
@@ -61,7 +98,7 @@ function Calendar({
       components={{
         IconLeft: ({ ...props }) => <ChevronLeft className="h-4 w-4" />,
         IconRight: ({ ...props }) => <ChevronRight className="h-4 w-4" />,
-        ...components
+        Head: (headProps) => <CustomHead {...headProps} enabledDays={enabledDays} />,
       }}
       {...props}
     />

@@ -23,7 +23,6 @@ import { getRequestsForPeriod, getRequestsForDate } from '@/lib/requests';
 import { addMonths, subMonths, startOfMonth, endOfMonth, parseISO, format, startOfDay } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Head } from 'react-day-picker';
 
 export default function Home() {
   const { user, loading } = useAuth();
@@ -67,10 +66,6 @@ export default function Home() {
     const rule = enabledDays.find(
       (r) => r.centerId === selectedCenter && r.catalogName === selectedCatalog
     );
-    // JS days: 0-Sun, 1-Mon, ..., 6-Sat
-    // The rule uses 0 for Sunday...
-    // The calendar with weekStartsOn={1} will have weekdays Mon...Sun.
-    // The original getDay() will map to the rule days.
     return rule ? rule.days : [];
   }, [selectedCenter, selectedCatalog]);
 
@@ -198,34 +193,6 @@ export default function Home() {
     requested: 'bg-orange-300 rounded-md',
     sentToSap: 'bg-blue-800 text-white rounded-md',
   };
-
-  const CustomHead = useCallback((props: React.ComponentProps<typeof Head>) => {
-    // weekStartsOn is 1, so weekDays are Mon, Tue, ..., Sun
-    const weekDays = props.weekdays.map(d => format(d, 'c', {locale: es})); // c gives day of week as number (1=Mon)
-    
-    // Map JS getDay() to week index.
-    const dayIndexMap = [1, 2, 3, 4, 5, 6, 0]; // Mon -> Sun
-    
-    return (
-        <thead className="[&_tr]:border-b">
-            <tr className="flex">
-                {props.weekdays.map((weekday, i) => {
-                    const jsDay = dayIndexMap[i];
-                    const isEnabled = enabledDaysForCatalog.includes(jsDay);
-                    return (
-                        <th
-                            key={i}
-                            scope="col"
-                            className={`text-muted-foreground rounded-md w-9 font-normal text-[0.8rem] ${isEnabled ? 'bg-primary/20' : ''}`}
-                        >
-                            {format(weekday, 'EEEEE', { locale: es })}
-                        </th>
-                    );
-                })}
-            </tr>
-        </thead>
-    );
-}, [enabledDaysForCatalog, es]);
 
   if (loading || !user) {
     return (
@@ -372,13 +339,11 @@ export default function Home() {
                     months: 'flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0',
                     caption: 'flex justify-center pt-1 relative items-center bg-primary text-primary-foreground rounded-t-md py-2'
                   }}
-                  components={{
-                    Head: CustomHead,
-                  }}
                   locale={es}
                   weekStartsOn={1}
                   modifiers={requestModifiers}
                   modifiersClassNames={requestModifiersClassNames}
+                  enabledDays={enabledDaysForCatalog}
                 />
               </div>
 
