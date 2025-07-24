@@ -318,7 +318,7 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="w-full mt-4">
+              <div className="w-full mt-4 flex justify-center">
                 <Calendar
                   mode="single"
                   selected={selectedDate}
@@ -367,4 +367,4 @@ export default function Home() {
   );
 }
 
-
+    
