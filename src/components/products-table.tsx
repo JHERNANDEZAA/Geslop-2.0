@@ -180,11 +180,11 @@ export function ProductsTable({ materials, requestData, existingRequests, onSucc
             </CardHeader>
             <CardContent className="space-y-4">
                 <div className="flex justify-start gap-2">
-                    <Button variant="outline" className="bg-primary/10 text-primary-foreground hover:bg-primary/20">
+                    <Button variant="outline">
                       <Star className="mr-2 h-4 w-4" />
                       Favoritos
                     </Button>
-                    <Button variant="outline" className="bg-primary/10 text-primary-foreground hover:bg-primary/20">
+                    <Button variant="outline">
                       <History className="mr-2 h-4 w-4" />
                       Última solicitud
                     </Button>
