@@ -124,7 +124,7 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <PageHeader />
-      <main className="flex-grow space-y-0">
+      <main className="flex-grow flex flex-col">
         <Card className="shadow-lg rounded-none border-x-0 border-t-0 border-b-0">
           <CardHeader>
             <CardTitle>Destinatario y Catálogo</CardTitle>
@@ -206,7 +206,7 @@ export default function Home() {
         </Card>
 
         {isDateSelectionActive && (
-          <Card ref={dateSectionRef} className="shadow-lg rounded-none border-x-0 border-t-0 border-b-0">
+          <Card ref={dateSectionRef} className="mt-4 shadow-lg rounded-none border-x-0 border-t-0 border-b-0">
             <CardHeader>
               <CardTitle>Fecha de Solicitud</CardTitle>
               <CardDescription>
@@ -240,7 +240,7 @@ export default function Home() {
         )}
 
         {isProductsVisible && selectedDate && (
-          <div ref={productsSectionRef}>
+          <div ref={productsSectionRef} className="mt-4">
             <ProductsTable 
               materials={filteredMaterials} 
               requestData={{
