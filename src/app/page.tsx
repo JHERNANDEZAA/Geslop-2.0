@@ -2,6 +2,8 @@
 "use client";
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/lib/auth.tsx';
 import {
   Card,
   CardContent,
@@ -19,8 +21,11 @@ import type { Center, Warehouse, Catalog, EnabledDays, Material } from '@/lib/ty
 import { centers, warehouses, catalogs, enabledDays, materials } from '@/lib/data';
 import { addMonths, subMonths, startOfMonth } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Home() {
+  const { user, loading } = useAuth();
+  const router = useRouter();
   const [selectedCenter, setSelectedCenter] = useState<string>('');
   const [selectedWarehouse, setSelectedWarehouse] = useState<string>('');
   const [selectedCatalog, setSelectedCatalog] = useState<string>('');
@@ -31,6 +36,12 @@ export default function Home() {
   
   const dateSectionRef = useRef<HTMLDivElement>(null);
   const productsSectionRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/login');
+    }
+  }, [user, loading, router]);
 
   const availableWarehouses = useMemo(() => {
     return warehouses.filter((w) => w.centerId === selectedCenter);
@@ -119,9 +130,24 @@ export default function Home() {
   };
 
   const today = new Date();
-  const defaultMonth = subMonths(today, 1);
+  const defaultMonth = startOfMonth(today);
   const fromMonth = startOfMonth(subMonths(today, 1));
   const toMonth = startOfMonth(addMonths(today, 1));
+
+  if (loading || !user) {
+    return (
+      <div className="flex flex-col min-h-screen bg-background">
+        <PageHeader />
+        <main className="flex-grow p-4">
+          <div className="space-y-4">
+            <Skeleton className="h-32 w-full" />
+            <Skeleton className="h-64 w-full" />
+            <Skeleton className="h-96 w-full" />
+          </div>
+        </main>
+      </div>
+    );
+  }
   
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -226,7 +252,6 @@ export default function Home() {
                   fromMonth={fromMonth}
                   toMonth={toMonth}
                   disabled={isDayDisabled}
-                  disableNavigation
                   className="rounded-md border bg-white"
                   locale={es}
                   weekStartsOn={1}
