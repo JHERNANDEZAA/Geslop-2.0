@@ -220,7 +220,7 @@ export function ProductsTable({ materials, requestData, existingRequests, onSucc
                     <Button 
                       onClick={handleShowFavorites}
                       variant={showOnlyFavorites ? 'default' : 'outline'}
-                      className={showOnlyFavorites ? 'bg-primary hover:bg-primary/90 text-primary-foreground' : ''}
+                      className={showOnlyFavorites ? 'bg-orange-500 hover:bg-orange-600 text-white' : ''}
                     >
                       <Star className="mr-2 h-4 w-4" />
                       Favoritos
