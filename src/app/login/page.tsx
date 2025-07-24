@@ -30,7 +30,8 @@ export default function LoginPage() {
         try {
           await signUpWithEmail(email, password);
           router.push('/');
-        } catch (signupError: any) {
+        } catch (signupError: any)
+{
           toast({
             title: 'Error',
             description: signupError.message,
