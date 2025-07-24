@@ -218,9 +218,9 @@ export function ProductsTable({ materials, requestData, existingRequests, onSucc
             <CardContent className="space-y-4">
                 <div className="flex justify-start gap-2">
                     <Button 
-                      className="bg-primary hover:bg-primary/90 text-primary-foreground"
                       onClick={handleShowFavorites}
                       variant={showOnlyFavorites ? 'default' : 'outline'}
+                      className={showOnlyFavorites ? 'bg-primary hover:bg-primary/90 text-primary-foreground' : ''}
                     >
                       <Star className="mr-2 h-4 w-4" />
                       Favoritos
