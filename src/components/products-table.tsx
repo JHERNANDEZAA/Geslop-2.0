@@ -180,11 +180,11 @@ export function ProductsTable({ materials, requestData, existingRequests, onSucc
             </CardHeader>
             <CardContent className="space-y-4">
                 <div className="flex justify-start gap-2">
-                    <Button>
+                    <Button variant="outline" className="bg-primary/10 text-primary-foreground hover:bg-primary/20">
                       <Star className="mr-2 h-4 w-4" />
                       Favoritos
                     </Button>
-                    <Button>
+                    <Button variant="outline" className="bg-primary/10 text-primary-foreground hover:bg-primary/20">
                       <History className="mr-2 h-4 w-4" />
                       Última solicitud
                     </Button>
@@ -204,9 +204,6 @@ export function ProductsTable({ materials, requestData, existingRequests, onSucc
             </CardHeader>
             <CardContent className="space-y-4">
                 <div className="flex justify-end gap-2">
-                    <Button onClick={handleSubmit} className="bg-accent hover:bg-accent/90" disabled={isSubmitting}>
-                      {isSubmitting ? 'Enviando...' : 'Solicitar'}
-                    </Button>
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
                         <Button variant="destructive" disabled={isSubmitting}>Borrar solicitud</Button>
@@ -227,6 +224,9 @@ export function ProductsTable({ materials, requestData, existingRequests, onSucc
                         </AlertDialogFooter>
                       </AlertDialogContent>
                     </AlertDialog>
+                    <Button onClick={handleSubmit} className="bg-accent hover:bg-accent/90" disabled={isSubmitting}>
+                      {isSubmitting ? 'Enviando...' : 'Solicitar'}
+                    </Button>
                 </div>
                 
                 <div className="overflow-x-auto">
