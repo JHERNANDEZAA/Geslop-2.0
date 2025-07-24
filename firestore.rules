@@ -3,14 +3,17 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    // Allow users to manage their own favorites
-    match /favorites/{favoriteId} {
-      allow read, write: if request.auth != null && request.resource.data.userId == request.auth.token.email;
+    // Requests can be read by any authenticated user.
+    // Requests can only be created, updated, or deleted by the user who owns them.
+    match /requests/{requestId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth.token.email == resource.data.user;
     }
 
-    match /requests/{requestId} {
-      allow read, create, update, delete: if request.auth != null;
+    // Users can only manage their own favorites.
+    match /favorites/{favoriteId} {
+      // favoriteId is composed of userEmail_materialCode
+      allow read, write: if request.auth != null && request.auth.token.email == split(favoriteId, '_')[0];
     }
   }
 }

@@ -6,6 +6,8 @@ export const getFavorites = async (userId: string): Promise<string[]> => {
     if (!userId) return [];
     
     const favoritesRef = collection(db, 'favorites');
+    // Note: This query requires a composite index on userId and materialCode.
+    // Firestore should prompt to create it in the console error logs.
     const q = query(favoritesRef, where('userId', '==', userId));
 
     try {
@@ -24,7 +26,7 @@ export const getFavorites = async (userId: string): Promise<string[]> => {
 export const addFavorite = async (userId: string, materialCode: string) => {
     if (!userId || !materialCode) return;
     
-    // We use a composite key for the document ID to ensure uniqueness
+    // We use a composite key for the document ID to ensure uniqueness and prevent duplicates.
     const favoriteId = `${userId}_${materialCode}`;
     const favoriteRef = doc(db, 'favorites', favoriteId);
 
