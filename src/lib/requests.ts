@@ -93,13 +93,14 @@ export const getRequestsForPeriod = async (center: string, warehouseCode: string
 
     try {
         const querySnapshot = await getDocs(q);
-        const requestsByDate: Record<string, { sentToSap: boolean }> = {};
+        const requestsByDate: Record<string, { hasRequest: boolean, sentToSap: boolean }> = {};
 
         querySnapshot.forEach((doc) => {
             const data = doc.data() as StoredRequest;
             if (!requestsByDate[data.requestDate]) {
-                requestsByDate[data.requestDate] = { sentToSap: false };
+                requestsByDate[data.requestDate] = { hasRequest: false, sentToSap: false };
             }
+            requestsByDate[data.requestDate].hasRequest = true;
             if (data.sentToSap === 'X') {
                 requestsByDate[data.requestDate].sentToSap = true;
             }
@@ -107,7 +108,7 @@ export const getRequestsForPeriod = async (center: string, warehouseCode: string
         
         return Object.entries(requestsByDate).map(([date, info]) => ({
             date,
-            hasRequest: true,
+            hasRequest: info.hasRequest,
             sentToSap: info.sentToSap,
         }));
 
@@ -147,3 +148,5 @@ export const getRequestsForDate = async (center: string, warehouseCode: string, 
         return [];
     }
 }
+
+    

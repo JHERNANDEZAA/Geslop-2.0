@@ -171,10 +171,11 @@ export default function Home() {
     const sentToSap: Date[] = [];
 
     requestsInfo.forEach(info => {
-        const date = parseISO(info.date);
+        // Adding 1 day to parse correctly from YYYY-MM-DD to local time in the browser
+        const date = parseISO(`${info.date}T00:00:00`);
         if (info.sentToSap) {
             sentToSap.push(date);
-        } else {
+        } else if (info.hasRequest) {
             requested.push(date);
         }
     });
@@ -330,6 +331,7 @@ export default function Home() {
                   className="rounded-md border bg-white"
                   classNames={{
                     months: 'flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0',
+                    caption: 'flex justify-center pt-1 relative items-center bg-primary text-primary-foreground rounded-t-md py-2'
                   }}
                   locale={es}
                   weekStartsOn={1}
@@ -369,5 +371,7 @@ export default function Home() {
     </div>
   );
 }
+
+    
 
     
