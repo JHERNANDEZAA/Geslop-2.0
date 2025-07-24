@@ -189,11 +189,9 @@ export default function Home() {
                   className="rounded-md border bg-white"
                 />
               </div>
-              {selectedDate && (
-                <Button onClick={() => setProductsVisible(true)} className="bg-accent hover:bg-accent/90">
-                  Añadir Productos
-                </Button>
-              )}
+              <Button onClick={() => setProductsVisible(true)} disabled={!selectedDate}>
+                Añadir Productos
+              </Button>
             </CardContent>
           </Card>
         )}
