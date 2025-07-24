@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -25,7 +26,7 @@ function Calendar({
       classNames={{
         months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
         month: "space-y-4 flex-1",
-        caption: "flex justify-center pt-1 relative items-center",
+        caption: "flex justify-center pt-1 relative items-center bg-primary text-primary-foreground rounded-t-md py-2",
         caption_label: "text-sm font-medium",
         nav: cn("space-x-1 flex items-center", { "hidden": disableNavigation }),
         nav_button: cn(
