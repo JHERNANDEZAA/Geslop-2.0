@@ -102,7 +102,7 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
       <PageHeader />
-      <main className="flex-grow container mx-auto px-1 md:px-2 space-y-6">
+      <main className="flex-grow container mx-auto px-4 md:px-6 space-y-6">
         <Card className="shadow-lg">
           <CardHeader>
             <CardTitle>Destinatario y Catálogo</CardTitle>
