@@ -327,7 +327,10 @@ export default function Home() {
                   month={displayMonth}
                   disableNavigation
                   disabled={isDayDisabled}
-                  className="rounded-md border bg-white"
+                  className="rounded-md border bg-white w-full"
+                  classNames={{
+                    months: 'flex flex-col sm:flex-row space-y-4 sm:space-y-0 w-full justify-around',
+                  }}
                   locale={es}
                   weekStartsOn={1}
                   modifiers={requestModifiers}
