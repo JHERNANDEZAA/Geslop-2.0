@@ -39,6 +39,7 @@ export default function Home() {
   const dateSectionRef = useRef<HTMLDivElement>(null);
   const productsSectionRef = useRef<HTMLDivElement>(null);
 
+  const displayFromMonth = useMemo(() => subMonths(startOfMonth(new Date()), 1), []);
   const currentMonth = useMemo(() => startOfMonth(new Date()), []);
 
   useEffect(() => {
@@ -269,7 +270,7 @@ export default function Home() {
                   selected={selectedDate}
                   onSelect={handleDateSelect}
                   numberOfMonths={3}
-                  month={currentMonth}
+                  month={displayFromMonth}
                   disableNavigation
                   disabled={isDayDisabled}
                   className="rounded-md border bg-white"
@@ -297,7 +298,7 @@ export default function Home() {
                 center: selectedCenter,
                 warehouseCode: selectedWarehouse,
                 catalog: selectedCatalog,
-                requestDate: format(selectedDate, 'yyyy-MM-dd')
+                requestDate: format(selectedDate, 'yyyy-MM-dd', { timeZone: 'UTC' })
               }}
             />
           </div>
