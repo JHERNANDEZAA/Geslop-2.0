@@ -294,7 +294,7 @@ export default function Home() {
                 Seleccione una fecha para su pedido en el calendario.
               </CardDescription>
             </CardHeader>
-            <CardContent className="flex flex-col items-center gap-4">
+            <CardContent className="flex flex-col gap-4">
               <div className="border p-4 rounded-md w-full bg-gray-50/50">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-sm">
                   <div className="flex items-center gap-2">
@@ -318,7 +318,7 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="w-full mt-4 flex justify-center">
+              <div className="w-full mt-4">
                 <Calendar
                   mode="single"
                   selected={selectedDate}
@@ -335,12 +335,14 @@ export default function Home() {
                 />
               </div>
 
-              <Button 
-                onClick={handleShowProducts} 
-                disabled={!selectedDate}
-              >
-                Añadir / Modificar Productos
-              </Button>
+              <div className="w-full flex justify-start">
+                <Button 
+                  onClick={handleShowProducts} 
+                  disabled={!selectedDate}
+                >
+                  Añadir / Modificar Productos
+                </Button>
+              </div>
             </CardContent>
           </Card>
         )}
