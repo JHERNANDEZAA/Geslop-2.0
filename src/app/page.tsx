@@ -104,69 +104,71 @@ export default function Home() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="border p-4 rounded-md">
-                <h3 className="text-lg font-semibold mb-4">Destinatario</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                        <label htmlFor="center-select" className="text-sm font-medium">Centro</label>
-                        <Select value={selectedCenter} onValueChange={setSelectedCenter}>
-                        <SelectTrigger id="center-select" className="bg-white">
-                            <SelectValue placeholder="Seleccione un centro" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {centers.map((center) => (
-                            <SelectItem key={center.id} value={center.id}>
-                                {center.id} - {center.name}
-                            </SelectItem>
-                            ))}
-                        </SelectContent>
-                        </Select>
-                    </div>
-                    <div className="space-y-2">
-                        <label htmlFor="warehouse-select" className="text-sm font-medium">Almacén</label>
-                        <Select
-                        value={selectedWarehouse}
-                        onValueChange={setSelectedWarehouse}
-                        disabled={!selectedCenter}
-                        >
-                        <SelectTrigger id="warehouse-select" className="bg-white">
-                            <SelectValue placeholder="Seleccione un almacén" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {availableWarehouses.map((wh) => (
-                            <SelectItem key={wh.warehouseCode} value={wh.warehouseCode}>
-                                {wh.warehouseCode} - {wh.warehouseDescription}
-                            </SelectItem>
-                            ))}
-                        </SelectContent>
-                        </Select>
-                    </div>
-                </div>
-            </div>
-
-            <div className="border p-4 rounded-md">
-                <h3 className="text-lg font-semibold mb-4">Catálogo</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                      <label htmlFor="catalog-select" className="text-sm font-medium">Catálogo</label>
-                      <Select
-                      value={selectedCatalog}
-                      onValueChange={setSelectedCatalog}
-                      disabled={!selectedWarehouse}
-                      >
-                      <SelectTrigger id="catalog-select" className="bg-white">
-                          <SelectValue placeholder="Seleccione un catálogo" />
-                      </SelectTrigger>
-                      <SelectContent>
-                          {availableCatalogs.map((cat) => (
-                          <SelectItem key={cat.catalogName} value={cat.catalogName}>
-                              {cat.catalogName}
-                          </SelectItem>
-                          ))}
-                      </SelectContent>
-                      </Select>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="border p-4 rounded-md">
+                  <h3 className="text-lg font-semibold mb-4">Destinatario</h3>
+                  <div className="grid grid-cols-1 gap-6">
+                      <div className="space-y-2">
+                          <label htmlFor="center-select" className="text-sm font-medium">Centro</label>
+                          <Select value={selectedCenter} onValueChange={setSelectedCenter}>
+                          <SelectTrigger id="center-select" className="bg-white">
+                              <SelectValue placeholder="Seleccione un centro" />
+                          </SelectTrigger>
+                          <SelectContent>
+                              {centers.map((center) => (
+                              <SelectItem key={center.id} value={center.id}>
+                                  {center.id} - {center.name}
+                              </SelectItem>
+                              ))}
+                          </SelectContent>
+                          </Select>
+                      </div>
+                      <div className="space-y-2">
+                          <label htmlFor="warehouse-select" className="text-sm font-medium">Almacén</label>
+                          <Select
+                          value={selectedWarehouse}
+                          onValueChange={setSelectedWarehouse}
+                          disabled={!selectedCenter}
+                          >
+                          <SelectTrigger id="warehouse-select" className="bg-white">
+                              <SelectValue placeholder="Seleccione un almacén" />
+                          </SelectTrigger>
+                          <SelectContent>
+                              {availableWarehouses.map((wh) => (
+                              <SelectItem key={wh.warehouseCode} value={wh.warehouseCode}>
+                                  {wh.warehouseCode} - {wh.warehouseDescription}
+                              </SelectItem>
+                              ))}
+                          </SelectContent>
+                          </Select>
+                      </div>
                   </div>
-                </div>
+              </div>
+
+              <div className="border p-4 rounded-md">
+                  <h3 className="text-lg font-semibold mb-4">Catálogo</h3>
+                  <div className="grid grid-cols-1 gap-6">
+                    <div className="space-y-2">
+                        <label htmlFor="catalog-select" className="text-sm font-medium">Catálogo</label>
+                        <Select
+                        value={selectedCatalog}
+                        onValueChange={setSelectedCatalog}
+                        disabled={!selectedWarehouse}
+                        >
+                        <SelectTrigger id="catalog-select" className="bg-white">
+                            <SelectValue placeholder="Seleccione un catálogo" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {availableCatalogs.map((cat) => (
+                            <SelectItem key={cat.catalogName} value={cat.catalogName}>
+                                {cat.catalogName}
+                            </SelectItem>
+                            ))}
+                        </SelectContent>
+                        </Select>
+                    </div>
+                  </div>
+              </div>
             </div>
           </CardContent>
           <CardFooter>
@@ -198,10 +200,12 @@ export default function Home() {
                   className="rounded-md border bg-white"
                 />
               </div>
+            </CardContent>
+            <CardFooter className="flex-col items-center gap-4">
               <Button onClick={() => setProductsVisible(true)} disabled={!selectedDate} className="bg-primary hover:bg-primary/90 text-primary-foreground">
                 Añadir Productos
               </Button>
-            </CardContent>
+            </CardFooter>
           </Card>
         )}
 
