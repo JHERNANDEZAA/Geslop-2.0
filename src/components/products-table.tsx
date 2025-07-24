@@ -100,7 +100,7 @@ export function ProductsTable({ materials, requestData }: ProductsTableProps) {
   }
 
   return (
-    <Card className="shadow-lg">
+    <Card className="shadow-lg rounded-none border-x-0">
       <CardHeader>
         <CardTitle>Productos SAP</CardTitle>
         <CardDescription>Filtre y seleccione las cantidades de los productos que desea solicitar.</CardDescription>

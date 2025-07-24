@@ -102,8 +102,8 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
       <PageHeader />
-      <main className="flex-grow space-y-6 px-4 py-6 md:px-6 lg:px-8">
-        <Card className="shadow-lg">
+      <main className="flex-grow space-y-6">
+        <Card className="shadow-lg rounded-none border-x-0">
           <CardHeader>
             <CardTitle>Destinatario y Catálogo</CardTitle>
             <CardDescription>
@@ -184,7 +184,7 @@ export default function Home() {
         </Card>
 
         {isDateSelectionActive && (
-          <Card className="shadow-lg">
+          <Card className="shadow-lg rounded-none border-x-0">
             <CardHeader>
               <CardTitle>Fecha de Solicitud</CardTitle>
               <CardDescription>
