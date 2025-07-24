@@ -1,3 +1,4 @@
+
 export type Center = {
   id: string;
   name: string;
@@ -40,3 +41,13 @@ export type ProductRequest = {
   quantity: number;
   notes: string;
 };
+
+export type StoredRequest = {
+  center: string;
+  warehouseCode: string;
+  requestDate: string;
+  catalog: string;
+  productCode: string;
+  quantity: number;
+  notes: string;
+}

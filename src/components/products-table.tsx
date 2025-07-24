@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useMemo } from 'react';
@@ -8,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from "@/hooks/use-toast"
+import { saveRequest } from '@/lib/requests';
 
 interface ProductsTableProps {
   materials: Material[];
@@ -31,6 +33,7 @@ export function ProductsTable({ materials, requestData }: ProductsTableProps) {
   });
   const [productRequests, setProductRequests] = useState<Record<string, ProductRequest>>({});
   const [currentPage, setCurrentPage] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -73,21 +76,40 @@ export function ProductsTable({ materials, requestData }: ProductsTableProps) {
   
   const totalPages = Math.ceil(filteredMaterials.length / ITEMS_PER_PAGE);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
     const finalRequest = {
       ...requestData,
       products: Object.values(productRequests).filter(p => p.quantity > 0)
     };
     
-    // In a real app, this would be an API call.
-    console.log("Solicitud enviada:", finalRequest);
-    
-    toast({
-      title: "Solicitud Enviada",
-      description: `Se ha procesado su solicitud para el centro ${requestData.center}, almacén ${requestData.warehouseCode} en la fecha ${requestData.requestDate}.`,
-      variant: "default",
-      className: "bg-accent text-accent-foreground"
-    })
+    if (finalRequest.products.length === 0) {
+      toast({
+        title: "No hay productos que solicitar",
+        description: "Por favor, añada una cantidad a al menos un producto.",
+        variant: "destructive",
+      });
+      setIsSubmitting(false);
+      return;
+    }
+
+    try {
+      await saveRequest(finalRequest);
+      toast({
+        title: "Solicitud Enviada",
+        description: `Se ha procesado su solicitud para el centro ${requestData.center}, almacén ${requestData.warehouseCode} en la fecha ${requestData.requestDate}.`,
+        variant: "default",
+        className: "bg-accent text-accent-foreground"
+      });
+    } catch (error) {
+      toast({
+        title: "Error al enviar la solicitud",
+        description: "Hubo un problema al guardar su solicitud. Por favor, inténtelo de nuevo.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const TrafficLight = ({ color }: { color: 'green' | 'yellow' | 'red' }) => {
@@ -116,7 +138,9 @@ export function ProductsTable({ materials, requestData }: ProductsTableProps) {
           <div className="flex justify-start gap-2">
             <Button variant="outline">Favoritos</Button>
             <Button variant="outline">Última solicitud</Button>
-            <Button onClick={handleSubmit} className="bg-accent hover:bg-accent/90">Solicitar</Button>
+            <Button onClick={handleSubmit} className="bg-accent hover:bg-accent/90" disabled={isSubmitting}>
+              {isSubmitting ? 'Enviando...' : 'Solicitar'}
+            </Button>
           </div>
         </div>
         
@@ -176,11 +200,13 @@ export function ProductsTable({ materials, requestData }: ProductsTableProps) {
                 <Button variant="outline" onClick={() => setCurrentPage(p => Math.max(0, p - 1))} disabled={currentPage === 0}>
                 Anterior
                 </Button>
-                <Button variant="outline" onClick={() => setCurrentPage(p => Math.min(totalPages - 1, p + 1))} disabled={currentPage === totalPages - 1}>
+                <Button variant="outline" onClick={() => setCurrentPage(p => Math.min(totalPages - 1, p + 1))} disabled={currentPage === totalPages - 1 || isSubmitting}>
                 Siguiente
                 </Button>
             </div>
-            <Button onClick={handleSubmit} className="bg-accent hover:bg-accent/90">Solicitar</Button>
+            <Button onClick={handleSubmit} className="bg-accent hover:bg-accent/90" disabled={isSubmitting}>
+              {isSubmitting ? 'Enviando...' : 'Solicitar'}
+            </Button>
         </div>
       </CardContent>
     </Card>
