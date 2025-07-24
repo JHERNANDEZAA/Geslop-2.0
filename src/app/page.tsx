@@ -132,7 +132,7 @@ export default function Home() {
                   <SelectContent>
                     {availableWarehouses.map((wh) => (
                       <SelectItem key={wh.warehouseCode} value={wh.warehouseCode}>
-                        {wh.warehouseDescription}
+                        {wh.warehouseCode} - {wh.warehouseDescription}
                       </SelectItem>
                     ))}
                   </SelectContent>
