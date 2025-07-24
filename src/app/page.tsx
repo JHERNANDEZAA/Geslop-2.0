@@ -102,7 +102,7 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
       <PageHeader />
-      <main className="flex-grow space-y-6">
+      <main className="flex-grow space-y-6 px-4 py-6 md:px-6 lg:px-8">
         <Card className="shadow-lg">
           <CardHeader>
             <CardTitle>Destinatario y Catálogo</CardTitle>
@@ -111,7 +111,7 @@ export default function Home() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-10 gap-6">
               <div className="border p-4 rounded-md md:col-span-7">
                   <h3 className="text-lg font-semibold mb-4">Destinatario</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -152,7 +152,7 @@ export default function Home() {
                   </div>
               </div>
 
-              <div className="border p-4 rounded-md md:col-span-5">
+              <div className="border p-4 rounded-md md:col-span-3">
                   <h3 className="text-lg font-semibold mb-4">Catálogo</h3>
                   <div className="grid grid-cols-1 gap-6">
                     <div className="space-y-2">
