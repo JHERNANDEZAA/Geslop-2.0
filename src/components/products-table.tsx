@@ -174,6 +174,10 @@ export function ProductsTable({ materials, requestData, existingRequests, onSucc
         <CardDescription>Filtre y seleccione las cantidades de los productos que desea solicitar.</CardDescription>
       </CardHeader>
       <CardContent>
+        <div className="flex justify-start gap-2 mb-4">
+            <Button variant="outline">Favoritos</Button>
+            <Button variant="outline">Última solicitud</Button>
+        </div>
         <div className="p-4 border rounded-lg bg-gray-50/50 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
             <Input name="materialCode" placeholder="Código de producto" onChange={handleFilterChange} value={filters.materialCode} />
@@ -182,8 +186,6 @@ export function ProductsTable({ materials, requestData, existingRequests, onSucc
             <Input name="familyDescription" placeholder="Descripción de familia" onChange={handleFilterChange} value={filters.familyDescription}/>
           </div>
           <div className="flex justify-start gap-2">
-            <Button variant="outline">Favoritos</Button>
-            <Button variant="outline">Última solicitud</Button>
             <Button onClick={handleSubmit} className="bg-accent hover:bg-accent/90" disabled={isSubmitting}>
               {isSubmitting ? 'Enviando...' : 'Solicitar'}
             </Button>
