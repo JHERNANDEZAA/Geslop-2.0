@@ -40,7 +40,7 @@ export function ProductsTable({ materials, requestData, existingRequests }: Prod
     const initialRequests: Record<string, ProductRequest> = {};
     if (existingRequests) {
       existingRequests.forEach(req => {
-        initialRequests[req.materialCode] = req;
+        initialRequests[req.materialCode] = { ...req, sentToSap: req.sentToSap || ''};
       });
     }
     setProductRequests(initialRequests);
@@ -55,7 +55,7 @@ export function ProductsTable({ materials, requestData, existingRequests }: Prod
   
   const handleRequestChange = (materialCode: string, field: 'quantity' | 'notes', value: string | number) => {
     setProductRequests(prev => {
-      const currentRequest = prev[materialCode] || { materialCode, quantity: 0, notes: '' };
+      const currentRequest = prev[materialCode] || { materialCode, quantity: 0, notes: '', sentToSap: '' };
       if (field === 'quantity') {
         const numValue = Number(value);
         if (numValue < 0) return prev;
@@ -92,13 +92,13 @@ export function ProductsTable({ materials, requestData, existingRequests }: Prod
     setIsSubmitting(true);
     const finalRequest = {
       ...requestData,
-      products: Object.values(productRequests).filter(p => p.quantity > 0)
+      products: Object.values(productRequests)
     };
 
     try {
       await saveRequest(finalRequest);
 
-      if (finalRequest.products.length > 0) {
+      if (finalRequest.products.filter(p => p.quantity > 0).length > 0) {
         toast({
             title: "Solicitud Enviada",
             description: `Se ha procesado su solicitud para el centro ${requestData.center}, almacén ${requestData.warehouseCode} en la fecha ${requestData.requestDate}.`,

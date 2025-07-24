@@ -40,6 +40,7 @@ export type ProductRequest = {
   materialCode: string;
   quantity: number;
   notes: string;
+  sentToSap: 'X' | '';
 };
 
 export type StoredRequest = {
@@ -50,4 +51,5 @@ export type StoredRequest = {
   productCode: string;
   quantity: number;
   notes: string;
+  sentToSap: 'X' | '';
 }

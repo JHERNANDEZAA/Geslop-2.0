@@ -1,6 +1,6 @@
 
 import { db } from './firebase';
-import { collection, query, where, getDocs, writeBatch, doc } from 'firebase/firestore';
+import { collection, query, where, getDocs, writeBatch, doc, runTransaction } from 'firebase/firestore';
 import type { ProductRequest, StoredRequest } from './types';
 
 interface RequestData {
@@ -12,49 +12,47 @@ interface RequestData {
 }
 
 export const saveRequest = async (requestData: RequestData) => {
-  const { center, warehouseCode, requestDate, products } = requestData;
-
-  const requestsRef = collection(db, 'requests');
-
-  // Create a query to find existing documents for the same center, warehouse and date
-  const q = query(
-    requestsRef,
-    where('center', '==', center),
-    where('warehouseCode', '==', warehouseCode),
-    where('requestDate', '==', requestDate)
-  );
-
-  const batch = writeBatch(db);
-
-  try {
-    // Get all documents that match the query to delete them
-    const querySnapshot = await getDocs(q);
-    querySnapshot.forEach((doc) => {
-      batch.delete(doc.ref);
-    });
-
-    // Add new documents for products with quantity > 0
-    const validProducts = products.filter(p => p.quantity > 0);
-    validProducts.forEach((product) => {
-      const newRequestRef = doc(requestsRef);
-      batch.set(newRequestRef, {
-        center,
-        warehouseCode,
-        requestDate,
-        catalog: requestData.catalog,
-        productCode: product.materialCode,
-        quantity: product.quantity,
-        notes: product.notes,
+    const { center, warehouseCode, requestDate, products } = requestData;
+  
+    const requestsRef = collection(db, 'requests');
+  
+    const q = query(
+      requestsRef,
+      where('center', '==', center),
+      where('warehouseCode', '==', warehouseCode),
+      where('requestDate', '==', requestDate)
+    );
+  
+    try {
+      await runTransaction(db, async (transaction) => {
+        const querySnapshot = await getDocs(q);
+  
+        // Delete existing documents for this request
+        querySnapshot.forEach((doc) => {
+          transaction.delete(doc.ref);
+        });
+  
+        // Add new documents for products with quantity > 0
+        const validProducts = products.filter(p => p.quantity > 0);
+        validProducts.forEach((product) => {
+          const newRequestRef = doc(requestsRef);
+          transaction.set(newRequestRef, {
+            center,
+            warehouseCode,
+            requestDate,
+            catalog: requestData.catalog,
+            productCode: product.materialCode,
+            quantity: product.quantity,
+            notes: product.notes,
+            sentToSap: product.sentToSap || '',
+          });
+        });
       });
-    });
-    
-    // Commit the batch
-    await batch.commit();
-    console.log('Request saved successfully');
-  } catch (error) {
-    console.error('Error saving request: ', error);
-    throw error;
-  }
+      console.log('Request saved successfully');
+    } catch (error) {
+      console.error('Error saving request: ', error);
+      throw error;
+    }
 };
 
 export const getRequestsForPeriod = async (center: string, warehouseCode: string, startDate: Date, endDate: Date): Promise<string[]> => {
@@ -104,6 +102,7 @@ export const getRequestsForDate = async (center: string, warehouseCode: string, 
                 materialCode: data.productCode,
                 quantity: data.quantity,
                 notes: data.notes,
+                sentToSap: data.sentToSap || ''
             });
         });
         return requests;
