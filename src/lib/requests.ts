@@ -44,7 +44,7 @@ export const saveRequest = async (requestData: RequestData) => {
             productCode: product.materialCode,
             quantity: product.quantity,
             notes: product.notes,
-            sentToSap: product.sentToSap || '',
+            sentToSap: '', // Always save with an empty string
           });
         });
       });
