@@ -7,9 +7,12 @@ import { DayPicker } from "react-day-picker"
 
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
+import { format } from "date-fns"
+import { es } from "date-fns/locale"
 
 export type CalendarProps = React.ComponentProps<typeof DayPicker> & {
   disableNavigation?: boolean;
+  enabledDays?: number[];
 };
 
 function Calendar({
@@ -17,8 +20,43 @@ function Calendar({
   classNames,
   showOutsideDays = true,
   disableNavigation = false,
+  enabledDays,
   ...props
 }: CalendarProps) {
+  
+  const Head = (props: {
+    weekdays: Date[];
+    // this component is not exported from react-day-picker
+  } & any) => {
+    // day of week for es locale is 1 based (1=Mon)
+    const weekDays = props.weekdays.map((d: Date) => parseInt(format(d, 'c', {locale: es})));
+
+    // Map JS getDay() to week index.
+    // enabledDays uses 0=Sun, 1=Mon, ..., 6=Sat
+    // weekStartsOn=1, so Head gets Mon, Tue, ... Sun
+    const dayIndexMap = [1, 2, 3, 4, 5, 6, 0]; // Mon -> Sun
+
+    return (
+      <thead className={cn(props.className, '[&_tr]:border-b')}>
+        <tr className='flex'>
+          {weekDays.map((weekDay, i) => {
+            return (
+              <th
+                key={i}
+                scope="col"
+                className={cn('text-muted-foreground rounded-md w-9 font-normal text-[0.8rem]',
+                  {'head_cell_enabled text-primary': enabledDays?.includes(dayIndexMap[i])}
+                )}
+              >
+                {format(props.weekdays[i], 'cccccc', {locale: es})}
+              </th>
+            );
+          })}
+        </tr>
+      </thead>
+    );
+  };
+
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
@@ -60,6 +98,7 @@ function Calendar({
       components={{
         IconLeft: ({ ...props }) => <ChevronLeft className="h-4 w-4" />,
         IconRight: ({ ...props }) => <ChevronRight className="h-4 w-4" />,
+        Head,
       }}
       {...props}
     />

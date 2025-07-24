@@ -82,4 +82,7 @@
   body {
     @apply bg-background text-foreground;
   }
+  .head_cell_enabled {
+    @apply bg-primary/20 text-primary-foreground rounded-md;
+  }
 }
