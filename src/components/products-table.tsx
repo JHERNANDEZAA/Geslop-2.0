@@ -174,21 +174,25 @@ export function ProductsTable({ materials, requestData, existingRequests, onSucc
         <CardDescription>Filtre y seleccione las cantidades de los productos que desea solicitar.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="space-y-4">
-            <CardTitle>Filtros</CardTitle>
-            <div className="flex justify-start gap-2">
-                <Button variant="outline">Favoritos</Button>
-                <Button variant="outline">Última solicitud</Button>
-            </div>
-            <div className="p-4 border rounded-lg bg-gray-50/50">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <Input name="materialCode" placeholder="Código de producto" onChange={handleFilterChange} value={filters.materialCode} />
-                    <Input name="materialDescription" placeholder="Descripción de producto" onChange={handleFilterChange} value={filters.materialDescription} />
-                    <Input name="familyCode" placeholder="Código de familia" onChange={handleFilterChange} value={filters.familyCode}/>
-                    <Input name="familyDescription" placeholder="Descripción de familia" onChange={handleFilterChange} value={filters.familyDescription}/>
+        <Card>
+            <CardHeader>
+                <CardTitle>Filtros</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                <div className="flex justify-start gap-2">
+                    <Button variant="outline">Favoritos</Button>
+                    <Button variant="outline">Última solicitud</Button>
                 </div>
-            </div>
-        </div>
+                <div className="p-4 border rounded-lg bg-gray-50/50">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <Input name="materialCode" placeholder="Código de producto" onChange={handleFilterChange} value={filters.materialCode} />
+                        <Input name="materialDescription" placeholder="Descripción de producto" onChange={handleFilterChange} value={filters.materialDescription} />
+                        <Input name="familyCode" placeholder="Código de familia" onChange={handleFilterChange} value={filters.familyCode}/>
+                        <Input name="familyDescription" placeholder="Descripción de familia" onChange={handleFilterChange} value={filters.familyDescription}/>
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
         
         <Card>
             <CardHeader>
