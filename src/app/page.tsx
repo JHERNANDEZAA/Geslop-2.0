@@ -74,6 +74,9 @@ export default function Home() {
       }
   }, [selectedCatalog]);
 
+  const handleShowCalendar = () => {
+    setDateSelectionActive(true);
+  };
 
   const handleDateSelect = (date: Date | undefined) => {
     if (date) {
@@ -108,8 +111,8 @@ export default function Home() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="border p-4 rounded-md">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <div className="border p-4 rounded-md md:col-span-3">
                   <h3 className="text-lg font-semibold mb-4">Destinatario</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-2">
@@ -149,7 +152,7 @@ export default function Home() {
                   </div>
               </div>
 
-              <div className="border p-4 rounded-md">
+              <div className="border p-4 rounded-md md:col-span-1">
                   <h3 className="text-lg font-semibold mb-4">Catálogo</h3>
                   <div className="grid grid-cols-1 gap-6">
                     <div className="space-y-2">
@@ -174,12 +177,10 @@ export default function Home() {
                   </div>
               </div>
             </div>
-          </CardContent>
-          <CardFooter>
-            <Button onClick={() => setDateSelectionActive(true)} disabled={!selectedCatalog}>
+            <Button onClick={handleShowCalendar} disabled={!selectedCatalog}>
               Activar calendario de solicitud
             </Button>
-          </CardFooter>
+          </CardContent>
         </Card>
 
         {isDateSelectionActive && (
@@ -204,12 +205,10 @@ export default function Home() {
                   className="rounded-md border bg-white"
                 />
               </div>
-            </CardContent>
-            <CardFooter className="flex-col items-center gap-4">
               <Button onClick={() => setProductsVisible(true)} disabled={!selectedDate}>
                 Añadir Productos
               </Button>
-            </CardFooter>
+            </CardContent>
           </Card>
         )}
 
