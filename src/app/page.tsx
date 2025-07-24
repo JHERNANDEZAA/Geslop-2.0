@@ -15,7 +15,7 @@ import { ProductsTable } from '@/components/products-table';
 import { PageHeader } from '@/components/page-header';
 import type { Center, Warehouse, Catalog, EnabledDays, Material } from '@/lib/types';
 import { centers, warehouses, catalogs, enabledDays, materials } from '@/lib/data';
-import { addDays, isPast } from 'date-fns';
+import { addMonths, startOfMonth } from 'date-fns';
 
 export default function Home() {
   const [selectedCenter, setSelectedCenter] = useState<string>('');
@@ -86,6 +86,10 @@ export default function Home() {
     const dayOfWeek = day.getDay();
     return !enabledDaysForCatalog.includes(dayOfWeek);
   };
+
+  const today = new Date();
+  const fromMonth = startOfMonth(today);
+  const toMonth = startOfMonth(addMonths(today, 1));
   
   return (
     <div className="flex flex-col min-h-screen">
@@ -178,7 +182,10 @@ export default function Home() {
                     selected={selectedDate}
                     onSelect={handleDateSelect}
                     numberOfMonths={2}
+                    fromMonth={fromMonth}
+                    toMonth={toMonth}
                     disabled={isDayDisabled}
+                    disableNavigation
                     className="rounded-md border bg-white"
                   />
                 </div>
