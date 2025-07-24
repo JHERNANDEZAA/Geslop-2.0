@@ -297,24 +297,8 @@ export default function Home() {
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col items-center gap-4">
-              <div className="w-full flex justify-center">
-                <Calendar
-                  mode="single"
-                  selected={selectedDate}
-                  onSelect={handleDateSelect}
-                  numberOfMonths={3}
-                  month={displayMonth}
-                  disableNavigation
-                  disabled={isDayDisabled}
-                  className="rounded-md border bg-white"
-                  locale={es}
-                  weekStartsOn={1}
-                  modifiers={requestModifiers}
-                  modifiersClassNames={requestModifiersClassNames}
-                />
-              </div>
 
-              <div className="border p-4 rounded-md mt-4 w-full max-w-4xl bg-gray-50/50">
+              <div className="border p-4 rounded-md w-full max-w-4xl bg-gray-50/50">
                 <h4 className="font-semibold mb-3 text-center">Leyenda</h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-sm">
                   <div className="flex items-center gap-2">
@@ -336,6 +320,23 @@ export default function Home() {
                     <span>Día no habilitado para solicitar</span>
                   </div>
                 </div>
+              </div>
+
+              <div className="w-full flex justify-center mt-4">
+                <Calendar
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={handleDateSelect}
+                  numberOfMonths={3}
+                  month={displayMonth}
+                  disableNavigation
+                  disabled={isDayDisabled}
+                  className="rounded-md border bg-white"
+                  locale={es}
+                  weekStartsOn={1}
+                  modifiers={requestModifiers}
+                  modifiersClassNames={requestModifiersClassNames}
+                />
               </div>
 
               <Button 
@@ -367,3 +368,5 @@ export default function Home() {
     </div>
   );
 }
+
+    
