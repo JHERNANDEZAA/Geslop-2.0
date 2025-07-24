@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
@@ -343,7 +342,6 @@ export default function Home() {
                   weekStartsOn={1}
                   modifiers={requestModifiers}
                   modifiersClassNames={requestModifiersClassNames}
-                  enabledDays={enabledDaysForCatalog}
                 />
               </div>
 
