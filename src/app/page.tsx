@@ -119,6 +119,7 @@ export default function Home() {
   };
 
   const today = new Date();
+  const defaultMonth = subMonths(today, 1);
   const fromMonth = startOfMonth(subMonths(today, 1));
   const toMonth = startOfMonth(addMonths(today, 1));
   
@@ -221,6 +222,7 @@ export default function Home() {
                   selected={selectedDate}
                   onSelect={handleDateSelect}
                   numberOfMonths={3}
+                  month={defaultMonth}
                   fromMonth={fromMonth}
                   toMonth={toMonth}
                   disabled={isDayDisabled}
