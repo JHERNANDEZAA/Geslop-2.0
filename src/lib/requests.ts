@@ -1,6 +1,6 @@
 
 import { db } from './firebase';
-import { collection, query, where, getDocs, writeBatch, doc, DocumentData } from 'firebase/firestore';
+import { collection, query, where, getDocs, writeBatch, doc } from 'firebase/firestore';
 import type { ProductRequest } from './types';
 
 interface RequestData {
@@ -13,15 +13,6 @@ interface RequestData {
 
 export const saveRequest = async (requestData: RequestData) => {
   const { center, warehouseCode, requestDate, products } = requestData;
-
-  // First, check if there are any products to save.
-  const validProducts = products.filter(p => p.quantity > 0);
-  if (validProducts.length === 0) {
-    // If no products have a quantity > 0, we don't do anything.
-    // This prevents deleting existing requests when submitting an empty one.
-    console.log('No products with quantity > 0. Aborting save.');
-    return;
-  }
 
   const requestsRef = collection(db, 'requests');
 
@@ -36,13 +27,14 @@ export const saveRequest = async (requestData: RequestData) => {
   const batch = writeBatch(db);
 
   try {
-    // Delete existing documents that match the query
+    // Get all documents that match the query to delete them
     const querySnapshot = await getDocs(q);
     querySnapshot.forEach((doc) => {
       batch.delete(doc.ref);
     });
 
     // Add new documents for products with quantity > 0
+    const validProducts = products.filter(p => p.quantity > 0);
     validProducts.forEach((product) => {
       const newRequestRef = doc(requestsRef);
       batch.set(newRequestRef, {

@@ -83,28 +83,28 @@ export function ProductsTable({ materials, requestData }: ProductsTableProps) {
       products: Object.values(productRequests).filter(p => p.quantity > 0)
     };
     
-    if (finalRequest.products.length === 0) {
-      toast({
-        title: "No hay productos que solicitar",
-        description: "Por favor, añada una cantidad a al menos un producto.",
-        variant: "destructive",
-      });
-      setIsSubmitting(false);
-      return;
-    }
-
     try {
       await saveRequest(finalRequest);
-      toast({
-        title: "Solicitud Enviada",
-        description: `Se ha procesado su solicitud para el centro ${requestData.center}, almacén ${requestData.warehouseCode} en la fecha ${requestData.requestDate}.`,
-        variant: "default",
-        className: "bg-accent text-accent-foreground"
-      });
+
+      if (finalRequest.products.length > 0) {
+        toast({
+            title: "Solicitud Enviada",
+            description: `Se ha procesado su solicitud para el centro ${requestData.center}, almacén ${requestData.warehouseCode} en la fecha ${requestData.requestDate}.`,
+            variant: "default",
+            className: "bg-accent text-accent-foreground"
+        });
+      } else {
+        toast({
+            title: "Solicitud Eliminada",
+            description: `Se han eliminado los productos solicitados para el centro ${requestData.center}, almacén ${requestData.warehouseCode} en la fecha ${requestData.requestDate}.`,
+            variant: "default",
+        });
+      }
+      
     } catch (error) {
       toast({
-        title: "Error al enviar la solicitud",
-        description: "Hubo un problema al guardar su solicitud. Por favor, inténtelo de nuevo.",
+        title: "Error al procesar la solicitud",
+        description: "Hubo un problema al guardar o eliminar su solicitud. Por favor, inténtelo de nuevo.",
         variant: "destructive",
       });
     } finally {
