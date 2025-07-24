@@ -220,7 +220,7 @@ export default function Home() {
                   mode="single"
                   selected={selectedDate}
                   onSelect={handleDateSelect}
-                  numberOfMonths={2}
+                  numberOfMonths={3}
                   fromMonth={fromMonth}
                   toMonth={toMonth}
                   disabled={isDayDisabled}
