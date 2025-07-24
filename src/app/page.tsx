@@ -130,9 +130,7 @@ export default function Home() {
   };
 
   const today = new Date();
-  const defaultMonth = startOfMonth(today);
-  const fromMonth = startOfMonth(subMonths(today, 1));
-  const toMonth = startOfMonth(addMonths(today, 1));
+  const defaultMonth = startOfMonth(subMonths(today, 1));
 
   if (loading || !user) {
     return (
@@ -249,8 +247,7 @@ export default function Home() {
                   onSelect={handleDateSelect}
                   numberOfMonths={3}
                   month={defaultMonth}
-                  fromMonth={fromMonth}
-                  toMonth={toMonth}
+                  disableNavigation
                   disabled={isDayDisabled}
                   className="rounded-md border bg-white"
                   locale={es}
