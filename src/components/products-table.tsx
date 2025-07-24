@@ -84,7 +84,7 @@ export function ProductsTable({ materials, requestData }: ProductsTableProps) {
     
     toast({
       title: "Solicitud Enviada",
-      description: `Se ha procesado su solicitud para el centro ${requestData.center} en la fecha ${requestData.requestDate}.`,
+      description: `Se ha procesado su solicitud para el centro ${requestData.center}, almacén ${requestData.warehouseCode} en la fecha ${requestData.requestDate}.`,
       variant: "default",
       className: "bg-accent text-accent-foreground"
     })
@@ -169,17 +169,18 @@ export function ProductsTable({ materials, requestData }: ProductsTableProps) {
         </div>
 
         <div className="flex items-center justify-between mt-4">
-          <p className="text-sm text-muted-foreground">
-            Página {currentPage + 1} de {totalPages}
-          </p>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={() => setCurrentPage(p => Math.max(0, p - 1))} disabled={currentPage === 0}>
-              Anterior
-            </Button>
-            <Button variant="outline" onClick={() => setCurrentPage(p => Math.min(totalPages - 1, p + 1))} disabled={currentPage === totalPages - 1}>
-              Siguiente
-            </Button>
-          </div>
+            <div className="flex items-center gap-2">
+                <p className="text-sm text-muted-foreground">
+                    Página {currentPage + 1} de {totalPages}
+                </p>
+                <Button variant="outline" onClick={() => setCurrentPage(p => Math.max(0, p - 1))} disabled={currentPage === 0}>
+                Anterior
+                </Button>
+                <Button variant="outline" onClick={() => setCurrentPage(p => Math.min(totalPages - 1, p + 1))} disabled={currentPage === totalPages - 1}>
+                Siguiente
+                </Button>
+            </div>
+            <Button onClick={handleSubmit} className="bg-accent hover:bg-accent/90">Solicitar</Button>
         </div>
       </CardContent>
     </Card>
