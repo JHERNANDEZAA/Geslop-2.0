@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from "@/hooks/use-toast"
 import { saveRequest, deleteRequest } from '@/lib/requests';
+import { Star, History } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -179,8 +180,14 @@ export function ProductsTable({ materials, requestData, existingRequests, onSucc
             </CardHeader>
             <CardContent className="space-y-4">
                 <div className="flex justify-start gap-2">
-                    <Button variant="secondary">Favoritos</Button>
-                    <Button variant="secondary">Última solicitud</Button>
+                    <Button>
+                      <Star className="mr-2 h-4 w-4" />
+                      Favoritos
+                    </Button>
+                    <Button>
+                      <History className="mr-2 h-4 w-4" />
+                      Última solicitud
+                    </Button>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <Input name="materialCode" placeholder="Código de producto" onChange={handleFilterChange} value={filters.materialCode} />
