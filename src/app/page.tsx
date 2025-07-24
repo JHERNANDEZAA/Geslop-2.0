@@ -36,6 +36,7 @@ export default function Home() {
 
   const [isDateSelectionActive, setDateSelectionActive] = useState(false);
   const [isProductsVisible, setProductsVisible] = useState(false);
+  const [isReadOnly, setIsReadOnly] = useState(false);
   
   const dateSectionRef = useRef<HTMLDivElement>(null);
   const productsSectionRef = useRef<HTMLDivElement>(null);
@@ -136,20 +137,18 @@ export default function Home() {
       setSelectedDate(utcDate);
       setProductsVisible(false); // Hide products while loading new data
       const formattedDate = format(utcDate, 'yyyy-MM-dd');
+
+      const requestInfo = requestsInfo.find(r => r.date === formattedDate);
+      setIsReadOnly(requestInfo?.sentToSap || false);
+
       const requests = await getRequestsForDate(selectedCenter, selectedWarehouse, formattedDate);
       setExistingRequests(requests);
     }
-  }, [selectedCenter, selectedWarehouse]);
+  }, [selectedCenter, selectedWarehouse, requestsInfo]);
 
   const isDayDisabled = (day: Date) => {
     const today = startOfDay(new Date());
 
-    const formattedDay = format(day, 'yyyy-MM-dd');
-    const requestInfo = requestsInfo.find(r => r.date === formattedDay);
-    if (requestInfo?.sentToSap) {
-      return true; // Disable if sent to SAP
-    }
-    
     // Disable past dates
     if (day < today) return true;
     
@@ -185,7 +184,7 @@ export default function Home() {
 
   const requestModifiersClassNames = {
     requested: 'bg-orange-300 rounded-md',
-    sentToSap: 'bg-blue-800 text-white rounded-md cursor-not-allowed',
+    sentToSap: 'bg-blue-800 text-white rounded-md',
   };
 
   if (loading || !user) {
@@ -364,6 +363,7 @@ export default function Home() {
               }}
               existingRequests={existingRequests}
               onSuccess={handleSuccess}
+              isReadOnly={isReadOnly}
             />
           </div>
         )}

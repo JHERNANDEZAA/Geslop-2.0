@@ -32,11 +32,12 @@ interface ProductsTableProps {
   };
   existingRequests?: ProductRequest[];
   onSuccess: () => void;
+  isReadOnly?: boolean;
 }
 
 const ITEMS_PER_PAGE = 50;
 
-export function ProductsTable({ materials, requestData, existingRequests, onSuccess }: ProductsTableProps) {
+export function ProductsTable({ materials, requestData, existingRequests, onSuccess, isReadOnly = false }: ProductsTableProps) {
   const { toast } = useToast()
   const [filters, setFilters] = useState({
     materialCode: '',
@@ -171,7 +172,11 @@ export function ProductsTable({ materials, requestData, existingRequests, onSucc
     <Card className="shadow-lg rounded-none border-x-0">
       <CardHeader>
         <CardTitle>Productos SAP</CardTitle>
-        <CardDescription>Filtre y seleccione las cantidades de los productos que desea solicitar.</CardDescription>
+        <CardDescription>
+          {isReadOnly 
+            ? "Esta solicitud ya ha sido enviada a SAP y no puede ser modificada. Mostrando en modo consulta."
+            : "Filtre y seleccione las cantidades de los productos que desea solicitar."}
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <Card>
@@ -180,11 +185,11 @@ export function ProductsTable({ materials, requestData, existingRequests, onSucc
             </CardHeader>
             <CardContent className="space-y-4">
                 <div className="flex justify-start gap-2">
-                    <Button>
+                    <Button variant="outline" className="bg-primary/10 hover:bg-primary/20 text-primary-foreground border-primary/20">
                       <Star className="mr-2 h-4 w-4" />
                       Favoritos
                     </Button>
-                    <Button>
+                    <Button variant="outline" className="bg-primary/10 hover:bg-primary/20 text-primary-foreground border-primary/20">
                       <History className="mr-2 h-4 w-4" />
                       Última solicitud
                     </Button>
@@ -206,7 +211,7 @@ export function ProductsTable({ materials, requestData, existingRequests, onSucc
                 <div className="flex justify-end gap-2">
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button variant="destructive" disabled={isSubmitting}>Borrar solicitud</Button>
+                        <Button variant="destructive" disabled={isSubmitting || isReadOnly}>Borrar solicitud</Button>
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
@@ -224,7 +229,7 @@ export function ProductsTable({ materials, requestData, existingRequests, onSucc
                         </AlertDialogFooter>
                       </AlertDialogContent>
                     </AlertDialog>
-                    <Button onClick={handleSubmit} className="bg-accent hover:bg-accent/90" disabled={isSubmitting}>
+                    <Button onClick={handleSubmit} className="bg-accent hover:bg-accent/90" disabled={isSubmitting || isReadOnly}>
                       {isSubmitting ? 'Enviando...' : 'Solicitar'}
                     </Button>
                 </div>
@@ -259,6 +264,7 @@ export function ProductsTable({ materials, requestData, existingRequests, onSucc
                                           value={productRequests[material.materialCode]?.quantity || ''}
                                           onChange={(e) => handleRequestChange(material.materialCode, 'quantity', e.target.value)}
                                           className="w-24"
+                                          disabled={isReadOnly}
                                         />
                                     </TableCell>
                                     <TableCell>{material.unit}</TableCell>
@@ -269,6 +275,7 @@ export function ProductsTable({ materials, requestData, existingRequests, onSucc
                                           value={productRequests[material.materialCode]?.notes || ''}
                                           onChange={(e) => handleRequestChange(material.materialCode, 'notes', e.target.value)}
                                           className="w-full"
+                                          disabled={isReadOnly}
                                         />
                                     </TableCell>
                                 </TableRow>
@@ -289,7 +296,7 @@ export function ProductsTable({ materials, requestData, existingRequests, onSucc
                         Siguiente
                         </Button>
                     </div>
-                    <Button onClick={handleSubmit} className="bg-accent hover:bg-accent/90" disabled={isSubmitting}>
+                    <Button onClick={handleSubmit} className="bg-accent hover:bg-accent/90" disabled={isSubmitting || isReadOnly}>
                       {isSubmitting ? 'Enviando...' : 'Solicitar'}
                     </Button>
                 </div>
