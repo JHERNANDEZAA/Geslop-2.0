@@ -174,11 +174,8 @@ export function ProductsTable({ materials, requestData, existingRequests, onSucc
         <CardDescription>Filtre y seleccione las cantidades de los productos que desea solicitar.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <Card>
-          <CardHeader>
+        <div className="space-y-4">
             <CardTitle>Filtros</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
             <div className="flex justify-start gap-2">
                 <Button variant="outline">Favoritos</Button>
                 <Button variant="outline">Última solicitud</Button>
@@ -191,8 +188,7 @@ export function ProductsTable({ materials, requestData, existingRequests, onSucc
                     <Input name="familyDescription" placeholder="Descripción de familia" onChange={handleFilterChange} value={filters.familyDescription}/>
                 </div>
             </div>
-          </CardContent>
-        </Card>
+        </div>
         
         <Card>
             <CardHeader>
