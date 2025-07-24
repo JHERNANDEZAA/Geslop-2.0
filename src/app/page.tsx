@@ -102,7 +102,7 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
       <PageHeader />
-      <main className="flex-grow container mx-auto p-2 md:p-4 space-y-6">
+      <main className="flex-grow container mx-auto px-1 md:px-2 space-y-6">
         <Card className="shadow-lg">
           <CardHeader>
             <CardTitle>Destinatario y Catálogo</CardTitle>
@@ -205,7 +205,11 @@ export default function Home() {
                   className="rounded-md border bg-white"
                 />
               </div>
-              <Button onClick={() => setProductsVisible(true)} disabled={!selectedDate}>
+              <Button 
+                onClick={() => setProductsVisible(true)} 
+                disabled={!selectedDate}
+                className="bg-accent hover:bg-accent/90"
+              >
                 Añadir Productos
               </Button>
             </CardContent>
