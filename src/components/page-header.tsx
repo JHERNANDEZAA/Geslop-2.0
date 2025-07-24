@@ -5,16 +5,6 @@ import { useAuth, signOutUser } from '@/lib/auth.tsx';
 import { Building2, LogOut } from 'lucide-react';
 import { Button } from './ui/button';
 import { useRouter } from 'next/navigation';
-import {
-  Menubar,
-  MenubarContent,
-  MenubarItem,
-  MenubarMenu,
-  MenubarSeparator,
-  MenubarShortcut,
-  MenubarTrigger,
-} from "@/components/ui/menubar"
-
 
 export function PageHeader() {
   const { user } = useAuth();
@@ -44,26 +34,6 @@ export function PageHeader() {
                 </Button>
             </div>
           )}
-        </div>
-        <div className="flex items-center justify-start h-12">
-            <Menubar>
-                <MenubarMenu>
-                    <MenubarTrigger>Logística</MenubarTrigger>
-                    <MenubarContent>
-                        <MenubarItem>
-                            Pedidos
-                        </MenubarItem>
-                    </MenubarContent>
-                </MenubarMenu>
-                <MenubarMenu>
-                    <MenubarTrigger>Menú</MenubarTrigger>
-                     <MenubarContent>
-                        <MenubarItem>
-                            Catálogo
-                        </MenubarItem>
-                    </MenubarContent>
-                </MenubarMenu>
-            </Menubar>
         </div>
       </div>
     </header>
