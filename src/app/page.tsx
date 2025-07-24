@@ -111,8 +111,8 @@ export default function Home() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-20 gap-6">
-              <div className="border p-4 rounded-md md:col-span-13">
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+              <div className="border p-4 rounded-md md:col-span-7">
                   <h3 className="text-lg font-semibold mb-4">Destinatario</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-2">
@@ -152,7 +152,7 @@ export default function Home() {
                   </div>
               </div>
 
-              <div className="border p-4 rounded-md md:col-span-7">
+              <div className="border p-4 rounded-md md:col-span-5">
                   <h3 className="text-lg font-semibold mb-4">Catálogo</h3>
                   <div className="grid grid-cols-1 gap-6">
                     <div className="space-y-2">
@@ -205,7 +205,7 @@ export default function Home() {
                   className="rounded-md border bg-white"
                 />
               </div>
-              <Button onClick={() => setProductsVisible(true)} disabled={!selectedDate} className="bg-accent hover:bg-accent/90 text-accent-foreground">
+              <Button onClick={() => setProductsVisible(true)} disabled={!selectedDate}>
                 Añadir Productos
               </Button>
             </CardContent>
