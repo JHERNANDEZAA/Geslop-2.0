@@ -153,6 +153,7 @@ export default function Home() {
                   <h3 className="text-lg font-semibold mb-4">Catálogo</h3>
                   <div className="grid grid-cols-1 gap-6">
                     <div className="space-y-2">
+                        <label htmlFor="catalog-select" className="text-sm font-medium">Catálogo</label>
                         <Select
                         value={selectedCatalog}
                         onValueChange={setSelectedCatalog}
@@ -205,7 +206,7 @@ export default function Home() {
               </div>
             </CardContent>
             <CardFooter className="flex-col items-center gap-4">
-              <Button onClick={() => setProductsVisible(true)} disabled={!selectedDate} className="bg-accent hover:bg-accent/90">
+              <Button onClick={() => setProductsVisible(true)} disabled={!selectedDate}>
                 Añadir Productos
               </Button>
             </CardFooter>
