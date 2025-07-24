@@ -299,7 +299,6 @@ export default function Home() {
             <CardContent className="flex flex-col items-center gap-4">
 
               <div className="border p-4 rounded-md w-full max-w-4xl bg-gray-50/50">
-                <h4 className="font-semibold mb-3 text-center">Leyenda</h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-sm">
                   <div className="flex items-center gap-2">
                     <div className="h-5 w-5 rounded-sm border bg-white"></div>
