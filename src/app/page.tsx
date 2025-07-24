@@ -307,7 +307,7 @@ export default function Home() {
                     <span>Día con solicitud modificable</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="h-5 w-5 rounded-sm bg-blue-800"></div>
+                    <div className="h-5 w-5 rounded-sm bg-blue-800 text-white"></div>
                     <span>Día con solicitud enviada a SAP (no modificable)</span>
                   </div>
                   <div className="flex items-center gap-2">
