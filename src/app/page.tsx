@@ -295,7 +295,7 @@ export default function Home() {
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-4">
-              <div className="border p-4 rounded-md w-full bg-gray-50/50">
+              <div className="border p-4 rounded-md bg-gray-50/50">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-sm">
                   <div className="flex items-center gap-2">
                     <div className="h-5 w-5 rounded-sm border bg-white"></div>
@@ -318,7 +318,7 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="w-full mt-4">
+              <div className="w-full mt-4 flex justify-center">
                 <Calendar
                   mode="single"
                   selected={selectedDate}
@@ -327,7 +327,7 @@ export default function Home() {
                   month={displayMonth}
                   disableNavigation
                   disabled={isDayDisabled}
-                  className="rounded-md border bg-white w-full"
+                  className="rounded-md border bg-white"
                   locale={es}
                   weekStartsOn={1}
                   modifiers={requestModifiers}
@@ -366,3 +366,4 @@ export default function Home() {
     </div>
   );
 }
+
