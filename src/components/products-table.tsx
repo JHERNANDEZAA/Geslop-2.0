@@ -174,7 +174,11 @@ export function ProductsTable({ materials, requestData, existingRequests, onSucc
         <CardDescription>Filtre y seleccione las cantidades de los productos que desea solicitar.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="p-4 border rounded-lg bg-card space-y-4">
+        <Card>
+          <CardHeader>
+            <CardTitle>Filtros</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
             <div className="flex justify-start gap-2">
                 <Button variant="outline">Favoritos</Button>
                 <Button variant="outline">Última solicitud</Button>
@@ -187,100 +191,106 @@ export function ProductsTable({ materials, requestData, existingRequests, onSucc
                     <Input name="familyDescription" placeholder="Descripción de familia" onChange={handleFilterChange} value={filters.familyDescription}/>
                 </div>
             </div>
-        </div>
+          </CardContent>
+        </Card>
         
-        <div className="p-4 border rounded-lg bg-card space-y-4">
-            <div className="flex justify-end gap-2">
-                <Button onClick={handleSubmit} className="bg-accent hover:bg-accent/90" disabled={isSubmitting}>
-                  {isSubmitting ? 'Enviando...' : 'Solicitar'}
-                </Button>
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button variant="destructive" disabled={isSubmitting}>Borrar solicitud</Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>¿Está seguro?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Esta acción no se puede deshacer. Se borrará permanentemente la solicitud
-                        para el centro {requestData.center}, almacén {requestData.warehouseCode} en la fecha {requestData.requestDate}.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                      <AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90">
-                        Borrar
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-            </div>
-            
-            <div className="overflow-x-auto">
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Código material</TableHead>
-                            <TableHead>Descripción material</TableHead>
-                            <TableHead>Ubicación</TableHead>
-                            <TableHead>Redondeo</TableHead>
-                            <TableHead>Semáforo</TableHead>
-                            <TableHead className="w-28">Cantidad</TableHead>
-                            <TableHead>Unidad</TableHead>
-                            <TableHead>Precio</TableHead>
-                            <TableHead className="w-64">Observaciones</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {paginatedMaterials.map(material => (
-                            <TableRow key={material.materialCode}>
-                                <TableCell>{material.materialCode}</TableCell>
-                                <TableCell>{material.materialDescription}</TableCell>
-                                <TableCell>{material.location}</TableCell>
-                                <TableCell>{material.rounding}</TableCell>
-                                <TableCell><TrafficLight color={material.trafficLight} /></TableCell>
-                                <TableCell>
-                                    <Input 
-                                      type="number" 
-                                      min="0"
-                                      value={productRequests[material.materialCode]?.quantity || ''}
-                                      onChange={(e) => handleRequestChange(material.materialCode, 'quantity', e.target.value)}
-                                      className="w-24"
-                                    />
-                                </TableCell>
-                                <TableCell>{material.unit}</TableCell>
-                                <TableCell>{material.price.toFixed(2)}€</TableCell>
-                                <TableCell>
-                                    <Textarea 
-                                      maxLength={300} 
-                                      value={productRequests[material.materialCode]?.notes || ''}
-                                      onChange={(e) => handleRequestChange(material.materialCode, 'notes', e.target.value)}
-                                      className="w-full"
-                                    />
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </div>
-
-            <div className="flex items-center justify-between mt-4">
-                <div className="flex items-center gap-2">
-                    <p className="text-sm text-muted-foreground">
-                        Página {currentPage + 1} de {totalPages}
-                    </p>
-                    <Button variant="outline" onClick={() => setCurrentPage(p => Math.max(0, p - 1))} disabled={currentPage === 0}>
-                    Anterior
+        <Card>
+            <CardHeader>
+                <CardTitle>Productos</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                <div className="flex justify-end gap-2">
+                    <Button onClick={handleSubmit} className="bg-accent hover:bg-accent/90" disabled={isSubmitting}>
+                      {isSubmitting ? 'Enviando...' : 'Solicitar'}
                     </Button>
-                    <Button variant="outline" onClick={() => setCurrentPage(p => Math.min(totalPages - 1, p + 1))} disabled={currentPage === totalPages - 1 || isSubmitting}>
-                    Siguiente
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="destructive" disabled={isSubmitting}>Borrar solicitud</Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>¿Está seguro?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Esta acción no se puede deshacer. Se borrará permanentemente la solicitud
+                            para el centro {requestData.center}, almacén {requestData.warehouseCode} en la fecha {requestData.requestDate}.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                          <AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90">
+                            Borrar
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                </div>
+                
+                <div className="overflow-x-auto">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Código material</TableHead>
+                                <TableHead>Descripción material</TableHead>
+                                <TableHead>Ubicación</TableHead>
+                                <TableHead>Redondeo</TableHead>
+                                <TableHead>Semáforo</TableHead>
+                                <TableHead className="w-28">Cantidad</TableHead>
+                                <TableHead>Unidad</TableHead>
+                                <TableHead>Precio</TableHead>
+                                <TableHead className="w-64">Observaciones</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {paginatedMaterials.map(material => (
+                                <TableRow key={material.materialCode}>
+                                    <TableCell>{material.materialCode}</TableCell>
+                                    <TableCell>{material.materialDescription}</TableCell>
+                                    <TableCell>{material.location}</TableCell>
+                                    <TableCell>{material.rounding}</TableCell>
+                                    <TableCell><TrafficLight color={material.trafficLight} /></TableCell>
+                                    <TableCell>
+                                        <Input 
+                                          type="number" 
+                                          min="0"
+                                          value={productRequests[material.materialCode]?.quantity || ''}
+                                          onChange={(e) => handleRequestChange(material.materialCode, 'quantity', e.target.value)}
+                                          className="w-24"
+                                        />
+                                    </TableCell>
+                                    <TableCell>{material.unit}</TableCell>
+                                    <TableCell>{material.price.toFixed(2)}€</TableCell>
+                                    <TableCell>
+                                        <Textarea 
+                                          maxLength={300} 
+                                          value={productRequests[material.materialCode]?.notes || ''}
+                                          onChange={(e) => handleRequestChange(material.materialCode, 'notes', e.target.value)}
+                                          className="w-full"
+                                        />
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </div>
+
+                <div className="flex items-center justify-between mt-4">
+                    <div className="flex items-center gap-2">
+                        <p className="text-sm text-muted-foreground">
+                            Página {currentPage + 1} de {totalPages}
+                        </p>
+                        <Button variant="outline" onClick={() => setCurrentPage(p => Math.max(0, p - 1))} disabled={currentPage === 0}>
+                        Anterior
+                        </Button>
+                        <Button variant="outline" onClick={() => setCurrentPage(p => Math.min(totalPages - 1, p + 1))} disabled={currentPage === totalPages - 1 || isSubmitting}>
+                        Siguiente
+                        </Button>
+                    </div>
+                    <Button onClick={handleSubmit} className="bg-accent hover:bg-accent/90" disabled={isSubmitting}>
+                      {isSubmitting ? 'Enviando...' : 'Solicitar'}
                     </Button>
                 </div>
-                <Button onClick={handleSubmit} className="bg-accent hover:bg-accent/90" disabled={isSubmitting}>
-                  {isSubmitting ? 'Enviando...' : 'Solicitar'}
-                </Button>
-            </div>
-        </div>
+            </CardContent>
+        </Card>
       </CardContent>
     </Card>
   );
