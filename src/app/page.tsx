@@ -327,7 +327,7 @@ export default function Home() {
                   month={displayMonth}
                   disableNavigation
                   disabled={isDayDisabled}
-                  className="rounded-md border bg-white"
+                  className="rounded-md border bg-white w-full"
                   locale={es}
                   weekStartsOn={1}
                   modifiers={requestModifiers}
