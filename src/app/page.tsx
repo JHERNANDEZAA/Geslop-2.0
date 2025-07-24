@@ -160,13 +160,11 @@ export default function Home() {
               </div>
             </div>
           </CardContent>
-          {selectedCatalog && (
-            <CardFooter>
-              <Button onClick={() => setDateSelectionActive(true)} disabled={!selectedCenter || !selectedWarehouse || !selectedCatalog}>
-                Activar calendario de solicitud
-              </Button>
-            </CardFooter>
-          )}
+          <CardFooter>
+            <Button onClick={() => setDateSelectionActive(true)} disabled={!selectedCatalog}>
+              Activar calendario de solicitud
+            </Button>
+          </CardFooter>
         </Card>
 
         {isDateSelectionActive && (
