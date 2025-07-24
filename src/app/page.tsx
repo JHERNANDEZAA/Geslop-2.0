@@ -20,7 +20,7 @@ import { PageHeader } from '@/components/page-header';
 import type { Center, Warehouse, Catalog, EnabledDays, Material } from '@/lib/types';
 import { centers, warehouses, catalogs, enabledDays, materials } from '@/lib/data';
 import { getRequestsForPeriod } from '@/lib/requests';
-import { addMonths, subMonths, startOfMonth, endOfMonth, parseISO } from 'date-fns';
+import { addMonths, subMonths, startOfMonth, endOfMonth, parseISO, format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -297,7 +297,7 @@ export default function Home() {
                 center: selectedCenter,
                 warehouseCode: selectedWarehouse,
                 catalog: selectedCatalog,
-                requestDate: selectedDate.toISOString().split('T')[0]
+                requestDate: format(selectedDate, 'yyyy-MM-dd')
               }}
             />
           </div>
