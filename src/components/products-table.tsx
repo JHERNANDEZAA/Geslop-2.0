@@ -179,8 +179,8 @@ export function ProductsTable({ materials, requestData, existingRequests, onSucc
             </CardHeader>
             <CardContent className="space-y-4">
                 <div className="flex justify-start gap-2">
-                    <Button variant="outline">Favoritos</Button>
-                    <Button variant="outline">Última solicitud</Button>
+                    <Button variant="secondary">Favoritos</Button>
+                    <Button variant="secondary">Última solicitud</Button>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <Input name="materialCode" placeholder="Código de producto" onChange={handleFilterChange} value={filters.materialCode} />
