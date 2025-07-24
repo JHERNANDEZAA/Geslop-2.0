@@ -20,7 +20,7 @@ import { PageHeader } from '@/components/page-header';
 import type { Center, Warehouse, Catalog, EnabledDays, Material, ProductRequest, RequestInfo } from '@/lib/types';
 import { centers, warehouses, catalogs, enabledDays, materials } from '@/lib/data';
 import { getRequestsForPeriod, getRequestsForDate } from '@/lib/requests';
-import { addMonths, subMonths, startOfMonth, endOfMonth, parseISO, format } from 'date-fns';
+import { addMonths, subMonths, startOfMonth, endOfMonth, parseISO, format, startOfDay } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -132,7 +132,6 @@ export default function Home() {
 
   const handleDateSelect = useCallback(async (date: Date | undefined) => {
     if (date) {
-      // Create a new Date object in UTC to avoid timezone issues
       const utcDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
       setSelectedDate(utcDate);
       setProductsVisible(false); // Hide products while loading new data
@@ -143,8 +142,7 @@ export default function Home() {
   }, [selectedCenter, selectedWarehouse]);
 
   const isDayDisabled = (day: Date) => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); // Set to start of today for comparison
+    const today = startOfDay(new Date());
 
     const formattedDay = format(day, 'yyyy-MM-dd');
     const requestInfo = requestsInfo.find(r => r.date === formattedDay);
@@ -320,7 +318,7 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="w-full flex justify-center mt-4">
+              <div className="w-full mt-4 flex justify-center">
                 <Calendar
                   mode="single"
                   selected={selectedDate}
