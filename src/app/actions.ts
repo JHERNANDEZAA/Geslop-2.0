@@ -30,7 +30,8 @@ async function fetchHanaMaterials(): Promise<{ materials: HanaMaterial[], rawRes
     }
 
     const headers = new Headers();
-    headers.append("Authorization", "Basic " + btoa(user + ":" + password));
+    // Use Buffer for server-side Base64 encoding instead of btoa
+    headers.append("Authorization", "Basic " + Buffer.from(user + ":" + password).toString('base64'));
     headers.append("Accept", "application/json");
 
     try {
@@ -102,4 +103,3 @@ export async function loadHanaData() {
         return { success: false, message: 'An error occurred during the material loading process.', debugInfo: errorMessage };
     }
 }
-
