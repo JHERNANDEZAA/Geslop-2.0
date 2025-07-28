@@ -1,7 +1,6 @@
 
 'use server';
 
-import 'dotenv/config';
 import { db } from '@/lib/firebase';
 import { collection, doc, writeBatch } from 'firebase/firestore';
 
@@ -87,5 +86,3 @@ export async function loadHanaData() {
         return { success: false, message: error.message };
     }
 }
-
-    
