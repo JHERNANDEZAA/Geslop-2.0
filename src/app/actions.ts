@@ -86,3 +86,4 @@ export async function loadHanaData() {
         return { success: false, message: errorMessage };
     }
 }
+
