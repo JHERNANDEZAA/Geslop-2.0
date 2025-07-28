@@ -184,16 +184,15 @@ export default function Home() {
     if (result.success) {
       toast({
         title: "Éxito",
-        description: result.message,
+        description: result.message as string,
         variant: "default",
         className: "bg-accent text-accent-foreground"
       });
     } else {
       toast({
         title: "Error de Carga",
-        description: result.debugInfo || "Ocurrió un error desconocido.",
-        variant: "destructive",
-        duration: 15000 // Show for longer to allow reading the debug info
+        description: (result.message as Error).message || "Ocurrió un error desconocido.",
+        variant: "destructive"
       });
     }
     setIsLoadingData(false);

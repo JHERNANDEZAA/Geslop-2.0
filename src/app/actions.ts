@@ -20,7 +20,7 @@ interface HanaMaterial {
     YY1_CATALOGO_PPR: string;
 }
 
-async function fetchHanaMaterials(): Promise<{ materials: HanaMaterial[], rawResponse: string }> {
+async function fetchHanaMaterials(): Promise<HanaMaterial[]> {
     const url = process.env.S4_HANA_URL;
     const user = process.env.S4_HANA_USER;
     const password = process.env.S4_HANA_PASSWORD;
@@ -30,31 +30,21 @@ async function fetchHanaMaterials(): Promise<{ materials: HanaMaterial[], rawRes
     }
 
     const headers = new Headers();
-    // Use Buffer for server-side Base64 encoding. It's globally available in Node.js runtime.
-    headers.append("Authorization", "Basic " + Buffer.from(user + ":" + password).toString('base64'));
+    headers.append("Authorization", "Basic " + btoa(user + ":" + password));
     headers.append("Accept", "application/json");
 
     try {
-        const response = await fetch(url, { headers, cache: 'no-store' });
-        
-        const responseText = await response.text();
-        
-        if (!response.ok) {
-            // Include status and raw text in the error message for better client-side debugging
-            throw new Error(`Failed to fetch data from S4/HANA: ${response.status} ${response.statusText}. Raw Response: ${responseText}`);
-        }
-        
-        const data = JSON.parse(responseText);
+        const response = await fetch(url, { headers });
 
-        // The actual results are in the 'd.results' property
-        if (data && data.d && Array.isArray(data.d.results)) {
-            return { materials: data.d.results, rawResponse: responseText };
-        } else {
-            throw new Error(`Unexpected JSON structure from S4/HANA. 'd.results' not found. Raw Response: ${responseText}`);
+        if (!response.ok) {
+            throw new Error(`Failed to fetch data from S4/HANA: ${response.status} ${response.statusText}`);
         }
+        
+        const data = await response.json();
+
+        return data.d.results;
     } catch (error) {
         console.error("Error connecting to S4/HANA:", error);
-        // Re-throw the error to be caught by the action handler
         throw error;
     }
 }
@@ -62,26 +52,15 @@ async function fetchHanaMaterials(): Promise<{ materials: HanaMaterial[], rawRes
 async function storeMaterialsInFirestore(materials: HanaMaterial[]) {
     const batch = writeBatch(db);
     const materialsCollection = collection(db, 'hana_materials');
-    let processedCount = 0;
 
     materials.forEach(material => {
-        if (material.SAP_UUID && material.SAP_UUID.trim() !== '') {
-            const docRef = doc(materialsCollection, material.SAP_UUID);
-            batch.set(docRef, material);
-            processedCount++;
-        } else {
-            console.warn("Skipping material with empty SAP_UUID:", material);
-        }
+        const docRef = doc(materialsCollection, material.SAP_UUID);
+        batch.set(docRef, material);
     });
-
-    if (processedCount === 0) {
-        console.log("No valid materials with SAP_UUID found to store.");
-        return "No valid materials with SAP_UUID found to store.";
-    }
 
     try {
         await batch.commit();
-        return `Successfully stored ${processedCount} of ${materials.length} fetched materials in Firestore.`;
+        return `Successfully stored ${materials.length} materials in Firestore.`;
     } catch (error) {
         console.error("Error storing materials in Firestore:", error);
         throw error;
@@ -90,16 +69,16 @@ async function storeMaterialsInFirestore(materials: HanaMaterial[]) {
 
 export async function loadHanaData() {
     try {
-        const { materials, rawResponse } = await fetchHanaMaterials();
+        const materials = await fetchHanaMaterials();
         
         if (materials && materials.length > 0) {
             const result = await storeMaterialsInFirestore(materials);
-            return { success: true, message: result, debugInfo: `Raw S4/HANA Response (first 500 chars): ${rawResponse.substring(0, 500)}` };
+            return { success: true, message: result };
         } else {
-            return { success: true, message: "No materials found to load.", debugInfo: `Raw S4/HANA Response: ${rawResponse}` };
+            return { success: true, message: "No materials found to load." };
         }
-    } catch (error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        return { success: false, message: 'An error occurred during the material loading process.', debugInfo: errorMessage };
+    } catch (error: any) {
+        console.error("An error occurred during the material loading process:", error);
+        return { success: false, message: error };
     }
 }
