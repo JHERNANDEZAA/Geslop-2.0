@@ -46,7 +46,11 @@ async function fetchHanaMaterials(): Promise<{ materials: HanaMaterial[], rawRes
         const data = JSON.parse(responseText);
 
         // The actual results are in the 'd.results' property
-        return { materials: data.d.results, rawResponse: responseText };
+        if (data && data.d && Array.isArray(data.d.results)) {
+            return { materials: data.d.results, rawResponse: responseText };
+        } else {
+            throw new Error(`Unexpected JSON structure from S4/HANA. 'd.results' not found. Raw Response: ${responseText}`);
+        }
     } catch (error) {
         console.error("Error connecting to S4/HANA:", error);
         // Re-throw the error to be caught by the action handler
@@ -98,3 +102,4 @@ export async function loadHanaData() {
         return { success: false, message: 'An error occurred during the material loading process.', debugInfo: errorMessage };
     }
 }
+
