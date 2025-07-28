@@ -26,6 +26,24 @@ const nextConfig: NextConfig = {
       "https://*.firebase.studio"
     ],
   },
+  async headers() {
+    return [
+        {
+            // Apply these headers to all routes in your application.
+            source: '/:path*',
+            headers: [
+                {
+                    key: 'Cross-Origin-Opener-Policy',
+                    value: 'same-origin-allow-popups',
+                },
+                {
+                    key: 'Cross-Origin-Embedder-Policy',
+                    value: 'require-corp',
+                },
+            ],
+        },
+    ];
+  },
 };
 
 export default nextConfig;
