@@ -30,7 +30,7 @@ async function fetchHanaMaterials(): Promise<{ materials: HanaMaterial[], rawRes
     }
 
     const headers = new Headers();
-    // Use Buffer for server-side Base64 encoding instead of btoa
+    // Use Buffer for server-side Base64 encoding. It's globally available in Node.js runtime.
     headers.append("Authorization", "Basic " + Buffer.from(user + ":" + password).toString('base64'));
     headers.append("Accept", "application/json");
 
