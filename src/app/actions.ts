@@ -96,9 +96,9 @@ export async function loadHanaData() {
             console.log("No materials found to load.");
             return { success: true, message: "No materials found to load." };
         }
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("An error occurred during the material loading process:", error);
-        // Ensure the message is a string for the toast component
+        // Ensure the message is always a string for serialization
         const errorMessage = error instanceof Error ? error.message : String(error);
         return { success: false, message: errorMessage || 'An unknown error occurred' };
     }
