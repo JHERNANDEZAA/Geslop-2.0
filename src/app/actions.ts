@@ -99,6 +99,7 @@ export async function loadHanaData() {
     } catch (error: any) {
         console.error("An error occurred during the material loading process:", error);
         // Ensure the message is a string for the toast component
-        return { success: false, message: error.message || 'An unknown error occurred' };
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        return { success: false, message: errorMessage || 'An unknown error occurred' };
     }
 }
