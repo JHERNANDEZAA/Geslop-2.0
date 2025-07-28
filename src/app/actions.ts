@@ -1,12 +1,12 @@
-// To execute this script, run `npm run load-materials` in your terminal.
-// NOTE: This script is currently not the primary way to load data.
-// The logic has been moved to a Server Action in `src/app/page.tsx`
-// to be triggered by a button in the UI.
+
+'use server';
 
 import 'dotenv/config';
-import { db } from '../lib/firebase';
+import { db } from '@/lib/firebase';
 import { collection, doc, writeBatch } from 'firebase/firestore';
 
+
+// --- Server Action for Data Loading ---
 interface HanaMaterial {
     SAP_UUID: string;
     Product: string;
@@ -35,7 +35,7 @@ async function fetchHanaMaterials(): Promise<HanaMaterial[]> {
     headers.append("Accept", "application/json");
 
     try {
-        const response = await fetch(url, { headers });
+        const response = await fetch(url, { headers, cache: 'no-store' });
 
         if (!response.ok) {
             const errorText = await response.text();
@@ -61,31 +61,31 @@ async function storeMaterialsInFirestore(materials: HanaMaterial[]) {
 
     try {
         await batch.commit();
-        console.log(`Successfully stored ${materials.length} materials in Firestore.`);
+        return `Successfully stored ${materials.length} materials in Firestore.`;
     } catch (error) {
         console.error("Error storing materials in Firestore:", error);
         throw error;
     }
 }
 
-async function main() {
+export async function loadHanaData() {
     try {
         console.log("Fetching materials from S4/HANA...");
         const materials = await fetchHanaMaterials();
         
         if (materials && materials.length > 0) {
             console.log(`Fetched ${materials.length} materials. Storing in Firestore...`);
-            await storeMaterialsInFirestore(materials);
+            const result = await storeMaterialsInFirestore(materials);
             console.log("Data load complete.");
+            return { success: true, message: result };
         } else {
             console.log("No materials found to load.");
+            return { success: true, message: "No materials found to load." };
         }
-    } catch (error) {
+    } catch (error: any) {
         console.error("An error occurred during the material loading process:", error);
-        process.exit(1);
+        return { success: false, message: error.message };
     }
 }
-
-main();
 
     

@@ -1,5 +1,7 @@
+
 "use client";
 
+import 'dotenv/config';
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth.tsx';
@@ -22,6 +24,9 @@ import { getRequestsForPeriod, getRequestsForDate } from '@/lib/requests';
 import { addMonths, subMonths, startOfMonth, endOfMonth, parseISO, format, startOfDay } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useToast } from '@/hooks/use-toast';
+import { loadHanaData } from './actions';
+
 
 export default function Home() {
   const { user, loading } = useAuth();
@@ -36,6 +41,8 @@ export default function Home() {
   const [isDateSelectionActive, setDateSelectionActive] = useState(false);
   const [isProductsVisible, setProductsVisible] = useState(false);
   const [isReadOnly, setIsReadOnly] = useState(false);
+  const [isLoadingData, setIsLoadingData] = useState(false);
+  const { toast } = useToast();
   
   const dateSectionRef = useRef<HTMLDivElement>(null);
   const productsSectionRef = useRef<HTMLDivElement>(null);
@@ -171,6 +178,26 @@ export default function Home() {
     fetchRequestDates();
   };
 
+  const handleLoadData = async () => {
+    setIsLoadingData(true);
+    const result = await loadHanaData();
+    if (result.success) {
+      toast({
+        title: "Éxito",
+        description: result.message,
+        variant: "default",
+        className: "bg-accent text-accent-foreground"
+      });
+    } else {
+      toast({
+        title: "Error",
+        description: result.message,
+        variant: "destructive",
+      });
+    }
+    setIsLoadingData(false);
+  }
+
   const requestModifiers = useMemo(() => {
     const requested: Date[] = [];
     const sentToSap: Date[] = [];
@@ -220,6 +247,23 @@ export default function Home() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
+            {/* --- Data Load Button --- */}
+            <Card className="border-dashed border-red-500">
+                <CardHeader>
+                    <CardTitle>Carga de datos Manual</CardTitle>
+                    <CardDescription>
+                        Este botón es una solución temporal para cargar los materiales desde S4/HANA.
+                        Púlsalo para iniciar la carga.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Button onClick={handleLoadData} disabled={isLoadingData}>
+                        {isLoadingData ? 'Cargando datos...' : 'Cargar Materiales de S4/HANA'}
+                    </Button>
+                </CardContent>
+            </Card>
+            {/* --- End Data Load Button --- */}
+
             <div className="grid grid-cols-1 md:grid-cols-10 gap-6">
               <div className="border p-4 rounded-md md:col-span-7">
                   <h3 className="text-lg font-semibold mb-4">Destinatario</h3>
@@ -365,7 +409,7 @@ export default function Home() {
                 center: selectedCenter,
                 warehouseCode: selectedWarehouse,
                 catalog: selectedCatalog,
-                requestDate: format(selectedDate, 'yyyy-MM-dd'),
+                requestDate: format(selectedDate, 'yyyy-dd-MM'),
                 user: user.email || ''
               }}
               existingRequests={existingRequests}
@@ -378,3 +422,5 @@ export default function Home() {
     </div>
   );
 }
+
+    
