@@ -190,9 +190,10 @@ export default function Home() {
       });
     } else {
       toast({
-        title: "Error",
-        description: result.message,
+        title: "Error de Carga",
+        description: result.debugInfo || "Ocurrió un error desconocido.",
         variant: "destructive",
+        duration: 15000 // Show for longer to allow reading the debug info
       });
     }
     setIsLoadingData(false);
@@ -422,5 +423,3 @@ export default function Home() {
     </div>
   );
 }
-
-    

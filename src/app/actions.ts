@@ -20,7 +20,7 @@ interface HanaMaterial {
     YY1_CATALOGO_PPR: string;
 }
 
-async function fetchHanaMaterials(): Promise<HanaMaterial[]> {
+async function fetchHanaMaterials(): Promise<{ materials: HanaMaterial[], rawResponse: string }> {
     const url = process.env.S4_HANA_URL;
     const user = process.env.S4_HANA_USER;
     const password = process.env.S4_HANA_PASSWORD;
@@ -37,19 +37,16 @@ async function fetchHanaMaterials(): Promise<HanaMaterial[]> {
         const response = await fetch(url, { headers, cache: 'no-store' });
         
         const responseText = await response.text();
-        console.log("S4/HANA Response Status:", response.status, response.statusText);
-        console.log("S4/HANA Raw Response Body:", responseText);
-
+        
         if (!response.ok) {
-            // The error is already logged from the raw response text
-            throw new Error(`Failed to fetch data from S4/HANA: ${response.status} ${response.statusText}.`);
+            // Include status and raw text in the error message for better client-side debugging
+            throw new Error(`Failed to fetch data from S4/HANA: ${response.status} ${response.statusText}. Raw Response: ${responseText}`);
         }
         
         const data = JSON.parse(responseText);
-        console.log("S4/HANA Parsed Data:", JSON.stringify(data, null, 2));
 
         // The actual results are in the 'd.results' property
-        return data.d.results;
+        return { materials: data.d.results, rawResponse: responseText };
     } catch (error) {
         console.error("Error connecting to S4/HANA:", error);
         // Re-throw the error to be caught by the action handler
@@ -63,7 +60,6 @@ async function storeMaterialsInFirestore(materials: HanaMaterial[]) {
     let processedCount = 0;
 
     materials.forEach(material => {
-        // FIX: Ensure SAP_UUID exists and is not an empty string before processing
         if (material.SAP_UUID && material.SAP_UUID.trim() !== '') {
             const docRef = doc(materialsCollection, material.SAP_UUID);
             batch.set(docRef, material);
@@ -89,22 +85,16 @@ async function storeMaterialsInFirestore(materials: HanaMaterial[]) {
 
 export async function loadHanaData() {
     try {
-        console.log("Fetching materials from S4/HANA...");
-        const materials = await fetchHanaMaterials();
+        const { materials, rawResponse } = await fetchHanaMaterials();
         
         if (materials && materials.length > 0) {
-            console.log(`Fetched ${materials.length} materials. Storing in Firestore...`);
             const result = await storeMaterialsInFirestore(materials);
-            console.log("Data load complete.");
-            return { success: true, message: result };
+            return { success: true, message: result, debugInfo: `Raw S4/HANA Response (first 500 chars): ${rawResponse.substring(0, 500)}` };
         } else {
-            console.log("No materials found to load.");
-            return { success: true, message: "No materials found to load." };
+            return { success: true, message: "No materials found to load.", debugInfo: `Raw S4/HANA Response: ${rawResponse}` };
         }
     } catch (error: unknown) {
-        console.error("An error occurred during the material loading process:", error);
-        // Ensure the message is always a string for serialization
         const errorMessage = error instanceof Error ? error.message : String(error);
-        return { success: false, message: errorMessage || 'An unknown error occurred' };
+        return { success: false, message: 'An error occurred during the material loading process.', debugInfo: errorMessage };
     }
 }
