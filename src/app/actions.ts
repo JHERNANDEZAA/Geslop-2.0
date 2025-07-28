@@ -30,7 +30,7 @@ async function fetchHanaMaterials(): Promise<HanaMaterial[]> {
     }
 
     const headers = new Headers();
-    headers.append("Authorization", "Basic " + btoa(user + ":" + password));
+    headers.append("Authorization", "Basic " + Buffer.from(user + ":" + password).toString('base64'));
     headers.append("Accept", "application/json");
 
     try {
@@ -54,8 +54,11 @@ async function storeMaterialsInFirestore(materials: HanaMaterial[]) {
     const materialsCollection = collection(db, 'hana_materials');
 
     materials.forEach(material => {
-        const docRef = doc(materialsCollection, material.SAP_UUID);
-        batch.set(docRef, material);
+        // Ensure SAP_UUID exists to avoid Firestore errors with empty doc IDs
+        if (material.SAP_UUID) {
+          const docRef = doc(materialsCollection, material.SAP_UUID);
+          batch.set(docRef, material);
+        }
     });
 
     try {
@@ -79,6 +82,7 @@ export async function loadHanaData() {
         }
     } catch (error: any) {
         console.error("An error occurred during the material loading process:", error);
-        return { success: false, message: error };
+        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+        return { success: false, message: errorMessage };
     }
 }
