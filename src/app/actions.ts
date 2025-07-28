@@ -35,14 +35,19 @@ async function fetchHanaMaterials(): Promise<HanaMaterial[]> {
 
     try {
         const response = await fetch(url, { headers, cache: 'no-store' });
+        
+        const responseText = await response.text();
+        console.log("S4/HANA Response Status:", response.status, response.statusText);
+        console.log("S4/HANA Raw Response Body:", responseText);
 
         if (!response.ok) {
-            const errorText = await response.text();
-            console.error(`S4/HANA API Error: ${errorText}`);
+            // The error is already logged from the raw response text
             throw new Error(`Failed to fetch data from S4/HANA: ${response.status} ${response.statusText}.`);
         }
         
-        const data = await response.json();
+        const data = JSON.parse(responseText);
+        console.log("S4/HANA Parsed Data:", JSON.stringify(data, null, 2));
+
         // The actual results are in the 'd.results' property
         return data.d.results;
     } catch (error) {
