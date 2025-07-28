@@ -31,7 +31,7 @@ async function fetchHanaMaterials(): Promise<HanaMaterial[]> {
     }
 
     const headers = new Headers();
-    headers.append("Authorization", "Basic " + btoa(user + ":" + password));
+    headers.append("Authorization", "Basic " + Buffer.from(user + ":" + password).toString('base64'));
     headers.append("Accept", "application/json");
 
     try {
