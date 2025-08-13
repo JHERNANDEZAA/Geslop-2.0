@@ -16,7 +16,7 @@
       ]
     },
     {
-      "collectionGroup": "requests",
+      "collectionGroup": "request_headers",
       "queryScope": "COLLECTION",
       "fields": [
         {
@@ -28,7 +28,7 @@
           "order": "ASCENDING"
         },
         {
-          "fieldPath": "queryableDate",
+          "fieldPath": "requestDate",
           "order": "ASCENDING"
         }
       ]

@@ -16,9 +16,7 @@ interface RequestData {
 export const saveRequest = async (requestData: RequestData) => {
     const { center, warehouseCode, requestDate, products, user, catalog } = requestData;
 
-    const requestDateObject = parse(requestDate, 'dd-MM-yyyy', new Date());
-    const queryableDate = format(requestDateObject, 'yyyy-MM-dd'); // Keep this for querying
-    const spanishRequestDate = format(requestDateObject, 'dd-MM-yyyy'); // New format for storing
+    const spanishRequestDate = requestDate; // Already in DD-MM-YYYY
 
     const headersRef = collection(db, 'request_headers');
     const positionsRef = collection(db, 'request_positions');
@@ -39,6 +37,9 @@ export const saveRequest = async (requestData: RequestData) => {
                 const existingHeaderDoc = querySnapshot.docs[0];
                 headerId = existingHeaderDoc.id;
 
+                // Update existing header if needed (e.g., user, creationDate)
+                // For now, we assume if it exists, we just need the ID.
+
                 const oldPositionsQuery = query(positionsRef, where('requestId', '==', headerId));
                 const oldPositionsSnapshot = await getDocs(oldPositionsQuery);
                 oldPositionsSnapshot.forEach(doc => {
@@ -49,6 +50,7 @@ export const saveRequest = async (requestData: RequestData) => {
                 const newHeaderRef = doc(headersRef);
                 headerId = newHeaderRef.id;
                 const newHeader: RequestHeader = {
+                    id: headerId,
                     center,
                     warehouseCode,
                     requestDate: spanishRequestDate,

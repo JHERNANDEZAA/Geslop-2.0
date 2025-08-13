@@ -46,7 +46,7 @@ export type ProductRequest = {
 };
 
 export type RequestHeader = {
-  id?: string; // Firestore ID
+  id: string; // Firestore ID
   center: string;
   warehouseCode: string;
   requestDate: string; // DD-MM-YYYY
