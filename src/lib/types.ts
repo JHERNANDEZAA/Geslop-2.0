@@ -49,12 +49,12 @@ export type RequestHeader = {
   id?: string; // Firestore ID
   center: string;
   warehouseCode: string;
-  requestDate: string; // YYYY-MM-DD
+  requestDate: string; // DD-MM-YYYY
   user: string;
   catalog: string;
   sentToSap: 'X' | '';
-  costCenter: string; // New field
-  creationDate: string; // ISO String
+  costCenter: string; 
+  creationDate: string; // DD-MM-YYYY
 };
 
 export type RequestPosition = {
