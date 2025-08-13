@@ -21,7 +21,6 @@ const nextConfig: NextConfig = {
   },
   // This is a workaround for a Next.js issue with cloud-based development environments.
   experimental: {
-    // This is required to allow requests from the development environment's origin.
     // allowedDevOrigins was removed as it's not a valid property and was causing a server crash.
   },
   async headers() {
