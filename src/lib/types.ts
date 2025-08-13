@@ -48,7 +48,8 @@ export type ProductRequest = {
 export type StoredRequest = {
   center: string;
   warehouseCode: string;
-  requestDate: string;
+  requestDate: string; // Stored as DD-MM-YYYY
+  queryableDate: string; // Stored as YYYY-MM-DD for querying and sorting
   catalog: string;
   productCode: string;
   quantity: number;
@@ -59,7 +60,7 @@ export type StoredRequest = {
 }
 
 export type RequestInfo = {
-  date: string;
+  date: string; // YYYY-MM-DD for calendar highlighting
   hasRequest: boolean;
   sentToSap: boolean;
 }

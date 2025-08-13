@@ -2,6 +2,7 @@
 import { db } from './firebase';
 import { collection, query, where, getDocs, writeBatch, doc, runTransaction } from 'firebase/firestore';
 import type { ProductRequest, StoredRequest, RequestInfo } from './types';
+import { format, parse } from 'date-fns';
 
 interface RequestData {
   center: string;
@@ -17,11 +18,16 @@ export const saveRequest = async (requestData: RequestData) => {
   
     const requestsRef = collection(db, 'requests');
   
+    // Firestore queries work best with a consistent format, like yyyy-MM-dd
+    // We store a separate field for this.
+    const requestDateObject = parse(requestDate, 'dd-MM-yyyy', new Date());
+    const queryableDate = format(requestDateObject, 'yyyy-MM-dd');
+
     const q = query(
       requestsRef,
       where('center', '==', center),
       where('warehouseCode', '==', warehouseCode),
-      where('requestDate', '==', requestDate)
+      where('queryableDate', '==', queryableDate)
     );
   
     try {
@@ -41,7 +47,8 @@ export const saveRequest = async (requestData: RequestData) => {
           transaction.set(newRequestRef, {
             center,
             warehouseCode,
-            requestDate,
+            requestDate, // DD-MM-YYYY format
+            queryableDate, // YYYY-MM-DD format for querying
             catalog: requestData.catalog,
             productCode: product.materialCode,
             quantity: product.quantity,
@@ -61,12 +68,15 @@ export const saveRequest = async (requestData: RequestData) => {
 
 export const deleteRequest = async (center: string, warehouseCode: string, requestDate: string) => {
   const requestsRef = collection(db, 'requests');
+
+  const requestDateObject = parse(requestDate, 'dd-MM-yyyy', new Date());
+  const queryableDate = format(requestDateObject, 'yyyy-MM-dd');
   
   const q = query(
     requestsRef,
     where('center', '==', center),
     where('warehouseCode', '==', warehouseCode),
-    where('requestDate', '==', requestDate)
+    where('queryableDate', '==', queryableDate)
   );
 
   try {
@@ -91,8 +101,8 @@ export const getRequestsForPeriod = async (center: string, warehouseCode: string
         requestsRef,
         where('center', '==', center),
         where('warehouseCode', '==', warehouseCode),
-        where('requestDate', '>=', startDate.toISOString().split('T')[0]),
-        where('requestDate', '<=', endDate.toISOString().split('T')[0])
+        where('queryableDate', '>=', format(startDate, 'yyyy-MM-dd')),
+        where('queryableDate', '<=', format(endDate, 'yyyy-MM-dd'))
     );
 
     try {
@@ -101,12 +111,15 @@ export const getRequestsForPeriod = async (center: string, warehouseCode: string
 
         querySnapshot.forEach((doc) => {
             const data = doc.data() as StoredRequest;
-            if (!requestsByDate[data.requestDate]) {
-                requestsByDate[data.requestDate] = { hasRequest: false, sentToSap: false };
+            // The date used for calendar highlighting must be in yyyy-MM-dd format
+            const highlightDate = data.queryableDate || format(parse(data.requestDate, 'dd-MM-yyyy', new Date()), 'yyyy-MM-dd');
+            
+            if (!requestsByDate[highlightDate]) {
+                requestsByDate[highlightDate] = { hasRequest: false, sentToSap: false };
             }
-            requestsByDate[data.requestDate].hasRequest = true;
+            requestsByDate[highlightDate].hasRequest = true;
             if (data.sentToSap === 'X') {
-                requestsByDate[data.requestDate].sentToSap = true;
+                requestsByDate[highlightDate].sentToSap = true;
             }
         });
         
@@ -131,7 +144,7 @@ export const getRequestsForDate = async (center: string, warehouseCode: string, 
         requestsRef,
         where('center', '==', center),
         where('warehouseCode', '==', warehouseCode),
-        where('requestDate', '==', requestDate)
+        where('requestDate', '==', requestDate) // Query using the DD-MM-YYYY format
     );
 
     try {

@@ -144,7 +144,7 @@ export default function Home() {
       const requestInfo = requestsInfo.find(r => r.date === formattedDate);
       setIsReadOnly(requestInfo?.sentToSap || false);
 
-      const requests = await getRequestsForDate(selectedCenter, selectedWarehouse, formattedDate);
+      const requests = await getRequestsForDate(selectedCenter, selectedWarehouse, format(utcDate, 'dd-MM-yyyy'));
       setExistingRequests(requests);
     }
   }, [selectedCenter, selectedWarehouse, requestsInfo]);
@@ -369,7 +369,7 @@ export default function Home() {
                 center: selectedCenter,
                 warehouseCode: selectedWarehouse,
                 catalog: selectedCatalog,
-                requestDate: format(selectedDate, 'yyyy-dd-MM'),
+                requestDate: format(selectedDate, 'dd-MM-yyyy'),
                 user: user.email || ''
               }}
               existingRequests={existingRequests}
@@ -382,5 +382,3 @@ export default function Home() {
     </div>
   );
 }
-
-    
