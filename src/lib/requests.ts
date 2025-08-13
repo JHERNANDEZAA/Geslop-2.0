@@ -2,7 +2,7 @@
 import { db } from './firebase';
 import { collection, query, where, getDocs, writeBatch, doc, runTransaction } from 'firebase/firestore';
 import type { ProductRequest, StoredRequest, RequestInfo } from './types';
-import { format, parse } from 'date-fns';
+import { format, parse, isWithinInterval } from 'date-fns';
 
 interface RequestData {
   center: string;
@@ -97,12 +97,12 @@ export const getRequestsForPeriod = async (center: string, warehouseCode: string
     if (!center || !warehouseCode) return [];
     
     const requestsRef = collection(db, 'requests');
+    // Simplified query to avoid complex index requirements.
+    // We fetch all requests for the center/warehouse and filter by date in the application.
     const q = query(
         requestsRef,
         where('center', '==', center),
-        where('warehouseCode', '==', warehouseCode),
-        where('queryableDate', '>=', format(startDate, 'yyyy-MM-dd')),
-        where('queryableDate', '<=', format(endDate, 'yyyy-MM-dd'))
+        where('warehouseCode', '==', warehouseCode)
     );
 
     try {
@@ -111,15 +111,19 @@ export const getRequestsForPeriod = async (center: string, warehouseCode: string
 
         querySnapshot.forEach((doc) => {
             const data = doc.data() as StoredRequest;
-            // The date used for calendar highlighting must be in yyyy-MM-dd format
-            const highlightDate = data.queryableDate || format(parse(data.requestDate, 'dd-MM-yyyy', new Date()), 'yyyy-MM-dd');
-            
-            if (!requestsByDate[highlightDate]) {
-                requestsByDate[highlightDate] = { hasRequest: false, sentToSap: false };
-            }
-            requestsByDate[highlightDate].hasRequest = true;
-            if (data.sentToSap === 'X') {
-                requestsByDate[highlightDate].sentToSap = true;
+            const requestDate = parse(data.queryableDate, 'yyyy-MM-dd', new Date());
+
+            // Filter by date range on the client side
+            if (isWithinInterval(requestDate, { start: startDate, end: endDate })) {
+                const highlightDate = data.queryableDate;
+                
+                if (!requestsByDate[highlightDate]) {
+                    requestsByDate[highlightDate] = { hasRequest: false, sentToSap: false };
+                }
+                requestsByDate[highlightDate].hasRequest = true;
+                if (data.sentToSap === 'X') {
+                    requestsByDate[highlightDate].sentToSap = true;
+                }
             }
         });
         
@@ -140,11 +144,15 @@ export const getRequestsForDate = async (center: string, warehouseCode: string, 
     if (!center || !warehouseCode || !requestDate) return [];
     
     const requestsRef = collection(db, 'requests');
+    
+    const requestDateObject = parse(requestDate, 'dd-MM-yyyy', new Date());
+    const queryableDate = format(requestDateObject, 'yyyy-MM-dd');
+    
     const q = query(
         requestsRef,
         where('center', '==', center),
         where('warehouseCode', '==', warehouseCode),
-        where('requestDate', '==', requestDate) // Query using the DD-MM-YYYY format
+        where('queryableDate', '==', queryableDate) // Query using the YYYY-MM-DD format
     );
 
     try {

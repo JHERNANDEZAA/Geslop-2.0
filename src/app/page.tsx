@@ -139,12 +139,14 @@ export default function Home() {
       const utcDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
       setSelectedDate(utcDate);
       setProductsVisible(false); // Hide products while loading new data
-      const formattedDate = format(utcDate, 'yyyy-MM-dd');
+      
+      const formattedDateForQuery = format(utcDate, 'dd-MM-yyyy');
+      const formattedDateForDisplay = format(utcDate, 'yyyy-MM-dd');
 
-      const requestInfo = requestsInfo.find(r => r.date === formattedDate);
+      const requestInfo = requestsInfo.find(r => r.date === formattedDateForDisplay);
       setIsReadOnly(requestInfo?.sentToSap || false);
 
-      const requests = await getRequestsForDate(selectedCenter, selectedWarehouse, format(utcDate, 'dd-MM-yyyy'));
+      const requests = await getRequestsForDate(selectedCenter, selectedWarehouse, formattedDateForQuery);
       setExistingRequests(requests);
     }
   }, [selectedCenter, selectedWarehouse, requestsInfo]);
