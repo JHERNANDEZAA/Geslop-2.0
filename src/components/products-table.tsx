@@ -152,8 +152,8 @@ export function ProductsTable({ materials, requestData, existingRequests, onSucc
         });
       } else {
         toast({
-            title: "Solicitud Eliminada",
-            description: `Se han eliminado los productos solicitados para el centro ${requestData.center}, almacén ${requestData.warehouseCode} en la fecha ${requestData.requestDate}.`,
+            title: "Solicitud Actualizada",
+            description: `Se han actualizado los productos solicitados para el centro ${requestData.center}, almacén ${requestData.warehouseCode} en la fecha ${requestData.requestDate}.`,
             variant: "default",
         });
       }
@@ -350,5 +350,3 @@ export function ProductsTable({ materials, requestData, existingRequests, onSucc
     </Card>
   );
 }
-
-    

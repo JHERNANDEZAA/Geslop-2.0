@@ -45,19 +45,28 @@ export type ProductRequest = {
   creationDate?: string;
 };
 
-export type StoredRequest = {
+export type RequestHeader = {
+  id?: string; // Firestore ID
   center: string;
   warehouseCode: string;
-  requestDate: string; // Stored as DD-MM-YYYY
-  queryableDate: string; // Stored as YYYY-MM-DD for querying and sorting
+  requestDate: string; // YYYY-MM-DD
+  user: string;
   catalog: string;
+  sentToSap: 'X' | '';
+  costCenter: string; // New field
+  creationDate: string; // ISO String
+};
+
+export type RequestPosition = {
+  id?: string; // Firestore ID
+  requestId: string;
   productCode: string;
   quantity: number;
   notes: string;
-  sentToSap: 'X' | '';
+  creationDate: string; // ISO String
   user: string;
-  creationDate: string;
-}
+};
+
 
 export type RequestInfo = {
   date: string; // YYYY-MM-DD for calendar highlighting
