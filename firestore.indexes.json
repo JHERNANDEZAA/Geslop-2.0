@@ -14,6 +14,24 @@
           "order": "ASCENDING"
         }
       ]
+    },
+    {
+      "collectionGroup": "requests",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "center",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "warehouseCode",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "queryableDate",
+          "order": "ASCENDING"
+        }
+      ]
     }
   ]
 }
