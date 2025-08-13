@@ -74,7 +74,7 @@ export const saveRequest = async (requestData: RequestData) => {
             }
 
             const validProducts = products.filter(p => p.quantity > 0);
-            const creationDate = new Date().toISOString();
+            const creationDate = format(new Date(), 'dd-MM-yyyy');
 
             validProducts.forEach((product) => {
                 const newPositionRef = doc(positionsRef);

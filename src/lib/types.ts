@@ -63,7 +63,7 @@ export type RequestPosition = {
   productCode: string;
   quantity: number;
   notes: string;
-  creationDate: string; // ISO String
+  creationDate: string; // DD-MM-YYYY
   user: string;
 };
 
