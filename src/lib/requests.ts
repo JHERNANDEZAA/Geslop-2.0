@@ -1,6 +1,6 @@
 
 import { db } from './firebase';
-import { collection, query, where, getDocs, writeBatch, doc, runTransaction, getDoc, collectionGroup } from 'firebase/firestore';
+import { collection, query, where, getDocs, writeBatch, doc, runTransaction, getDoc, collectionGroup, setDoc } from 'firebase/firestore';
 import type { ProductRequest, RequestInfo, RequestHeader, RequestPosition } from './types';
 import { format, parse, isWithinInterval, startOfDay } from 'date-fns';
 
@@ -31,15 +31,14 @@ export const saveRequest = async (requestData: RequestData) => {
     try {
         await runTransaction(db, async (transaction) => {
             const querySnapshot = await getDocs(q);
-            let headerId: string;
+            let headerId: number;
+            let headerDocRef;
 
             if (!querySnapshot.empty) {
                 const existingHeaderDoc = querySnapshot.docs[0];
-                headerId = existingHeaderDoc.id;
-
-                // Update existing header if needed (e.g., user, creationDate)
-                // For now, we assume if it exists, we just need the ID.
-
+                headerId = existingHeaderDoc.data().id;
+                headerDocRef = existingHeaderDoc.ref;
+                
                 const oldPositionsQuery = query(positionsRef, where('requestId', '==', headerId));
                 const oldPositionsSnapshot = await getDocs(oldPositionsQuery);
                 oldPositionsSnapshot.forEach(doc => {
@@ -47,8 +46,18 @@ export const saveRequest = async (requestData: RequestData) => {
                 });
 
             } else {
-                const newHeaderRef = doc(headersRef);
-                headerId = newHeaderRef.id;
+                // Get new incremental ID
+                const counterRef = doc(db, 'counters', 'request_header_counter');
+                const counterDoc = await transaction.get(counterRef);
+                
+                let nextId = 1;
+                if (counterDoc.exists()) {
+                    nextId = counterDoc.data().currentId + 1;
+                }
+                
+                headerId = nextId;
+                headerDocRef = doc(headersRef, headerId.toString());
+
                 const newHeader: RequestHeader = {
                     id: headerId,
                     center,
@@ -60,7 +69,8 @@ export const saveRequest = async (requestData: RequestData) => {
                     costCenter: '',
                     creationDate: format(new Date(), 'dd-MM-yyyy'),
                 };
-                transaction.set(newHeaderRef, newHeader);
+                transaction.set(headerDocRef, newHeader);
+                transaction.set(counterRef, { currentId: nextId });
             }
 
             const validProducts = products.filter(p => p.quantity > 0);
@@ -106,7 +116,7 @@ export const deleteRequest = async (center: string, warehouseCode: string, reque
             }
 
             const headerDoc = querySnapshot.docs[0];
-            const headerId = headerDoc.id;
+            const headerId = headerDoc.data().id;
 
             const positionsRef = collection(db, 'request_positions');
             const positionsQuery = query(positionsRef, where('requestId', '==', headerId));
@@ -187,7 +197,7 @@ export const getRequestsForDate = async (center: string, warehouseCode: string, 
         }
 
         const headerDoc = querySnapshot.docs[0];
-        const headerId = headerDoc.id;
+        const headerId = headerDoc.data().id;
         const headerData = headerDoc.data() as RequestHeader;
         
         const positionsRef = collection(db, 'request_positions');
