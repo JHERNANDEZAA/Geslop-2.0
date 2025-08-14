@@ -187,8 +187,8 @@ export default function AdminPurchasingPage() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <PageHeader />
-      <main className="flex-grow p-6">
-        <Card>
+      <main className="flex-grow flex flex-col">
+        <Card className="shadow-none rounded-none border-x-0 border-t-0 border-b-0">
           <CardHeader>
             <CardTitle>Administración de compras</CardTitle>
           </CardHeader>
@@ -494,6 +494,7 @@ export default function AdminPurchasingPage() {
                                                                 </SelectTrigger>
                                                             </FormControl>
                                                             <SelectContent>
+                                                                <SelectItem value="">Todos</SelectItem>
                                                                 <SelectItem value="C">C: Compras</SelectItem>
                                                                 <SelectItem value="T">T: Traspaso</SelectItem>
                                                             </SelectContent>
@@ -644,3 +645,5 @@ export default function AdminPurchasingPage() {
     </div>
   );
 }
+
+    
