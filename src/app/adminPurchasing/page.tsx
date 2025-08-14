@@ -6,6 +6,7 @@ import { useAuth } from '@/lib/auth';
 import { PageHeader } from '@/components/page-header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function AdminPurchasingPage() {
   const { user, loading } = useAuth();
@@ -35,14 +36,32 @@ export default function AdminPurchasingPage() {
     <div className="flex flex-col min-h-screen bg-background">
       <PageHeader />
       <main className="flex-grow p-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Administración de compras</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p>Página en construcción</p>
-          </CardContent>
-        </Card>
+        <Tabs defaultValue="catalog-management">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="catalog-management">Gestión de catálogos</TabsTrigger>
+            <TabsTrigger value="catalog-assignment">Asignación de catálogos a familias</TabsTrigger>
+          </TabsList>
+          <TabsContent value="catalog-management">
+            <Card>
+              <CardHeader>
+                <CardTitle>Gestión de catálogos</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p>Página en construcción</p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          <TabsContent value="catalog-assignment">
+            <Card>
+              <CardHeader>
+                <CardTitle>Asignación de catálogos a familias</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p>Página en construcción</p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );
