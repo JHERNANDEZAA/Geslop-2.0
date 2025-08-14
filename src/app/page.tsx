@@ -1,7 +1,6 @@
 
 "use client";
 
-import 'dotenv/config';
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth.tsx';
