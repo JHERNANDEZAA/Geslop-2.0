@@ -181,7 +181,7 @@ export default function AdminPurchasingPage() {
                     </CardHeader>
                     <CardContent>
                         <Tabs defaultValue="creation" className="w-full">
-                            <TabsList>
+                            <TabsList className="inline-flex">
                                 <TabsTrigger value="creation">Creación de catálogos</TabsTrigger>
                                 <TabsTrigger value="search">Búsqueda</TabsTrigger>
                             </TabsList>
@@ -410,7 +410,7 @@ export default function AdminPurchasingPage() {
                             </TabsContent>
                             <TabsContent value="search">
                                 <Card className="mt-4">
-                                    <CardHeader>
+                                    <CardHeader className="p-4">
                                         <CardTitle>Búsqueda de Catálogos</CardTitle>
                                         <CardDescription>
                                         Utilice los filtros para buscar catálogos existentes.
@@ -418,8 +418,8 @@ export default function AdminPurchasingPage() {
                                     </CardHeader>
                                     <Form {...searchForm}>
                                         <form onSubmit={searchForm.handleSubmit(onSearch)}>
-                                        <CardContent className="space-y-6">
-                                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                        <CardContent className="space-y-4 p-4">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                                 <FormField
                                                     control={searchForm.control}
                                                     name="id"
@@ -490,7 +490,7 @@ export default function AdminPurchasingPage() {
                                                 />
                                             </div>
                                         </CardContent>
-                                        <CardFooter className="flex justify-end">
+                                        <CardFooter className="flex justify-end p-4">
                                             <Button type="submit" disabled={isSearching} className="bg-primary text-primary-foreground hover:bg-primary/90">
                                                 {isSearching ? "Buscando..." : "Filtrar"}
                                             </Button>
@@ -499,12 +499,12 @@ export default function AdminPurchasingPage() {
                                     </Form>
 
                                     {searchResults.length > 0 && (
-                                    <div className="mt-6 p-6 pt-0">
+                                    <div className="mt-6">
                                         <Card className="border-0 shadow-none">
-                                            <CardHeader>
+                                            <CardHeader className="p-4">
                                                 <CardTitle>Catálogos</CardTitle>
                                             </CardHeader>
-                                            <CardContent>
+                                            <CardContent className="p-4 pt-0">
                                                 <div className="rounded-md border">
                                                     <Table>
                                                         <TableHeader>
@@ -569,5 +569,3 @@ export default function AdminPurchasingPage() {
     </div>
   );
 }
-
-
