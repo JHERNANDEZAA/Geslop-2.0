@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useAuth, signOutUser } from '@/lib/auth.tsx';
@@ -18,7 +19,7 @@ export function PageHeader() {
   };
 
   const navLinks = [
-    { href: '/', label: 'Solicitud', icon: List },
+    { href: '/purchaseRequisition', label: 'Solicitud', icon: List },
     { href: '/adminPurchasing', label: 'Administración de compras', icon: ShoppingCart },
   ]
 
