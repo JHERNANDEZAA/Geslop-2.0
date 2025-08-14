@@ -206,7 +206,7 @@ export default function AdminPurchasingPage() {
                     <CardContent>
                         <Tabs defaultValue="creation" className="w-full">
                             <TabsList className="inline-flex">
-                                <TabsTrigger value="creation" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Creación</TabsTrigger>
+                                <TabsTrigger value="creation" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Creación de catálogos</TabsTrigger>
                                 <TabsTrigger value="search" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Búsqueda</TabsTrigger>
                             </TabsList>
                             <TabsContent value="creation">
