@@ -501,7 +501,7 @@ export default function AdminPurchasingPage() {
                                     {searchResults.length > 0 && (
                                     <div className="mt-6">
                                         <Card className="border-0 shadow-none">
-                                            <CardHeader className="p-4">
+                                            <CardHeader className="p-4 pt-0">
                                                 <CardTitle>Catálogos</CardTitle>
                                             </CardHeader>
                                             <CardContent className="p-4 pt-0">
@@ -524,7 +524,7 @@ export default function AdminPurchasingPage() {
                                                         </TableHeader>
                                                         <TableBody>
                                                             {searchResults.map((catalog) => (
-                                                                <TableRow key={catalog.id}>
+                                                                <TableRow key={catalog.id} className="odd:bg-muted/50">
                                                                     <TableCell>{catalog.id}</TableCell>
                                                                     <TableCell>{catalog.description}</TableCell>
                                                                     <TableCell>{catalog.type}</TableCell>
