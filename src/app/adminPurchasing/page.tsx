@@ -499,46 +499,48 @@ export default function AdminPurchasingPage() {
                                     </Form>
 
                                     {searchResults.length > 0 && (
-                                    <div className="mt-6">
-                                        <Card className="border-0 shadow-none">
+                                    <div className="mt-6 p-6 pt-0">
+                                        <Card className="border shadow-none">
                                             <CardHeader>
                                                 <CardTitle>Catálogos</CardTitle>
                                             </CardHeader>
                                             <CardContent>
-                                                <Table>
-                                                    <TableHeader>
-                                                        <TableRow>
-                                                            <TableHead>ID</TableHead>
-                                                            <TableHead>Descripción</TableHead>
-                                                            <TableHead>Tipo</TableHead>
-                                                            <TableHead>Estado</TableHead>
-                                                            <TableHead>Válido Desde</TableHead>
-                                                            <TableHead>Válido Hasta</TableHead>
-                                                            <TableHead>Días</TableHead>
-                                                            <TableHead>Grupo Compras</TableHead>
-                                                            <TableHead>Org. Ventas</TableHead>
-                                                            <TableHead>Ant. Mín.</TableHead>
-                                                            <TableHead>Ant. Máx.</TableHead>
-                                                        </TableRow>
-                                                    </TableHeader>
-                                                    <TableBody>
-                                                        {searchResults.map((catalog) => (
-                                                            <TableRow key={catalog.id}>
-                                                                <TableCell>{catalog.id}</TableCell>
-                                                                <TableCell>{catalog.description}</TableCell>
-                                                                <TableCell>{catalog.type}</TableCell>
-                                                                <TableCell>{catalog.status === 'locked' ? 'Bloqueado' : 'Desbloqueado'}</TableCell>
-                                                                <TableCell>{catalog.validFrom}</TableCell>
-                                                                <TableCell>{catalog.validTo}</TableCell>
-                                                                <TableCell>{catalog.numDays}</TableCell>
-                                                                <TableCell>{catalog.purchaseGroup}</TableCell>
-                                                                <TableCell>{catalog.salesOrg}</TableCell>
-                                                                <TableCell>{catalog.minAnticipationDays}</TableCell>
-                                                                <TableCell>{catalog.maxAnticipationDays}</TableCell>
+                                                <div className="rounded-md border">
+                                                    <Table>
+                                                        <TableHeader>
+                                                            <TableRow>
+                                                                <TableHead>ID</TableHead>
+                                                                <TableHead>Descripción</TableHead>
+                                                                <TableHead>Tipo</TableHead>
+                                                                <TableHead>Estado</TableHead>
+                                                                <TableHead>Válido Desde</TableHead>
+                                                                <TableHead>Válido Hasta</TableHead>
+                                                                <TableHead>Días</TableHead>
+                                                                <TableHead>Grupo Compras</TableHead>
+                                                                <TableHead>Org. Ventas</TableHead>
+                                                                <TableHead>Ant. Mín.</TableHead>
+                                                                <TableHead>Ant. Máx.</TableHead>
                                                             </TableRow>
-                                                        ))}
-                                                    </TableBody>
-                                                </Table>
+                                                        </TableHeader>
+                                                        <TableBody>
+                                                            {searchResults.map((catalog) => (
+                                                                <TableRow key={catalog.id}>
+                                                                    <TableCell>{catalog.id}</TableCell>
+                                                                    <TableCell>{catalog.description}</TableCell>
+                                                                    <TableCell>{catalog.type}</TableCell>
+                                                                    <TableCell>{catalog.status === 'locked' ? 'Bloqueado' : 'Desbloqueado'}</TableCell>
+                                                                    <TableCell>{catalog.validFrom}</TableCell>
+                                                                    <TableCell>{catalog.validTo}</TableCell>
+                                                                    <TableCell>{catalog.numDays}</TableCell>
+                                                                    <TableCell>{catalog.purchaseGroup}</TableCell>
+                                                                    <TableCell>{catalog.salesOrg}</TableCell>
+                                                                    <TableCell>{catalog.minAnticipationDays}</TableCell>
+                                                                    <TableCell>{catalog.maxAnticipationDays}</TableCell>
+                                                                </TableRow>
+                                                            ))}
+                                                        </TableBody>
+                                                    </Table>
+                                                </div>
                                             </CardContent>
                                         </Card>
                                     </div>
@@ -567,3 +569,5 @@ export default function AdminPurchasingPage() {
     </div>
   );
 }
+
+    
