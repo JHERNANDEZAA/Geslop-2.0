@@ -107,9 +107,10 @@ export default function AdminPurchasingPage() {
         });
         form.reset();
       } else {
-        form.setError("id", {
-          type: "manual",
-          message: result.message,
+        toast({
+          title: "Error al guardar",
+          description: result.message,
+          variant: "destructive",
         });
       }
     } catch (error: any) {
@@ -501,7 +502,7 @@ export default function AdminPurchasingPage() {
                                     <div className="mt-6">
                                         <Card>
                                             <CardHeader>
-                                                <CardTitle>Resultados de la Búsqueda</CardTitle>
+                                                <CardTitle>Catálogos</CardTitle>
                                             </CardHeader>
                                             <CardContent>
                                                 <Table>
@@ -566,5 +567,6 @@ export default function AdminPurchasingPage() {
     </div>
   );
 }
+
 
     
