@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuth } from '@/lib/auth';
@@ -82,11 +82,18 @@ export default function AdminPurchasingPage() {
       });
       form.reset();
     } catch (error: any) {
-       toast({
-        title: "Error al guardar el catálogo",
-        description: error.message || "No se pudo guardar el catálogo. Revise los permisos o inténtelo de nuevo.",
-        variant: 'destructive',
-      });
+       if (error.message.includes("ya existe")) {
+         form.setError("id", {
+           type: "manual",
+           message: error.message,
+         });
+       } else {
+         toast({
+          title: "Error al guardar el catálogo",
+          description: error.message || "No se pudo guardar el catálogo. Revise los permisos o inténtelo de nuevo.",
+          variant: 'destructive',
+        });
+       }
     }
   };
 
@@ -357,4 +364,3 @@ export default function AdminPurchasingPage() {
       </main>
     </div>
   );
-}
