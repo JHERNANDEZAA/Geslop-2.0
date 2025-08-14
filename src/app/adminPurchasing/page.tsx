@@ -73,27 +73,31 @@ export default function AdminPurchasingPage() {
         validFrom: format(values.validFrom, 'dd-MM-yyyy'),
         validTo: format(values.validTo, 'dd-MM-yyyy'),
       };
-      await saveAdminCatalog(catalogData);
-      toast({
-        title: "Catálogo Guardado",
-        description: `El catálogo "${values.description}" ha sido guardado correctamente.`,
-        variant: "default",
-        className: "bg-accent text-accent-foreground"
-      });
-      form.reset();
+      
+      const result = await saveAdminCatalog(catalogData);
+
+      if (result.success) {
+        toast({
+          title: "Catálogo Guardado",
+          description: `El catálogo "${values.description}" ha sido guardado correctamente.`,
+          variant: "default",
+          className: "bg-accent text-accent-foreground"
+        });
+        form.reset();
+      } else {
+        // If the ID already exists, result.message will contain the error string.
+        form.setError("id", {
+          type: "manual",
+          message: result.message,
+        });
+      }
     } catch (error: any) {
-       if (error.message.includes("ya existe")) {
-         form.setError("id", {
-           type: "manual",
-           message: error.message,
-         });
-       } else {
+        // This will now only catch other errors, like permission issues.
          toast({
           title: "Error al guardar el catálogo",
           description: error.message || "No se pudo guardar el catálogo. Revise los permisos o inténtelo de nuevo.",
           variant: 'destructive',
         });
-       }
     }
   };
 
@@ -364,3 +368,4 @@ export default function AdminPurchasingPage() {
       </main>
     </div>
   );
+}

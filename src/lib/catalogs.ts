@@ -3,22 +3,22 @@ import { db } from './firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import type { CatalogAdmin } from './types';
 
-export const saveAdminCatalog = async (catalogData: CatalogAdmin) => {
+export const saveAdminCatalog = async (catalogData: CatalogAdmin): Promise<{ success: boolean; message?: string }> => {
   const catalogRef = doc(db, 'catalogs_admin', catalogData.id);
 
   try {
     const docSnap = await getDoc(catalogRef);
     if (docSnap.exists()) {
       // Document exists, which means the ID is not unique.
-      // We throw an error to be caught in the component.
-      throw new Error(`El ID de catálogo '${catalogData.id}' ya existe. Por favor, use uno diferente.`);
+      // Return an object indicating failure instead of throwing an error.
+      return { success: false, message: `El ID de catálogo '${catalogData.id}' ya existe. Por favor, use uno diferente.` };
     }
 
     // Document does not exist, so we can create it.
     await setDoc(catalogRef, catalogData);
+    return { success: true };
   } catch (error: any) {
-    // We re-throw the error to be handled by the calling component
-    // This allows us to display specific Firestore permission errors etc.
+    // For other errors (like permissions), we still throw them to be handled.
     console.error("Error in saveAdminCatalog: ", error);
     throw error;
   }
