@@ -127,246 +127,252 @@ export default function AdminPurchasingPage() {
                 <TabsTrigger value="catalog-management" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Gestión de catálogos</TabsTrigger>
                 <TabsTrigger value="catalog-assignment" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Asignación de catálogos a familias</TabsTrigger>
               </TabsList>
-              <TabsContent value="catalog-management" className="space-y-6">
-                 <Card className="mt-4">
-                  <CardHeader>
-                    <CardTitle>Gestión de catálogos</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Creación de catálogos</CardTitle>
-                      </CardHeader>
-                      <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)}>
-                          <CardContent>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                              <FormField
-                                control={form.control}
-                                name="id"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel>ID del catálogo *</FormLabel>
-                                    <FormControl>
-                                      <Input placeholder="Ej: CAT001" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                              <FormField
-                                control={form.control}
-                                name="description"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel>Descripción del catálogo *</FormLabel>
-                                    <FormControl>
-                                      <Input placeholder="Ej: Catálogo de Bebidas Verano" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                              <FormField
-                                control={form.control}
-                                name="validFrom"
-                                render={({ field }) => (
-                                  <FormItem className="flex flex-col">
-                                    <FormLabel>Fecha inicio de validez *</FormLabel>
-                                    <Popover>
-                                      <PopoverTrigger asChild>
-                                        <FormControl>
-                                          <Button
-                                            variant={"outline"}
-                                            className={cn(
-                                              "w-full justify-start text-left font-normal",
-                                              !field.value && "text-muted-foreground"
-                                            )}
-                                          >
-                                            <CalendarIcon className="mr-2 h-4 w-4" />
-                                            {field.value ? format(field.value, "dd-MM-yyyy") : <span>Seleccione una fecha</span>}
-                                          </Button>
-                                        </FormControl>
-                                      </PopoverTrigger>
-                                      <PopoverContent className="w-auto p-0">
-                                        <Calendar
-                                          mode="single"
-                                          selected={field.value}
-                                          onSelect={field.onChange}
-                                          initialFocus
-                                          locale={es}
-                                        />
-                                      </PopoverContent>
-                                    </Popover>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                               <FormField
-                                control={form.control}
-                                name="validTo"
-                                render={({ field }) => (
-                                  <FormItem className="flex flex-col">
-                                    <FormLabel>Fecha fin de validez *</FormLabel>
-                                    <Popover>
-                                      <PopoverTrigger asChild>
-                                        <FormControl>
-                                          <Button
-                                            variant={"outline"}
-                                            className={cn(
-                                              "w-full justify-start text-left font-normal",
-                                              !field.value && "text-muted-foreground"
-                                            )}
-                                          >
-                                            <CalendarIcon className="mr-2 h-4 w-4" />
-                                            {field.value ? format(field.value, "dd-MM-yyyy") : <span>Seleccione una fecha</span>}
-                                          </Button>
-                                        </FormControl>
-                                      </PopoverTrigger>
-                                      <PopoverContent className="w-auto p-0">
-                                        <Calendar
-                                          mode="single"
-                                          selected={field.value}
-                                          onSelect={field.onChange}
-                                          initialFocus
-                                          locale={es}
-                                        />
-                                      </PopoverContent>
-                                    </Popover>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                              <FormField
-                                control={form.control}
-                                name="status"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel>Estado *</FormLabel>
-                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                      <FormControl>
-                                        <SelectTrigger>
-                                          <SelectValue placeholder="Seleccione un estado" />
-                                        </SelectTrigger>
-                                      </FormControl>
-                                      <SelectContent>
-                                        <SelectItem value="unlocked">Desbloqueado</SelectItem>
-                                        <SelectItem value="locked">Bloqueado</SelectItem>
-                                      </SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                               <FormField
-                                control={form.control}
-                                name="type"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel>Tipo de catálogo *</FormLabel>
-                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                      <FormControl>
-                                        <SelectTrigger>
-                                          <SelectValue placeholder="Seleccione un tipo" />
-                                        </SelectTrigger>
-                                      </FormControl>
-                                      <SelectContent>
-                                        <SelectItem value="C">C: Compras</SelectItem>
-                                        <SelectItem value="T">T: Traspaso</SelectItem>
-                                      </SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                              <FormField
-                                control={form.control}
-                                name="numDays"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel>Número de días *</FormLabel>
-                                    <FormControl>
-                                      <Input type="number" min="0" placeholder="Ej: 30" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                              <FormField
-                                control={form.control}
-                                name="salesOrg"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel>Organización de ventas *</FormLabel>
-                                    <FormControl>
-                                      <Input placeholder="Ej: 1000" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                              <FormField
-                                control={form.control}
-                                name="purchaseGroup"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel>Grupo de compras *</FormLabel>
-                                    <FormControl>
-                                      <Input placeholder="Ej: 001" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                              <FormField
-                                control={form.control}
-                                name="maxAnticipationDays"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel>Días de anticipación máxima *</FormLabel>
-                                    <FormControl>
-                                      <Input type="number" min="0" placeholder="Ej: 90" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                              <FormField
-                                control={form.control}
-                                name="minAnticipationDays"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel>Días de anticipación mínimos *</FormLabel>
-                                    <FormControl>
-                                      <Input type="number" min="0" placeholder="Ej: 1" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                            </div>
-                          </CardContent>
-                          <CardFooter className="flex justify-end">
-                              <Button type="submit" disabled={form.formState.isSubmitting} className="bg-accent text-accent-foreground hover:bg-accent/90">
-                                {form.formState.isSubmitting ? "Creando..." : "Crear Catálogo"}
-                              </Button>
-                          </CardFooter>
-                        </form>
-                      </Form>
-                    </Card>
-                    <Card>
-                       <CardHeader>
-                        <CardTitle>Búsqueda</CardTitle>
-                        <CardDescription>
-                          Utilice los filtros para buscar catálogos existentes.
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                         {/* Search form and results will go here */}
-                         <p>La funcionalidad de búsqueda estará disponible próximamente.</p>
-                      </CardContent>
-                    </Card>
-                  </CardContent>
+              <TabsContent value="catalog-management">
+                <Card className="mt-4">
+                    <CardHeader>
+                        <CardTitle>Gestión de catálogos</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <Tabs defaultValue="creation" className="w-full">
+                            <TabsList className="grid w-full grid-cols-2">
+                                <TabsTrigger value="creation">Creación de catálogos</TabsTrigger>
+                                <TabsTrigger value="search">Búsqueda</TabsTrigger>
+                            </TabsList>
+                            <TabsContent value="creation">
+                                <Card className="mt-4 border-t-0 rounded-t-none">
+                                    <Form {...form}>
+                                        <form onSubmit={form.handleSubmit(onSubmit)}>
+                                        <CardContent className="pt-6">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                            <FormField
+                                                control={form.control}
+                                                name="id"
+                                                render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>ID del catálogo *</FormLabel>
+                                                    <FormControl>
+                                                    <Input placeholder="Ej: CAT001" {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                                )}
+                                            />
+                                            <FormField
+                                                control={form.control}
+                                                name="description"
+                                                render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Descripción del catálogo *</FormLabel>
+                                                    <FormControl>
+                                                    <Input placeholder="Ej: Catálogo de Bebidas Verano" {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                                )}
+                                            />
+                                            <FormField
+                                                control={form.control}
+                                                name="validFrom"
+                                                render={({ field }) => (
+                                                <FormItem className="flex flex-col">
+                                                    <FormLabel>Fecha inicio de validez *</FormLabel>
+                                                    <Popover>
+                                                    <PopoverTrigger asChild>
+                                                        <FormControl>
+                                                        <Button
+                                                            variant={"outline"}
+                                                            className={cn(
+                                                            "w-full justify-start text-left font-normal",
+                                                            !field.value && "text-muted-foreground"
+                                                            )}
+                                                        >
+                                                            <CalendarIcon className="mr-2 h-4 w-4" />
+                                                            {field.value ? format(field.value, "dd-MM-yyyy") : <span>Seleccione una fecha</span>}
+                                                        </Button>
+                                                        </FormControl>
+                                                    </PopoverTrigger>
+                                                    <PopoverContent className="w-auto p-0">
+                                                        <Calendar
+                                                        mode="single"
+                                                        selected={field.value}
+                                                        onSelect={field.onChange}
+                                                        initialFocus
+                                                        locale={es}
+                                                        />
+                                                    </PopoverContent>
+                                                    </Popover>
+                                                    <FormMessage />
+                                                </FormItem>
+                                                )}
+                                            />
+                                            <FormField
+                                                control={form.control}
+                                                name="validTo"
+                                                render={({ field }) => (
+                                                <FormItem className="flex flex-col">
+                                                    <FormLabel>Fecha fin de validez *</FormLabel>
+                                                    <Popover>
+                                                    <PopoverTrigger asChild>
+                                                        <FormControl>
+                                                        <Button
+                                                            variant={"outline"}
+                                                            className={cn(
+                                                            "w-full justify-start text-left font-normal",
+                                                            !field.value && "text-muted-foreground"
+                                                            )}
+                                                        >
+                                                            <CalendarIcon className="mr-2 h-4 w-4" />
+                                                            {field.value ? format(field.value, "dd-MM-yyyy") : <span>Seleccione una fecha</span>}
+                                                        </Button>
+                                                        </FormControl>
+                                                    </PopoverTrigger>
+                                                    <PopoverContent className="w-auto p-0">
+                                                        <Calendar
+                                                        mode="single"
+                                                        selected={field.value}
+                                                        onSelect={field.onChange}
+                                                        initialFocus
+                                                        locale={es}
+                                                        />
+                                                    </PopoverContent>
+                                                    </Popover>
+                                                    <FormMessage />
+                                                </FormItem>
+                                                )}
+                                            />
+                                            <FormField
+                                                control={form.control}
+                                                name="status"
+                                                render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Estado *</FormLabel>
+                                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                    <FormControl>
+                                                        <SelectTrigger>
+                                                        <SelectValue placeholder="Seleccione un estado" />
+                                                        </SelectTrigger>
+                                                    </FormControl>
+                                                    <SelectContent>
+                                                        <SelectItem value="unlocked">Desbloqueado</SelectItem>
+                                                        <SelectItem value="locked">Bloqueado</SelectItem>
+                                                    </SelectContent>
+                                                    </Select>
+                                                    <FormMessage />
+                                                </FormItem>
+                                                )}
+                                            />
+                                            <FormField
+                                                control={form.control}
+                                                name="type"
+                                                render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Tipo de catálogo *</FormLabel>
+                                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                    <FormControl>
+                                                        <SelectTrigger>
+                                                        <SelectValue placeholder="Seleccione un tipo" />
+                                                        </SelectTrigger>
+                                                    </FormControl>
+                                                    <SelectContent>
+                                                        <SelectItem value="C">C: Compras</SelectItem>
+                                                        <SelectItem value="T">T: Traspaso</SelectItem>
+                                                    </SelectContent>
+                                                    </Select>
+                                                    <FormMessage />
+                                                </FormItem>
+                                                )}
+                                            />
+                                            <FormField
+                                                control={form.control}
+                                                name="numDays"
+                                                render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Número de días *</FormLabel>
+                                                    <FormControl>
+                                                    <Input type="number" min="0" placeholder="Ej: 30" {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                                )}
+                                            />
+                                            <FormField
+                                                control={form.control}
+                                                name="salesOrg"
+                                                render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Organización de ventas *</FormLabel>
+                                                    <FormControl>
+                                                    <Input placeholder="Ej: 1000" {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                                )}
+                                            />
+                                            <FormField
+                                                control={form.control}
+                                                name="purchaseGroup"
+                                                render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Grupo de compras *</FormLabel>
+                                                    <FormControl>
+                                                    <Input placeholder="Ej: 001" {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                                )}
+                                            />
+                                            <FormField
+                                                control={form.control}
+                                                name="maxAnticipationDays"
+                                                render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Días de anticipación máxima *</FormLabel>
+                                                    <FormControl>
+                                                    <Input type="number" min="0" placeholder="Ej: 90" {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                                )}
+                                            />
+                                            <FormField
+                                                control={form.control}
+                                                name="minAnticipationDays"
+                                                render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Días de anticipación mínimos *</FormLabel>
+                                                    <FormControl>
+                                                    <Input type="number" min="0" placeholder="Ej: 1" {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                                )}
+                                            />
+                                            </div>
+                                        </CardContent>
+                                        <CardFooter className="flex justify-end">
+                                            <Button type="submit" disabled={form.formState.isSubmitting} className="bg-accent text-accent-foreground hover:bg-accent/90">
+                                                {form.formState.isSubmitting ? "Creando..." : "Crear Catálogo"}
+                                            </Button>
+                                        </CardFooter>
+                                        </form>
+                                    </Form>
+                                </Card>
+                            </TabsContent>
+                            <TabsContent value="search">
+                                <Card className="mt-4 border-t-0 rounded-t-none">
+                                    <CardHeader>
+                                        <CardTitle>Búsqueda</CardTitle>
+                                        <CardDescription>
+                                        Utilice los filtros para buscar catálogos existentes.
+                                        </CardDescription>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <p>La funcionalidad de búsqueda estará disponible próximamente.</p>
+                                    </CardContent>
+                                </Card>
+                            </TabsContent>
+                        </Tabs>
+                    </CardContent>
                 </Card>
               </TabsContent>
               <TabsContent value="catalog-assignment">
@@ -385,4 +391,5 @@ export default function AdminPurchasingPage() {
       </main>
     </div>
   );
-}
+
+    
