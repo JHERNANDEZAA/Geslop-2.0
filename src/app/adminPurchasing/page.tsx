@@ -500,7 +500,7 @@ export default function AdminPurchasingPage() {
 
                                     {searchResults.length > 0 && (
                                     <div className="mt-6 p-6 pt-0">
-                                        <Card className="border shadow-none">
+                                        <Card className="border-0 shadow-none">
                                             <CardHeader>
                                                 <CardTitle>Catálogos</CardTitle>
                                             </CardHeader>
@@ -570,4 +570,4 @@ export default function AdminPurchasingPage() {
   );
 }
 
-    
+
