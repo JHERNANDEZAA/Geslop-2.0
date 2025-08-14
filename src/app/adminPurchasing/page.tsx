@@ -143,7 +143,7 @@ export default function AdminPurchasingPage() {
                             name="id"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>ID del catálogo</FormLabel>
+                                <FormLabel>ID del catálogo *</FormLabel>
                                 <FormControl>
                                   <Input placeholder="Ej: CAT001" {...field} />
                                 </FormControl>
@@ -156,7 +156,7 @@ export default function AdminPurchasingPage() {
                             name="description"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Descripción del catálogo</FormLabel>
+                                <FormLabel>Descripción del catálogo *</FormLabel>
                                 <FormControl>
                                   <Input placeholder="Ej: Catálogo de Bebidas Verano" {...field} />
                                 </FormControl>
@@ -169,7 +169,7 @@ export default function AdminPurchasingPage() {
                             name="validFrom"
                             render={({ field }) => (
                               <FormItem className="flex flex-col">
-                                <FormLabel>Fecha inicio de validez</FormLabel>
+                                <FormLabel>Fecha inicio de validez *</FormLabel>
                                 <Popover>
                                   <PopoverTrigger asChild>
                                     <FormControl>
@@ -204,7 +204,7 @@ export default function AdminPurchasingPage() {
                             name="validTo"
                             render={({ field }) => (
                               <FormItem className="flex flex-col">
-                                <FormLabel>Fecha fin de validez</FormLabel>
+                                <FormLabel>Fecha fin de validez *</FormLabel>
                                 <Popover>
                                   <PopoverTrigger asChild>
                                     <FormControl>
@@ -239,7 +239,7 @@ export default function AdminPurchasingPage() {
                             name="status"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Estado</FormLabel>
+                                <FormLabel>Estado *</FormLabel>
                                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                                   <FormControl>
                                     <SelectTrigger>
@@ -260,7 +260,7 @@ export default function AdminPurchasingPage() {
                             name="type"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Tipo de catálogo</FormLabel>
+                                <FormLabel>Tipo de catálogo *</FormLabel>
                                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                                   <FormControl>
                                     <SelectTrigger>
@@ -281,7 +281,7 @@ export default function AdminPurchasingPage() {
                             name="numDays"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Número de días</FormLabel>
+                                <FormLabel>Número de días *</FormLabel>
                                 <FormControl>
                                   <Input type="number" min="0" placeholder="Ej: 30" {...field} />
                                 </FormControl>
@@ -294,7 +294,7 @@ export default function AdminPurchasingPage() {
                             name="salesOrg"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Organización de ventas</FormLabel>
+                                <FormLabel>Organización de ventas *</FormLabel>
                                 <FormControl>
                                   <Input placeholder="Ej: 1000" {...field} />
                                 </FormControl>
@@ -307,7 +307,7 @@ export default function AdminPurchasingPage() {
                             name="purchaseGroup"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Grupo de compras</FormLabel>
+                                <FormLabel>Grupo de compras *</FormLabel>
                                 <FormControl>
                                   <Input placeholder="Ej: 001" {...field} />
                                 </FormControl>
@@ -320,7 +320,7 @@ export default function AdminPurchasingPage() {
                             name="maxAnticipationDays"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Días de anticipación máxima</FormLabel>
+                                <FormLabel>Días de anticipación máxima *</FormLabel>
                                 <FormControl>
                                   <Input type="number" min="0" placeholder="Ej: 90" {...field} />
                                 </FormControl>
@@ -333,7 +333,7 @@ export default function AdminPurchasingPage() {
                             name="minAnticipationDays"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Días de anticipación mínimos</FormLabel>
+                                <FormLabel>Días de anticipación mínimos *</FormLabel>
                                 <FormControl>
                                   <Input type="number" min="0" placeholder="Ej: 1" {...field} />
                                 </FormControl>
@@ -369,5 +369,3 @@ export default function AdminPurchasingPage() {
     </div>
   );
 }
-
-    
