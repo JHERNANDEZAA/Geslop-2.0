@@ -16,6 +16,20 @@ export type Catalog = {
   catalogName: string;
 };
 
+export type CatalogAdmin = {
+  id: string; // Catalog ID
+  description: string;
+  validFrom: string; // DD-MM-YYYY
+  validTo: string; // DD-MM-YYYY
+  status: 'locked' | 'unlocked';
+  type: 'C' | 'T'; // C: Compras, T: Traspaso
+  numDays: number;
+  salesOrg: string;
+  purchaseGroup: string;
+  maxAnticipationDays: number;
+  minAnticipationDays: number;
+};
+
 export type EnabledDays = {
   centerId: string;
   catalogName: string;
