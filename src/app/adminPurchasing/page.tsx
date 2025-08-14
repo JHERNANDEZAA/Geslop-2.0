@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -17,14 +16,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar as CalendarIcon } from 'lucide-react';
+import { Calendar as CalendarIcon, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
-import { saveAdminCatalog, searchAdminCatalogs } from '@/lib/catalogs';
+import { saveAdminCatalog, searchAdminCatalogs, deleteAdminCatalog } from '@/lib/catalogs';
 import { useToast } from '@/hooks/use-toast';
 import type { CatalogAdmin } from '@/lib/types';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 const catalogSchema = z.object({
   id: z.string().min(1, 'El ID del catálogo es requerido'),
@@ -55,6 +55,7 @@ export default function AdminPurchasingPage() {
   const { toast } = useToast();
   const [searchResults, setSearchResults] = useState<CatalogAdmin[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [catalogToDelete, setCatalogToDelete] = useState<CatalogAdmin | null>(null);
 
   const form = useForm<z.infer<typeof catalogSchema>>({
     resolver: zodResolver(catalogSchema),
@@ -143,6 +144,28 @@ export default function AdminPurchasingPage() {
       } finally {
           setIsSearching(false);
       }
+  }
+  
+  const handleDeleteCatalog = async () => {
+    if (!catalogToDelete) return;
+
+    try {
+        await deleteAdminCatalog(catalogToDelete.id);
+        toast({
+            title: "Catálogo Eliminado",
+            description: `El catálogo "${catalogToDelete.description}" ha sido eliminado.`,
+            variant: "default",
+        });
+        setSearchResults(prev => prev.filter(c => c.id !== catalogToDelete.id));
+    } catch (error: any) {
+        toast({
+            title: "Error al eliminar",
+            description: error.message || "Ocurrió un error al eliminar el catálogo.",
+            variant: "destructive",
+        });
+    } finally {
+        setCatalogToDelete(null);
+    }
   }
 
 
@@ -509,6 +532,7 @@ export default function AdminPurchasingPage() {
                                                     <Table>
                                                         <TableHeader>
                                                             <TableRow>
+                                                                <TableHead className="w-10"></TableHead>
                                                                 <TableHead>ID</TableHead>
                                                                 <TableHead>Descripción</TableHead>
                                                                 <TableHead>Tipo</TableHead>
@@ -525,6 +549,15 @@ export default function AdminPurchasingPage() {
                                                         <TableBody>
                                                             {searchResults.map((catalog) => (
                                                                 <TableRow key={catalog.id} className="odd:bg-muted/50">
+                                                                    <TableCell>
+                                                                        <AlertDialog>
+                                                                            <AlertDialogTrigger asChild>
+                                                                                <Button variant="ghost" size="icon" onClick={() => setCatalogToDelete(catalog)}>
+                                                                                    <Trash2 className="h-4 w-4 text-destructive" />
+                                                                                </Button>
+                                                                            </AlertDialogTrigger>
+                                                                        </AlertDialog>
+                                                                    </TableCell>
                                                                     <TableCell>{catalog.id}</TableCell>
                                                                     <TableCell>{catalog.description}</TableCell>
                                                                     <TableCell>{catalog.type}</TableCell>
@@ -565,10 +598,36 @@ export default function AdminPurchasingPage() {
             </Tabs>
           </CardContent>
         </Card>
+        
+        {catalogToDelete && (
+            <AlertDialog open={!!catalogToDelete} onOpenChange={(open) => !open && setCatalogToDelete(null)}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>¿Está seguro que desea eliminar este catálogo?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            <p>Esta acción no se puede deshacer. Se eliminará permanentemente el siguiente catálogo:</p>
+                            <div className="mt-4 space-y-2 text-sm text-foreground bg-muted/50 p-4 rounded-md">
+                                <p><strong>ID:</strong> {catalogToDelete.id}</p>
+                                <p><strong>Descripción:</strong> {catalogToDelete.description}</p>
+                                <p><strong>Tipo:</strong> {catalogToDelete.type === 'C' ? 'Compras' : 'Traspaso'}</p>
+                                <p><strong>Estado:</strong> {catalogToDelete.status === 'locked' ? 'Bloqueado' : 'Desbloqueado'}</p>
+                                <p><strong>Válido Desde:</strong> {catalogToDelete.validFrom}</p>
+                                <p><strong>Válido Hasta:</strong> {catalogToDelete.validTo}</p>
+                                <p><strong>Grupo Compras:</strong> {catalogToDelete.purchaseGroup}</p>
+                                <p><strong>Org. Ventas:</strong> {catalogToDelete.salesOrg}</p>
+                            </div>
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel onClick={() => setCatalogToDelete(null)}>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleDeleteCatalog} className="bg-destructive hover:bg-destructive/90">Eliminar</AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+        )}
+
       </main>
     </div>
   );
 }
-
-
     

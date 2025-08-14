@@ -1,6 +1,5 @@
-
 import { db } from './firebase';
-import { doc, getDoc, setDoc, collection, getDocs, query, where, QueryConstraint } from 'firebase/firestore';
+import { doc, getDoc, setDoc, collection, getDocs, query, where, QueryConstraint, deleteDoc } from 'firebase/firestore';
 import type { CatalogAdmin } from './types';
 
 export const saveAdminCatalog = async (catalogData: CatalogAdmin): Promise<{ success: boolean; message?: string }> => {
@@ -71,4 +70,13 @@ export const searchAdminCatalogs = async (filters: SearchFilters): Promise<Catal
     }
 };
 
+export const deleteAdminCatalog = async (catalogId: string): Promise<void> => {
+    const catalogRef = doc(db, 'catalogs_admin', catalogId);
+    try {
+        await deleteDoc(catalogRef);
+    } catch (error: any) {
+        console.error("Error deleting admin catalog: ", error);
+        throw new Error("No se pudo eliminar el catálogo. Revise los permisos o inténtelo de nuevo.");
+    }
+};
     
