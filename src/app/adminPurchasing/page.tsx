@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -45,7 +44,7 @@ const searchSchema = z.object({
   id: z.string().optional(),
   description: z.string().optional(),
   purchaseGroup: z.string().optional(),
-  type: z.enum(['', 'C', 'T']).optional(),
+  type: z.enum(['all', 'C', 'T']).optional(),
   salesOrg: z.string().optional(),
 });
 
@@ -79,7 +78,7 @@ export default function AdminPurchasingPage() {
         id: '',
         description: '',
         purchaseGroup: '',
-        type: '',
+        type: 'all',
         salesOrg: '',
     }
   });
@@ -127,7 +126,11 @@ export default function AdminPurchasingPage() {
   const onSearch = async (values: z.infer<typeof searchSchema>) => {
       setIsSearching(true);
       try {
-        const results = await searchAdminCatalogs(values);
+        const filters = {...values};
+        if (filters.type === 'all') {
+            delete filters.type;
+        }
+        const results = await searchAdminCatalogs(filters as any);
         setSearchResults(results);
         if (results.length === 0) {
              toast({
@@ -207,7 +210,7 @@ export default function AdminPurchasingPage() {
                     <CardContent>
                         <Tabs defaultValue="creation" className="w-full">
                             <TabsList className="inline-flex">
-                                <TabsTrigger value="creation" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Creación</TabsTrigger>
+                                <TabsTrigger value="creation" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Creación de catálogos</TabsTrigger>
                                 <TabsTrigger value="search" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Búsqueda</TabsTrigger>
                             </TabsList>
                             <TabsContent value="creation">
@@ -494,7 +497,7 @@ export default function AdminPurchasingPage() {
                                                                 </SelectTrigger>
                                                             </FormControl>
                                                             <SelectContent>
-                                                                <SelectItem value="">Todos</SelectItem>
+                                                                <SelectItem value="all">Todos</SelectItem>
                                                                 <SelectItem value="C">C: Compras</SelectItem>
                                                                 <SelectItem value="T">T: Traspaso</SelectItem>
                                                             </SelectContent>
@@ -645,5 +648,3 @@ export default function AdminPurchasingPage() {
     </div>
   );
 }
-
-    
