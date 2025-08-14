@@ -139,7 +139,7 @@ export default function AdminPurchasingPage() {
                                 <TabsTrigger value="search">Búsqueda</TabsTrigger>
                             </TabsList>
                             <TabsContent value="creation">
-                                <Card className="mt-4 border-t-0 rounded-t-none">
+                                <Card className="mt-4">
                                     <CardHeader>
                                         <CardTitle>Creación de catálogos</CardTitle>
                                     </CardHeader>
@@ -362,7 +362,7 @@ export default function AdminPurchasingPage() {
                                 </Card>
                             </TabsContent>
                             <TabsContent value="search">
-                                <Card className="mt-4 border-t-0 rounded-t-none">
+                                <Card className="mt-4">
                                     <CardHeader>
                                         <CardTitle>Búsqueda</CardTitle>
                                         <CardDescription>
@@ -394,4 +394,5 @@ export default function AdminPurchasingPage() {
       </main>
     </div>
   );
-}
+
+    
