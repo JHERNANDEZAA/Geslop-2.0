@@ -468,7 +468,6 @@ export default function AdminPurchasingPage() {
                                                                 </SelectTrigger>
                                                             </FormControl>
                                                             <SelectContent>
-                                                                <SelectItem value="">Todos</SelectItem>
                                                                 <SelectItem value="C">C: Compras</SelectItem>
                                                                 <SelectItem value="T">T: Traspaso</SelectItem>
                                                             </SelectContent>
@@ -557,5 +556,3 @@ export default function AdminPurchasingPage() {
     </div>
   );
 }
-
-    
