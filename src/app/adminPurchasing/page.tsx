@@ -510,9 +510,14 @@ export default function AdminPurchasingPage() {
                                                             <TableHead>ID</TableHead>
                                                             <TableHead>Descripción</TableHead>
                                                             <TableHead>Tipo</TableHead>
+                                                            <TableHead>Estado</TableHead>
+                                                            <TableHead>Válido Desde</TableHead>
+                                                            <TableHead>Válido Hasta</TableHead>
+                                                            <TableHead>Días</TableHead>
                                                             <TableHead>Grupo Compras</TableHead>
                                                             <TableHead>Org. Ventas</TableHead>
-                                                            <TableHead>Estado</TableHead>
+                                                            <TableHead>Ant. Mín.</TableHead>
+                                                            <TableHead>Ant. Máx.</TableHead>
                                                         </TableRow>
                                                     </TableHeader>
                                                     <TableBody>
@@ -521,9 +526,14 @@ export default function AdminPurchasingPage() {
                                                                 <TableCell>{catalog.id}</TableCell>
                                                                 <TableCell>{catalog.description}</TableCell>
                                                                 <TableCell>{catalog.type}</TableCell>
+                                                                <TableCell>{catalog.status === 'locked' ? 'Bloqueado' : 'Desbloqueado'}</TableCell>
+                                                                <TableCell>{catalog.validFrom}</TableCell>
+                                                                <TableCell>{catalog.validTo}</TableCell>
+                                                                <TableCell>{catalog.numDays}</TableCell>
                                                                 <TableCell>{catalog.purchaseGroup}</TableCell>
                                                                 <TableCell>{catalog.salesOrg}</TableCell>
-                                                                <TableCell>{catalog.status === 'locked' ? 'Bloqueado' : 'Desbloqueado'}</TableCell>
+                                                                <TableCell>{catalog.minAnticipationDays}</TableCell>
+                                                                <TableCell>{catalog.maxAnticipationDays}</TableCell>
                                                             </TableRow>
                                                         ))}
                                                     </TableBody>
