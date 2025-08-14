@@ -32,11 +32,11 @@ const catalogSchema = z.object({
   validTo: z.date({ required_error: 'La fecha de fin es requerida' }),
   status: z.enum(['unlocked', 'locked'], { required_error: 'El estado es requerido' }),
   type: z.enum(['C', 'T'], { required_error: 'El tipo es requerido' }),
-  numDays: z.coerce.number().min(0, 'Debe ser mayor o igual a 0'),
+  numDays: z.coerce.number().min(1, 'El número de días es requerido y debe ser mayor que 0'),
   salesOrg: z.string().min(1, 'La organización de ventas es requerida'),
   purchaseGroup: z.string().min(1, 'El grupo de compras es requerido'),
-  maxAnticipationDays: z.coerce.number().min(0, 'Debe ser mayor o igual a 0'),
-  minAnticipationDays: z.coerce.number().min(0, 'Debe ser mayor o igual a 0'),
+  maxAnticipationDays: z.coerce.number().min(0, 'Los días de anticipación máxima son requeridos'),
+  minAnticipationDays: z.coerce.number().min(0, 'Los días de anticipación mínimos son requeridos'),
 });
 
 
@@ -65,7 +65,7 @@ export default function AdminPurchasingPage() {
       router.push('/login');
     }
   }, [user, loading, router]);
-  
+
   const onSubmit = async (values: z.infer<typeof catalogSchema>) => {
     try {
       const catalogData: CatalogAdmin = {
@@ -73,7 +73,7 @@ export default function AdminPurchasingPage() {
         validFrom: format(values.validFrom, 'dd-MM-yyyy'),
         validTo: format(values.validTo, 'dd-MM-yyyy'),
       };
-      
+
       const result = await saveAdminCatalog(catalogData);
 
       if (result.success) {
@@ -369,3 +369,5 @@ export default function AdminPurchasingPage() {
     </div>
   );
 }
+
+    
