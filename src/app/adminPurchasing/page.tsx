@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect } from 'react';
@@ -36,32 +37,39 @@ export default function AdminPurchasingPage() {
     <div className="flex flex-col min-h-screen bg-background">
       <PageHeader />
       <main className="flex-grow p-6">
-        <Tabs defaultValue="catalog-management">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="catalog-management">Gestión de catálogos</TabsTrigger>
-            <TabsTrigger value="catalog-assignment">Asignación de catálogos a familias</TabsTrigger>
-          </TabsList>
-          <TabsContent value="catalog-management">
-            <Card>
-              <CardHeader>
-                <CardTitle>Gestión de catálogos</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p>Página en construcción</p>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          <TabsContent value="catalog-assignment">
-            <Card>
-              <CardHeader>
-                <CardTitle>Asignación de catálogos a familias</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p>Página en construcción</p>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+        <Card>
+          <CardHeader>
+            <CardTitle>Administración de compras</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Tabs defaultValue="catalog-management" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="catalog-management">Gestión de catálogos</TabsTrigger>
+                <TabsTrigger value="catalog-assignment">Asignación de catálogos a familias</TabsTrigger>
+              </TabsList>
+              <TabsContent value="catalog-management">
+                <Card className="mt-4">
+                  <CardHeader>
+                    <CardTitle>Gestión de catálogos</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p>Página en construcción</p>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              <TabsContent value="catalog-assignment">
+                <Card className="mt-4">
+                  <CardHeader>
+                    <CardTitle>Asignación de catálogos a familias</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p>Página en construcción</p>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
       </main>
     </div>
   );
