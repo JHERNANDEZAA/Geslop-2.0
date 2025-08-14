@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -604,17 +605,19 @@ export default function AdminPurchasingPage() {
                 <AlertDialogContent>
                     <AlertDialogHeader>
                         <AlertDialogTitle>¿Está seguro que desea eliminar este catálogo?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            <p>Esta acción no se puede deshacer. Se eliminará permanentemente el siguiente catálogo:</p>
-                            <div className="mt-4 space-y-2 text-sm text-foreground bg-muted/50 p-4 rounded-md">
-                                <p><strong>ID:</strong> {catalogToDelete.id}</p>
-                                <p><strong>Descripción:</strong> {catalogToDelete.description}</p>
-                                <p><strong>Tipo:</strong> {catalogToDelete.type === 'C' ? 'Compras' : 'Traspaso'}</p>
-                                <p><strong>Estado:</strong> {catalogToDelete.status === 'locked' ? 'Bloqueado' : 'Desbloqueado'}</p>
-                                <p><strong>Válido Desde:</strong> {catalogToDelete.validFrom}</p>
-                                <p><strong>Válido Hasta:</strong> {catalogToDelete.validTo}</p>
-                                <p><strong>Grupo Compras:</strong> {catalogToDelete.purchaseGroup}</p>
-                                <p><strong>Org. Ventas:</strong> {catalogToDelete.salesOrg}</p>
+                        <AlertDialogDescription asChild>
+                            <div>
+                                <span>Esta acción no se puede deshacer. Se eliminará permanentemente el siguiente catálogo:</span>
+                                <div className="mt-4 space-y-2 text-sm text-foreground bg-muted/50 p-4 rounded-md">
+                                    <p><strong>ID:</strong> {catalogToDelete.id}</p>
+                                    <p><strong>Descripción:</strong> {catalogToDelete.description}</p>
+                                    <p><strong>Tipo:</strong> {catalogToDelete.type === 'C' ? 'Compras' : 'Traspaso'}</p>
+                                    <p><strong>Estado:</strong> {catalogToDelete.status === 'locked' ? 'Bloqueado' : 'Desbloqueado'}</p>
+                                    <p><strong>Válido Desde:</strong> {catalogToDelete.validFrom}</p>
+                                    <p><strong>Válido Hasta:</strong> {catalogToDelete.validTo}</p>
+                                    <p><strong>Grupo Compras:</strong> {catalogToDelete.purchaseGroup}</p>
+                                    <p><strong>Org. Ventas:</strong> {catalogToDelete.salesOrg}</p>
+                                </div>
                             </div>
                         </AlertDialogDescription>
                     </AlertDialogHeader>
