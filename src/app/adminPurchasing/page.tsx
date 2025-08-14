@@ -43,9 +43,9 @@ export default function AdminPurchasingPage() {
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="catalog-management" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="catalog-management">Gestión de catálogos</TabsTrigger>
-                <TabsTrigger value="catalog-assignment">Asignación de catálogos a familias</TabsTrigger>
+              <TabsList className="inline-flex h-auto rounded-lg bg-muted p-1 text-muted-foreground">
+                <TabsTrigger value="catalog-management" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Gestión de catálogos</TabsTrigger>
+                <TabsTrigger value="catalog-assignment" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Asignación de catálogos a familias</TabsTrigger>
               </TabsList>
               <TabsContent value="catalog-management">
                 <Card className="mt-4">
