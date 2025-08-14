@@ -134,7 +134,7 @@ export default function AdminPurchasingPage() {
                     </CardHeader>
                     <CardContent>
                         <Tabs defaultValue="creation" className="w-full">
-                            <TabsList className="grid w-full grid-cols-2">
+                            <TabsList>
                                 <TabsTrigger value="creation">Creación de catálogos</TabsTrigger>
                                 <TabsTrigger value="search">Búsqueda</TabsTrigger>
                             </TabsList>
@@ -391,5 +391,7 @@ export default function AdminPurchasingPage() {
       </main>
     </div>
   );
+
+    
 
     
