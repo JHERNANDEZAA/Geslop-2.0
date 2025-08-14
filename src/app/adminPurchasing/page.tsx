@@ -81,10 +81,10 @@ export default function AdminPurchasingPage() {
         className: "bg-accent text-accent-foreground"
       });
       form.reset();
-    } catch (error) {
+    } catch (error: any) {
        toast({
-        title: "Error",
-        description: "El ID del catálogo ya existe. Por favor, use uno diferente.",
+        title: "Error al guardar el catálogo",
+        description: error.message || "No se pudo guardar el catálogo. Revise los permisos o inténtelo de nuevo.",
         variant: 'destructive',
       });
     }
