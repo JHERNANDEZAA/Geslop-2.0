@@ -8,7 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuth } from '@/lib/auth';
 import { PageHeader } from '@/components/page-header';
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -85,14 +85,12 @@ export default function AdminPurchasingPage() {
         });
         form.reset();
       } else {
-        // If the ID already exists, result.message will contain the error string.
         form.setError("id", {
           type: "manual",
           message: result.message,
         });
       }
     } catch (error: any) {
-        // This will now only catch other errors, like permission issues.
          toast({
           title: "Error al guardar el catálogo",
           description: error.message || "No se pudo guardar el catálogo. Revise los permisos o inténtelo de nuevo.",
@@ -129,10 +127,10 @@ export default function AdminPurchasingPage() {
                 <TabsTrigger value="catalog-management" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Gestión de catálogos</TabsTrigger>
                 <TabsTrigger value="catalog-assignment" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Asignación de catálogos a familias</TabsTrigger>
               </TabsList>
-              <TabsContent value="catalog-management">
+              <TabsContent value="catalog-management" className="space-y-6">
                 <Card className="mt-4">
                   <CardHeader>
-                    <CardTitle>Gestión de catálogos</CardTitle>
+                    <CardTitle>Creación de catálogos</CardTitle>
                   </CardHeader>
                   <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -344,12 +342,24 @@ export default function AdminPurchasingPage() {
                         </div>
                       </CardContent>
                       <CardFooter className="flex justify-end">
-                          <Button type="submit" disabled={form.formState.isSubmitting}>
+                          <Button type="submit" disabled={form.formState.isSubmitting} className="bg-accent text-accent-foreground hover:bg-accent/90">
                             {form.formState.isSubmitting ? "Creando..." : "Crear Catálogo"}
                           </Button>
                       </CardFooter>
                     </form>
                   </Form>
+                </Card>
+                <Card>
+                   <CardHeader>
+                    <CardTitle>Búsqueda</CardTitle>
+                    <CardDescription>
+                      Utilice los filtros para buscar catálogos existentes.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                     {/* Search form and results will go here */}
+                     <p>La funcionalidad de búsqueda estará disponible próximamente.</p>
+                  </CardContent>
                 </Card>
               </TabsContent>
               <TabsContent value="catalog-assignment">
