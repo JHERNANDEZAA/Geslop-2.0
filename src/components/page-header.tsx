@@ -35,20 +35,6 @@ export function PageHeader() {
           </div>
           {user && (
             <div className="flex items-center space-x-4">
-                <nav className="hidden md:flex items-center space-x-2">
-                  {navLinks.map((link) => (
-                    <Button 
-                      key={link.href}
-                      variant={pathname === link.href ? 'default' : 'ghost'}
-                      asChild
-                    >
-                       <Link href={link.href}>
-                        <link.icon className="mr-2 h-4 w-4" />
-                        {link.label}
-                      </Link>
-                    </Button>
-                  ))}
-                </nav>
                 <span className="text-sm text-muted-foreground hidden sm:inline-block">{user.email}</span>
                 <Button variant="ghost" size="icon" onClick={handleSignOut}>
                     <LogOut className="h-5 w-5" />
@@ -59,13 +45,12 @@ export function PageHeader() {
         </div>
       </div>
        {user && (
-          <div className="md:hidden border-t">
-              <nav className="flex justify-around p-2">
+          <div className="border-t">
+              <nav className="mx-auto px-4 sm:px-6 lg:px-8 flex items-center space-x-2 h-12">
                  {navLinks.map((link) => (
                     <Button 
                       key={link.href}
                       variant={pathname === link.href ? 'default' : 'ghost'}
-                      className="flex-1"
                       asChild
                     >
                        <Link href={link.href}>
