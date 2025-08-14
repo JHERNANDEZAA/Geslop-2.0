@@ -22,13 +22,13 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       await signInWithEmail(email, password);
-      router.push('/purchasing');
+      router.push('/adminPurchasing');
     } catch (error: any) {
       // Try to sign up if sign in fails (user not found)
       if (error.code === 'auth/user-not-found') {
         try {
           await signUpWithEmail(email, password);
-          router.push('/purchasing');
+          router.push('/adminPurchasing');
         } catch (signupError: any)
 {
           toast({

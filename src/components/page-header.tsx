@@ -19,7 +19,7 @@ export function PageHeader() {
 
   const navLinks = [
     { href: '/', label: 'Solicitud', icon: List },
-    { href: '/purchasing', label: 'Compras', icon: ShoppingCart },
+    { href: '/adminPurchasing', label: 'Administración de compras', icon: ShoppingCart },
   ]
 
   return (
