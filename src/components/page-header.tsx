@@ -30,7 +30,7 @@ export function PageHeader() {
           <div className="flex items-center space-x-3">
             <Building2 className="h-8 w-8 text-primary" />
             <h1 className="text-2xl font-semibold text-foreground">
-              Solicitud de productos
+              Portal de compras LOPESAN
             </h1>
           </div>
           {user && (

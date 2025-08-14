@@ -5,7 +5,7 @@ import { Toaster } from "@/components/ui/toaster"
 import { AuthProvider } from '@/lib/auth.tsx';
 
 export const metadata: Metadata = {
-  title: 'Solicitud de productos',
+  title: 'Portal de compras LOPESAN',
   description: 'Product supply requests for hotels',
 };
 
