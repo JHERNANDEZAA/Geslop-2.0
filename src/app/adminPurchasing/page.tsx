@@ -424,9 +424,9 @@ export default function AdminPurchasingPage() {
                                             />
                                             </div>
                                         </CardContent>
-                                        <CardFooter className="flex justify-end">
+                                        <CardFooter className="flex justify-start">
                                             <Button type="submit" disabled={form.formState.isSubmitting} className="bg-accent text-accent-foreground hover:bg-accent/90">
-                                                {form.formState.isSubmitting ? "Creando..." : "Crear Catálogo"}
+                                                {form.formState.isSubmitting ? "Creando..." : "Crear catálogo"}
                                             </Button>
                                         </CardFooter>
                                         </form>
