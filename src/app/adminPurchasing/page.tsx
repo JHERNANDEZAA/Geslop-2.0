@@ -177,18 +177,18 @@ export default function AdminPurchasingPage() {
               <TabsContent value="catalog-management">
                 <Card className="mt-4">
                     <CardHeader>
-                        <CardTitle>Gestión de catálogos</CardTitle>
+                        <CardTitle className="text-xl">Gestión de catálogos</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <Tabs defaultValue="creation" className="w-full">
                             <TabsList className="inline-flex">
-                                <TabsTrigger value="creation">Creación de catálogos</TabsTrigger>
+                                <TabsTrigger value="creation">Creación</TabsTrigger>
                                 <TabsTrigger value="search">Búsqueda</TabsTrigger>
                             </TabsList>
                             <TabsContent value="creation">
                                 <Card className="mt-4">
                                     <CardHeader>
-                                        <CardTitle>Creación de catálogos</CardTitle>
+                                        <CardTitle className="text-lg">Creación de catálogos</CardTitle>
                                     </CardHeader>
                                     <Form {...form}>
                                         <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -411,7 +411,7 @@ export default function AdminPurchasingPage() {
                             <TabsContent value="search">
                                 <Card className="mt-4">
                                     <CardHeader className="p-4">
-                                        <CardTitle>Búsqueda de Catálogos</CardTitle>
+                                        <CardTitle className="text-lg">Búsqueda de Catálogos</CardTitle>
                                         <CardDescription>
                                         Utilice los filtros para buscar catálogos existentes.
                                         </CardDescription>
@@ -490,7 +490,7 @@ export default function AdminPurchasingPage() {
                                                 />
                                             </div>
                                         </CardContent>
-                                        <CardFooter className="flex justify-end p-4">
+                                        <CardFooter className="flex justify-start p-4">
                                             <Button type="submit" disabled={isSearching} className="bg-primary text-primary-foreground hover:bg-primary/90">
                                                 {isSearching ? "Buscando..." : "Filtrar"}
                                             </Button>
@@ -502,7 +502,7 @@ export default function AdminPurchasingPage() {
                                     <div className="mt-6">
                                         <Card className="border-0 shadow-none">
                                             <CardHeader className="p-4 pt-0">
-                                                <CardTitle>Catálogos</CardTitle>
+                                                <CardTitle className="text-base font-medium">Catálogos</CardTitle>
                                             </CardHeader>
                                             <CardContent className="p-4 pt-0">
                                                 <div className="rounded-md border">
@@ -555,7 +555,7 @@ export default function AdminPurchasingPage() {
               <TabsContent value="catalog-assignment">
                 <Card className="mt-4">
                   <CardHeader>
-                    <CardTitle>Asignación de catálogos a familias</CardTitle>
+                    <CardTitle className="text-xl">Asignación de catálogos a familias</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <p>Página en construcción</p>
@@ -569,3 +569,5 @@ export default function AdminPurchasingPage() {
     </div>
   );
 }
+
+    
