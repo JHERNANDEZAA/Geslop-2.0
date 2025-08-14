@@ -1,19 +1,26 @@
-
 "use client";
 
 import { useAuth, signOutUser } from '@/lib/auth.tsx';
-import { Building2, LogOut } from 'lucide-react';
+import { Building2, LogOut, ShoppingCart, List } from 'lucide-react';
 import { Button } from './ui/button';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
+import Link from 'next/link';
+import { cn } from '@/lib/utils';
 
 export function PageHeader() {
   const { user } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
 
   const handleSignOut = async () => {
     await signOutUser();
     router.push('/login');
   };
+
+  const navLinks = [
+    { href: '/', label: 'Solicitud', icon: List },
+    { href: '/purchasing', label: 'Compras', icon: ShoppingCart },
+  ]
 
   return (
     <header className="bg-card border-b shadow-sm sticky top-0 z-10">
@@ -27,6 +34,20 @@ export function PageHeader() {
           </div>
           {user && (
             <div className="flex items-center space-x-4">
+                <nav className="hidden md:flex items-center space-x-2">
+                  {navLinks.map((link) => (
+                    <Button 
+                      key={link.href}
+                      variant={pathname === link.href ? 'default' : 'ghost'}
+                      asChild
+                    >
+                       <Link href={link.href}>
+                        <link.icon className="mr-2 h-4 w-4" />
+                        {link.label}
+                      </Link>
+                    </Button>
+                  ))}
+                </nav>
                 <span className="text-sm text-muted-foreground hidden sm:inline-block">{user.email}</span>
                 <Button variant="ghost" size="icon" onClick={handleSignOut}>
                     <LogOut className="h-5 w-5" />
@@ -36,6 +57,25 @@ export function PageHeader() {
           )}
         </div>
       </div>
+       {user && (
+          <div className="md:hidden border-t">
+              <nav className="flex justify-around p-2">
+                 {navLinks.map((link) => (
+                    <Button 
+                      key={link.href}
+                      variant={pathname === link.href ? 'default' : 'ghost'}
+                      className="flex-1"
+                      asChild
+                    >
+                       <Link href={link.href}>
+                        <link.icon className="mr-2 h-4 w-4" />
+                        {link.label}
+                      </Link>
+                    </Button>
+                  ))}
+              </nav>
+          </div>
+       )}
     </header>
   );
 }
