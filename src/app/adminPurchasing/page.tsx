@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -56,6 +56,7 @@ export default function AdminPurchasingPage() {
   const [searchResults, setSearchResults] = useState<CatalogAdmin[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [catalogToDelete, setCatalogToDelete] = useState<CatalogAdmin | null>(null);
+  const searchResultsRef = useRef<HTMLDivElement>(null);
 
   const form = useForm<z.infer<typeof catalogSchema>>({
     resolver: zodResolver(catalogSchema),
@@ -88,6 +89,12 @@ export default function AdminPurchasingPage() {
       router.push('/login');
     }
   }, [user, loading, router]);
+  
+  useEffect(() => {
+    if (searchResults.length > 0 && searchResultsRef.current) {
+        searchResultsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [searchResults]);
 
   const onSubmit = async (values: z.infer<typeof catalogSchema>) => {
     try {
@@ -210,7 +217,7 @@ export default function AdminPurchasingPage() {
                     <CardContent>
                         <Tabs defaultValue="creation" className="w-full">
                             <TabsList className="inline-flex">
-                                <TabsTrigger value="creation" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Creación de catálogos</TabsTrigger>
+                                <TabsTrigger value="creation" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Creación</TabsTrigger>
                                 <TabsTrigger value="search" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Búsqueda</TabsTrigger>
                             </TabsList>
                             <TabsContent value="creation">
@@ -528,7 +535,7 @@ export default function AdminPurchasingPage() {
                                     </Form>
 
                                     {searchResults.length > 0 && (
-                                    <div className="mt-6">
+                                    <div ref={searchResultsRef} className="mt-6">
                                         <Card className="border-0 shadow-none">
                                             <CardHeader className="p-4 pt-0">
                                                 <CardTitle className="text-base font-medium">Catálogos</CardTitle>
