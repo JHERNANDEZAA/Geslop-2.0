@@ -140,6 +140,9 @@ export default function AdminPurchasingPage() {
                             </TabsList>
                             <TabsContent value="creation">
                                 <Card className="mt-4 border-t-0 rounded-t-none">
+                                    <CardHeader>
+                                        <CardTitle>Creación de catálogos</CardTitle>
+                                    </CardHeader>
                                     <Form {...form}>
                                         <form onSubmit={form.handleSubmit(onSubmit)}>
                                         <CardContent className="pt-6">
@@ -391,7 +394,4 @@ export default function AdminPurchasingPage() {
       </main>
     </div>
   );
-
-    
-
-    
+}
