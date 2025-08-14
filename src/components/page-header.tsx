@@ -19,7 +19,7 @@ export function PageHeader() {
   };
 
   const navLinks = [
-    { href: '/purchaseRequisition', label: 'Solicitud', icon: List },
+    { href: '/purchaseRequisition', label: 'Solicitud de productos', icon: List },
     { href: '/adminPurchasing', label: 'Administración de compras', icon: ShoppingCart },
   ]
 
