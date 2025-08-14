@@ -21,9 +21,10 @@ import { Calendar as CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
-import { saveAdminCatalog } from '@/lib/catalogs';
+import { saveAdminCatalog, searchAdminCatalogs } from '@/lib/catalogs';
 import { useToast } from '@/hooks/use-toast';
 import type { CatalogAdmin } from '@/lib/types';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 const catalogSchema = z.object({
   id: z.string().min(1, 'El ID del catálogo es requerido'),
@@ -39,11 +40,21 @@ const catalogSchema = z.object({
   minAnticipationDays: z.coerce.number().min(0, 'Los días de anticipación mínimos son requeridos'),
 });
 
+const searchSchema = z.object({
+  id: z.string().optional(),
+  description: z.string().optional(),
+  purchaseGroup: z.string().optional(),
+  type: z.enum(['', 'C', 'T']).optional(),
+  salesOrg: z.string().optional(),
+});
+
 
 export default function AdminPurchasingPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
+  const [searchResults, setSearchResults] = useState<CatalogAdmin[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
 
   const form = useForm<z.infer<typeof catalogSchema>>({
     resolver: zodResolver(catalogSchema),
@@ -57,6 +68,17 @@ export default function AdminPurchasingPage() {
       purchaseGroup: '',
       maxAnticipationDays: 0,
       minAnticipationDays: 0,
+    }
+  });
+  
+  const searchForm = useForm<z.infer<typeof searchSchema>>({
+    resolver: zodResolver(searchSchema),
+    defaultValues: {
+        id: '',
+        description: '',
+        purchaseGroup: '',
+        type: '',
+        salesOrg: '',
     }
   });
 
@@ -98,6 +120,30 @@ export default function AdminPurchasingPage() {
         });
     }
   };
+  
+  const onSearch = async (values: z.infer<typeof searchSchema>) => {
+      setIsSearching(true);
+      try {
+        const results = await searchAdminCatalogs(values);
+        setSearchResults(results);
+        if (results.length === 0) {
+             toast({
+                title: "Búsqueda sin resultados",
+                description: "No se encontraron catálogos con los filtros especificados.",
+                variant: "default",
+            });
+        }
+      } catch (error: any) {
+           toast({
+                title: "Error en la búsqueda",
+                description: error.message || "Ocurrió un error al realizar la búsqueda.",
+                variant: "destructive",
+            });
+      } finally {
+          setIsSearching(false);
+      }
+  }
+
 
   if (loading || !user) {
     return (
@@ -364,14 +410,130 @@ export default function AdminPurchasingPage() {
                             <TabsContent value="search">
                                 <Card className="mt-4">
                                     <CardHeader>
-                                        <CardTitle>Búsqueda</CardTitle>
+                                        <CardTitle>Búsqueda de Catálogos</CardTitle>
                                         <CardDescription>
                                         Utilice los filtros para buscar catálogos existentes.
                                         </CardDescription>
                                     </CardHeader>
-                                    <CardContent>
-                                        <p>La funcionalidad de búsqueda estará disponible próximamente.</p>
-                                    </CardContent>
+                                    <Form {...searchForm}>
+                                        <form onSubmit={searchForm.handleSubmit(onSearch)}>
+                                        <CardContent className="space-y-6">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                                <FormField
+                                                    control={searchForm.control}
+                                                    name="id"
+                                                    render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>ID del catálogo</FormLabel>
+                                                        <FormControl>
+                                                        <Input placeholder="Filtrar por ID" {...field} />
+                                                        </FormControl>
+                                                    </FormItem>
+                                                    )}
+                                                />
+                                                <FormField
+                                                    control={searchForm.control}
+                                                    name="description"
+                                                    render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Descripción del catálogo</FormLabel>
+                                                        <FormControl>
+                                                        <Input placeholder="Filtrar por descripción" {...field} />
+                                                        </FormControl>
+                                                    </FormItem>
+                                                    )}
+                                                />
+                                                <FormField
+                                                    control={searchForm.control}
+                                                    name="purchaseGroup"
+                                                    render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Grupo de compras</FormLabel>
+                                                        <FormControl>
+                                                        <Input placeholder="Filtrar por grupo de compras" {...field} />
+                                                        </FormControl>
+                                                    </FormItem>
+                                                    )}
+                                                />
+                                                <FormField
+                                                    control={searchForm.control}
+                                                    name="type"
+                                                    render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Tipo de catálogo</FormLabel>
+                                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                            <FormControl>
+                                                                <SelectTrigger>
+                                                                <SelectValue placeholder="Filtrar por tipo" />
+                                                                </SelectTrigger>
+                                                            </FormControl>
+                                                            <SelectContent>
+                                                                <SelectItem value="">Todos</SelectItem>
+                                                                <SelectItem value="C">C: Compras</SelectItem>
+                                                                <SelectItem value="T">T: Traspaso</SelectItem>
+                                                            </SelectContent>
+                                                        </Select>
+                                                    </FormItem>
+                                                    )}
+                                                />
+                                                <FormField
+                                                    control={searchForm.control}
+                                                    name="salesOrg"
+                                                    render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Organización de ventas</FormLabel>
+                                                        <FormControl>
+                                                        <Input placeholder="Filtrar por org. ventas" {...field} />
+                                                        </FormControl>
+                                                    </FormItem>
+                                                    )}
+                                                />
+                                            </div>
+                                        </CardContent>
+                                        <CardFooter className="flex justify-end">
+                                            <Button type="submit" disabled={isSearching} className="bg-primary text-primary-foreground hover:bg-primary/90">
+                                                {isSearching ? "Buscando..." : "Filtrar"}
+                                            </Button>
+                                        </CardFooter>
+                                        </form>
+                                    </Form>
+
+                                    {searchResults.length > 0 && (
+                                    <div className="mt-6">
+                                        <Card>
+                                            <CardHeader>
+                                                <CardTitle>Resultados de la Búsqueda</CardTitle>
+                                            </CardHeader>
+                                            <CardContent>
+                                                <Table>
+                                                    <TableHeader>
+                                                        <TableRow>
+                                                            <TableHead>ID</TableHead>
+                                                            <TableHead>Descripción</TableHead>
+                                                            <TableHead>Tipo</TableHead>
+                                                            <TableHead>Grupo Compras</TableHead>
+                                                            <TableHead>Org. Ventas</TableHead>
+                                                            <TableHead>Estado</TableHead>
+                                                        </TableRow>
+                                                    </TableHeader>
+                                                    <TableBody>
+                                                        {searchResults.map((catalog) => (
+                                                            <TableRow key={catalog.id}>
+                                                                <TableCell>{catalog.id}</TableCell>
+                                                                <TableCell>{catalog.description}</TableCell>
+                                                                <TableCell>{catalog.type}</TableCell>
+                                                                <TableCell>{catalog.purchaseGroup}</TableCell>
+                                                                <TableCell>{catalog.salesOrg}</TableCell>
+                                                                <TableCell>{catalog.status === 'locked' ? 'Bloqueado' : 'Desbloqueado'}</TableCell>
+                                                            </TableRow>
+                                                        ))}
+                                                    </TableBody>
+                                                </Table>
+                                            </CardContent>
+                                        </Card>
+                                    </div>
+                                    )}
+
                                 </Card>
                             </TabsContent>
                         </Tabs>
@@ -394,5 +556,6 @@ export default function AdminPurchasingPage() {
       </main>
     </div>
   );
+}
 
     
