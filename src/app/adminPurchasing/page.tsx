@@ -197,6 +197,7 @@ export default function AdminPurchasingPage() {
               <TabsList className="inline-flex h-auto rounded-lg bg-muted p-1 text-muted-foreground">
                 <TabsTrigger value="catalog-management" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Gestión de catálogos</TabsTrigger>
                 <TabsTrigger value="catalog-assignment" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Asignación de catálogos a familias</TabsTrigger>
+                <TabsTrigger value="catalog-recipient-assignment" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Asignación de catálogos a destinatarios</TabsTrigger>
               </TabsList>
               <TabsContent value="catalog-management">
                 <Card className="mt-4">
@@ -596,6 +597,16 @@ export default function AdminPurchasingPage() {
                   </CardContent>
                 </Card>
               </TabsContent>
+              <TabsContent value="catalog-recipient-assignment">
+                <Card className="mt-4">
+                    <CardHeader>
+                        <CardTitle className="text-xl">Asignación de catálogos a destinatarios</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <p>Página en construcción</p>
+                    </CardContent>
+                </Card>
+              </TabsContent>
             </Tabs>
           </CardContent>
         </Card>
@@ -633,4 +644,3 @@ export default function AdminPurchasingPage() {
     </div>
   );
 }
-
