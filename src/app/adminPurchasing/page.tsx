@@ -48,7 +48,13 @@ export default function AdminPurchasingPage() {
   const form = useForm<z.infer<typeof catalogSchema>>({
     resolver: zodResolver(catalogSchema),
     defaultValues: {
+      id: '',
+      description: '',
+      status: 'unlocked',
+      type: 'C',
       numDays: 0,
+      salesOrg: '',
+      purchaseGroup: '',
       maxAnticipationDays: 0,
       minAnticipationDays: 0,
     }
