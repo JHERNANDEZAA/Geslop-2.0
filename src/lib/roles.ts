@@ -24,6 +24,7 @@ export const saveRole = async (roleData: Omit<Role, 'id' | 'createdAt' | 'create
       id: newRoleId,
       createdAt: format(new Date(), 'dd-MM-yyyy'),
       createdBy: userEmail,
+      isAdministrator: false, // Default to not administrator
       apps: [],
     };
 
@@ -82,5 +83,17 @@ export const updateRoleApps = async (roleId: string, appIds: string[]): Promise<
     } catch (error: any) {
         console.error("Error updating role apps: ", error);
         throw new Error("No se pudo actualizar las aplicaciones del rol.");
+    }
+};
+
+export const updateRoleAdministrator = async (roleId: string, isAdministrator: boolean): Promise<void> => {
+    const roleRef = doc(db, 'roles', roleId);
+    try {
+        await updateDoc(roleRef, {
+            isAdministrator: isAdministrator
+        });
+    } catch (error: any) {
+        console.error("Error updating role administrator status: ", error);
+        throw new Error("No se pudo actualizar el estado de administrador del rol.");
     }
 };

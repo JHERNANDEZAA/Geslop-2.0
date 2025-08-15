@@ -10,9 +10,10 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import type { Role, AppDefinition } from '@/lib/types';
-import { getAllRoles, updateRoleApps } from '@/lib/roles';
+import { getAllRoles, updateRoleApps, updateRoleAdministrator } from '@/lib/roles';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Switch } from '@/components/ui/switch';
 import { Save } from 'lucide-react';
 
 const availableApps: AppDefinition[] = [
@@ -30,6 +31,7 @@ export default function AdminRoleAppsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [assignedApps, setAssignedApps] = useState<Record<string, string[]>>({});
+  const [adminRoles, setAdminRoles] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     if (!loading && !user) {
@@ -42,12 +44,18 @@ export default function AdminRoleAppsPage() {
     try {
       const allRoles = await getAllRoles();
       setRoles(allRoles);
-      // Initialize assignedApps state from fetched roles
+      
       const initialAssignedApps: Record<string, string[]> = {};
+      const initialAdminRoles: Record<string, boolean> = {};
+      
       allRoles.forEach(role => {
         initialAssignedApps[role.id] = role.apps || [];
+        initialAdminRoles[role.id] = role.isAdministrator || false;
       });
+
       setAssignedApps(initialAssignedApps);
+      setAdminRoles(initialAdminRoles);
+
     } catch (error: any) {
       toast({
         title: "Error al cargar roles",
@@ -74,14 +82,30 @@ export default function AdminRoleAppsPage() {
     });
   };
 
+  const handleAdminSwitchChange = (roleId: string, isAdministrator: boolean) => {
+    setAdminRoles(prev => ({ ...prev, [roleId]: isAdministrator }));
+  };
+
   const handleSave = async () => {
     setIsSaving(true);
     try {
+        const rolesToUpdate = roles.map(role => {
+            const isAdministrator = adminRoles[role.id];
+            const appIds = isAdministrator ? availableApps.map(app => app.id) : assignedApps[role.id];
+            return {
+                roleId: role.id,
+                isAdministrator: isAdministrator,
+                appIds: appIds
+            };
+        });
+
         await Promise.all(
-            Object.entries(assignedApps).map(([roleId, appIds]) => 
-                updateRoleApps(roleId, appIds)
-            )
+            rolesToUpdate.map(roleUpdate => Promise.all([
+                updateRoleAdministrator(roleUpdate.roleId, roleUpdate.isAdministrator),
+                updateRoleApps(roleUpdate.roleId, roleUpdate.appIds)
+            ]))
         );
+
         toast({
             title: "Guardado Correctamente",
             description: "Las asignaciones de aplicaciones a roles han sido actualizadas.",
@@ -132,27 +156,40 @@ export default function AdminRoleAppsPage() {
                         <TableHeader>
                             <TableRow>
                                 <TableHead className="font-bold text-lg text-foreground w-[250px]">Rol</TableHead>
+                                <TableHead className="text-center w-[150px]">Administrador</TableHead>
                                 {availableApps.map(app => (
                                     <TableHead key={app.id} className="text-center">{app.name}</TableHead>
                                 ))}
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {roles.map((role) => (
+                            {roles.map((role) => {
+                                const isAdministrator = adminRoles[role.id];
+                                const roleApps = isAdministrator ? availableApps.map(a => a.id) : (assignedApps[role.id] || []);
+                                
+                                return (
                                 <TableRow key={role.id}>
                                     <TableCell className="font-medium">{role.name}</TableCell>
+                                    <TableCell className="text-center">
+                                        <Switch
+                                            checked={isAdministrator}
+                                            onCheckedChange={(checked) => handleAdminSwitchChange(role.id, checked)}
+                                            aria-label={`Marcar ${role.name} como administrador`}
+                                        />
+                                    </TableCell>
                                     {availableApps.map(app => (
                                         <TableCell key={app.id} className="text-center">
                                             <Checkbox
                                                 id={`checkbox-${role.id}-${app.id}`}
-                                                checked={(assignedApps[role.id] || []).includes(app.id)}
+                                                checked={roleApps.includes(app.id)}
                                                 onCheckedChange={(checked) => handleCheckboxChange(role.id, app.id, checked)}
                                                 aria-label={`Asignar ${app.name} a ${role.name}`}
+                                                disabled={isAdministrator}
                                             />
                                         </TableCell>
                                     ))}
                                 </TableRow>
-                            ))}
+                            )})}
                         </TableBody>
                     </Table>
                 </div>

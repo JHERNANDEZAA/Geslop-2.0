@@ -95,6 +95,7 @@ export type Role = {
     createdAt: string; // DD-MM-YYYY
     createdBy: string;
     isActive: boolean;
+    isAdministrator?: boolean;
     apps?: string[];
 };
 
