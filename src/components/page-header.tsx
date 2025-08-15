@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth, signOutUser } from '@/lib/auth.tsx';
-import { Building2, LogOut, ShoppingCart, List, UserCog, AppWindow, UserCheck, Users, Users2 } from 'lucide-react';
+import { Building2, LogOut, ShoppingCart, List, UserCog, AppWindow, UserCheck, Users, Users2, Library } from 'lucide-react';
 import { Button } from './ui/button';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
@@ -21,6 +21,7 @@ export function PageHeader() {
     { href: '/purchaseRequisition', label: 'Solicitud de productos', icon: List },
     { href: '/adminPurchasing', label: 'Administración de compras', icon: ShoppingCart },
     { href: '/adminCatalogRecipients', label: 'Asignación de catálogos a destinatarios', icon: Users2 },
+    { href: '/adminCatalogFamilies', label: 'Asignación de catálogos a familias', icon: Library },
     { href: '/adminRoles', label: 'Administración de Roles', icon: UserCog },
     { href: '/adminRoleApps', label: 'Asignación de Aplicaciones', icon: AppWindow },
     { href: '/adminUserRoles', label: 'Asignación de Roles a Usuarios', icon: UserCheck },

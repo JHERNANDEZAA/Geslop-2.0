@@ -8,6 +8,7 @@ export const availableApps: AppDefinition[] = [
     { id: '/adminRoleApps', name: 'Asignación de Aplicaciones', description: 'Permite asignar aplicaciones a los diferentes roles.' },
     { id: '/adminUserRoles', name: 'Asignación de Roles a Usuarios', description: 'Permite asignar roles a los usuarios.' },
     { id: '/adminUsers', name: 'Gestión de Usuarios', description: 'Permite crear y gestionar los usuarios del sistema.' },
+    { id: '/adminCatalogFamilies', name: 'Asignación de catálogos a familias', description: 'Permite asignar catálogos a las familias de productos.' },
 ];
 
 export const getAllApps = async (): Promise<AppDefinition[]> => {
