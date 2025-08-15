@@ -20,6 +20,8 @@ const availableApps: AppDefinition[] = [
     { id: '/adminPurchasing', name: 'Administración de compras', description: 'Permite gestionar catálogos, familias y destinatarios.' },
     { id: '/adminRoles', name: 'Administración de Roles', description: 'Permite crear y gestionar los roles de usuario.' },
     { id: '/adminRoleApps', name: 'Asignación de Aplicaciones', description: 'Permite asignar aplicaciones a los diferentes roles.' },
+    { id: '/adminUserRoles', name: 'Asignación de Roles a Usuarios', description: 'Permite asignar roles a los usuarios.' },
+    { id: '/adminUsers', name: 'Gestión de Usuarios', description: 'Permite crear y gestionar los usuarios del sistema.' },
 ];
 
 export default function AdminRoleAppsPage() {
