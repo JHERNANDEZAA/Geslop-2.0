@@ -20,7 +20,6 @@ export function PageHeader() {
   const navLinks = [
     { href: '/purchaseRequisition', label: 'Solicitud de productos', icon: List },
     { href: '/adminPurchasing', label: 'Administración de compras', icon: ShoppingCart },
-    { href: '/adminCatalogRecipients', label: 'Asignación de catálogos a destinatarios', icon: Users2 },
     { href: '/adminCatalogFamilies', label: 'Asignación de catálogos a familias', icon: Library },
     { href: '/adminRoles', label: 'Administración de Roles', icon: UserCog },
     { href: '/adminRoleApps', label: 'Asignación de Aplicaciones', icon: AppWindow },
