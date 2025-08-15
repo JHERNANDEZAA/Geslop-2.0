@@ -23,6 +23,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { ChevronsUpDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 type CombinedUser = {
   auth: UserRecord;
@@ -448,5 +449,7 @@ export default function AdminUserRolesPage() {
     </div>
   );
 }
+
+    
 
     
