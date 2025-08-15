@@ -16,6 +16,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Switch } from '@/components/ui/switch';
 import { Save } from 'lucide-react';
+import { Label } from '@/components/ui/label';
 
 
 export default function AdminRoleAppsPage() {
@@ -92,9 +93,6 @@ export default function AdminRoleAppsPage() {
     try {
         const rolesToUpdate = roles.map(role => {
             const isAdministrator = adminRoles[role.id];
-            // If the role is an administrator, we don't need to save the specific apps,
-            // as their access is all-encompassing. We pass an empty array for apps in this case.
-            // Access control logic elsewhere should handle the administrator check.
             const appIds = isAdministrator ? [] : (assignedApps[role.id] || []);
             return {
                 roleId: role.id,
@@ -159,36 +157,35 @@ export default function AdminRoleAppsPage() {
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead className="w-[350px]">Aplicación</TableHead>
-                                {roles.map(role => (
-                                    <TableHead key={role.id} className="text-center">{role.name}</TableHead>
+                                <TableHead className="w-[350px]">Rol</TableHead>
+                                {availableApps.map(app => (
+                                    <TableHead key={app.id} className="text-center">{app.name}</TableHead>
                                 ))}
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            <TableRow>
-                                <TableHead className="font-medium">Administrador</TableHead>
-                                {roles.map(role => (
-                                    <TableCell key={`${role.id}-admin`} className="text-center">
-                                        <Switch
-                                            checked={adminRoles[role.id]}
-                                            onCheckedChange={(checked) => handleAdminSwitchChange(role.id, checked)}
-                                            aria-label={`Marcar ${role.name} como administrador`}
-                                        />
-                                    </TableCell>
-                                ))}
-                             </TableRow>
-                            {availableApps.map((app) => {
-                                return (
-                                <TableRow key={app.id}>
-                                    <TableCell className="font-medium">
-                                        <div>{app.name}</div>
-                                        <div className="text-xs text-muted-foreground">{app.description}</div>
-                                    </TableCell>
-                                    {roles.map(role => {
-                                        const isAdministrator = adminRoles[role.id];
-                                        const roleApps = isAdministrator ? availableApps.map(a => a.id) : (assignedApps[role.id] || []);
+                            {roles.map((role) => {
+                                const isAdministrator = adminRoles[role.id];
+                                const roleApps = isAdministrator ? availableApps.map(a => a.id) : (assignedApps[role.id] || []);
 
+                                return (
+                                <TableRow key={role.id}>
+                                    <TableCell className="font-medium">
+                                        <div className="flex flex-col gap-2">
+                                            <div className="font-bold">{role.name}</div>
+                                            <div className="text-xs text-muted-foreground">{role.description}</div>
+                                            <div className="flex items-center space-x-2 pt-2">
+                                                <Switch
+                                                    id={`admin-switch-${role.id}`}
+                                                    checked={isAdministrator}
+                                                    onCheckedChange={(checked) => handleAdminSwitchChange(role.id, checked)}
+                                                    aria-label={`Marcar ${role.name} como administrador`}
+                                                />
+                                                <Label htmlFor={`admin-switch-${role.id}`}>Administrador</Label>
+                                            </div>
+                                        </div>
+                                    </TableCell>
+                                    {availableApps.map(app => {
                                         return (
                                             <TableCell key={`${app.id}-${role.id}`} className="text-center">
                                                 <Checkbox
