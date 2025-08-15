@@ -21,8 +21,13 @@ const nextConfig: NextConfig = {
   },
   // This is a workaround for a Next.js issue with cloud-based development environments.
   experimental: {
-    // allowedDevOrigins was removed as it's not a valid property and was causing a server crash.
+    // allowedDevOrigins was removed as it's not a valid property here and was causing a server crash.
   },
+  // We add allowedDevOrigins here to allow cross-origin requests from the dev environment.
+  allowedDevOrigins: [
+      'https://*.cloudworkstations.dev',
+      'https://*.firebase.studio',
+  ],
   async headers() {
     return [
         {
