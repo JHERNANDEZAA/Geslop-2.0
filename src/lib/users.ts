@@ -20,6 +20,23 @@ export const getOrCreateUserProfile = async (uid: string, email: string): Promis
     }
 };
 
+export const createProfileForUser = async (uid: string, email: string, roles: string[]): Promise<void> => {
+    const userRef = doc(db, 'users', uid);
+    const userSnap = await getDoc(userRef);
+
+    if (userSnap.exists()) {
+        throw new Error("El perfil para este usuario ya existe en la base de datos.");
+    }
+
+    const newUserProfile: UserProfile = {
+        uid,
+        email,
+        roles,
+    };
+    await setDoc(userRef, newUserProfile);
+};
+
+
 export const findUserByEmail = async (email: string): Promise<UserProfile | null> => {
     const usersRef = collection(db, 'users');
     const q = query(usersRef, where("email", "==", email));

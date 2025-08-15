@@ -2,27 +2,27 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { useAuth } from '@/lib/auth';
 import { PageHeader } from '@/components/page-header';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import type { Role, UserProfile } from '@/lib/types';
 import { getAllRoles } from '@/lib/roles';
-import { findUserByEmail, getUserRoles, updateUserRoles } from '@/lib/users';
+import { getAllUsers, updateUserRoles, createProfileForUser } from '@/lib/users';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-import { Save } from 'lucide-react';
+import { Save, Users } from 'lucide-react';
+import { getAllAuthUsers } from '@/app/actions';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import type { UserRecord } from 'firebase-admin/auth';
 
-const searchUserSchema = z.object({
-  email: z.string().email('Debe ser un correo electrónico válido.'),
-});
+type CombinedUser = {
+  auth: UserRecord;
+  profile: UserProfile | null;
+};
 
 export default function AdminUserRolesPage() {
   const { user, loading } = useAuth();
@@ -30,18 +30,16 @@ export default function AdminUserRolesPage() {
   const { toast } = useToast();
   
   const [allRoles, setAllRoles] = useState<Role[]>([]);
-  const [targetUser, setTargetUser] = useState<UserProfile | null>(null);
-  const [userRoles, setUserRoles] = useState<string[]>([]);
+  const [combinedUsers, setCombinedUsers] = useState<CombinedUser[]>([]);
+  const [assignedRoles, setAssignedRoles] = useState<Record<string, string[]>>({});
+  
   const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-  const [isSearching, setIsSearching] = useState(false);
+  const [isSaving, setIsSaving] = useState<string | boolean>(false);
+  const [isFetching, setIsFetching] = useState(false);
+  
+  const [userToCreate, setUserToCreate] = useState<UserRecord | null>(null);
+  const [rolesForNewUser, setRolesForNewUser] = useState<string[]>([]);
 
-  const searchForm = useForm<z.infer<typeof searchUserSchema>>({
-    resolver: zodResolver(searchUserSchema),
-    defaultValues: {
-      email: '',
-    },
-  });
 
   useEffect(() => {
     if (!loading && !user) {
@@ -53,7 +51,7 @@ export default function AdminUserRolesPage() {
     setIsLoading(true);
     try {
       const roles = await getAllRoles();
-      setAllRoles(roles.filter(role => role.isActive)); // Only show active roles
+      setAllRoles(roles.filter(role => role.isActive));
     } catch (error: any) {
       toast({
         title: "Error al cargar roles",
@@ -69,53 +67,63 @@ export default function AdminUserRolesPage() {
     fetchAllRoles();
   }, []);
 
-  const handleSearchUser = async (values: z.infer<typeof searchUserSchema>) => {
-    setIsSearching(true);
-    setTargetUser(null);
-    setUserRoles([]);
+  const handleFetchUsers = async () => {
+    setIsFetching(true);
     try {
-      const foundUser = await findUserByEmail(values.email);
-      if (foundUser) {
-        setTargetUser(foundUser);
-        const roles = await getUserRoles(foundUser.uid);
-        setUserRoles(roles);
-      } else {
-        toast({
-          title: "Usuario no encontrado",
-          description: "No se encontró ningún usuario con ese correo electrónico en la base de datos.",
-          variant: "destructive",
+        const [authUsers, firestoreUsers] = await Promise.all([
+            getAllAuthUsers(),
+            getAllUsers(),
+        ]);
+        
+        const firestoreUsersMap = new Map(firestoreUsers.map(u => [u.uid, u]));
+
+        const combined: CombinedUser[] = authUsers.map(authUser => ({
+            auth: authUser,
+            profile: firestoreUsersMap.get(authUser.uid) || null,
+        }));
+        
+        setCombinedUsers(combined);
+
+        const initialAssignedRoles: Record<string, string[]> = {};
+        combined.forEach(u => {
+            if (u.profile) {
+                initialAssignedRoles[u.auth.uid] = u.profile.roles;
+            }
         });
-      }
+        setAssignedRoles(initialAssignedRoles);
+
     } catch (error: any) {
-      toast({
-        title: "Error en la búsqueda",
-        description: error.message,
-        variant: "destructive",
-      });
+        toast({
+            title: "Error al cargar usuarios",
+            description: error.message,
+            variant: "destructive",
+        });
     } finally {
-      setIsSearching(false);
+        setIsFetching(false);
     }
   };
 
-  const handleRoleChange = (roleId: string, checked: boolean | 'indeterminate') => {
+  const handleRoleChange = (uid: string, roleId: string, checked: boolean | 'indeterminate') => {
     if (typeof checked !== 'boolean') return;
-    setUserRoles(prev => {
+
+    setAssignedRoles(prev => {
+        const currentRoles = prev[uid] || [];
         if (checked) {
-            return [...prev, roleId];
+            return { ...prev, [uid]: [...currentRoles, roleId] };
         } else {
-            return prev.filter(id => id !== roleId);
+            return { ...prev, [uid]: currentRoles.filter(id => id !== roleId) };
         }
     });
   };
 
-  const handleSaveChanges = async () => {
-    if (!targetUser) return;
-    setIsSaving(true);
+  const handleSaveChanges = async (uid: string) => {
+    setIsSaving(uid);
     try {
-        await updateUserRoles(targetUser.uid, userRoles);
+        const rolesToSave = assignedRoles[uid] || [];
+        await updateUserRoles(uid, rolesToSave);
         toast({
             title: "Roles actualizados",
-            description: `Los roles para ${targetUser.email} han sido guardados correctamente.`,
+            description: `Los roles para el usuario han sido guardados.`,
             variant: "default",
             className: "bg-accent text-accent-foreground",
         });
@@ -128,10 +136,46 @@ export default function AdminUserRolesPage() {
     } finally {
         setIsSaving(false);
     }
+  };
+
+  const handleCreateProfile = async () => {
+    if (!userToCreate) return;
+    setIsSaving(userToCreate.uid);
+    try {
+        await createProfileForUser(userToCreate.uid, userToCreate.email!, rolesForNewUser);
+        toast({
+            title: "Perfil Creado",
+            description: `El perfil para ${userToCreate.email} ha sido creado.`,
+            variant: "default",
+        });
+        // Refetch all users to update the UI
+        handleFetchUsers();
+    } catch (error: any) {
+        toast({
+            title: "Error al crear perfil",
+            description: error.message,
+            variant: "destructive",
+        });
+    } finally {
+        setIsSaving(false);
+        setUserToCreate(null);
+        setRolesForNewUser([]);
+    }
+  }
+  
+  const handleNewUserRoleChange = (roleId: string, checked: boolean | 'indeterminate') => {
+      if (typeof checked !== 'boolean') return;
+      setRolesForNewUser(prev => {
+          if (checked) {
+              return [...prev, roleId];
+          } else {
+              return prev.filter(id => id !== roleId);
+          }
+      });
   }
 
 
-  if (loading || !user || isLoading) {
+  if (loading || isLoading) {
     return (
       <div className="flex flex-col min-h-screen bg-background">
         <PageHeader />
@@ -154,66 +198,98 @@ export default function AdminUserRolesPage() {
             <CardHeader>
                 <CardTitle>Asignación de Roles a Usuarios</CardTitle>
                 <CardDescription>
-                    Busque un usuario por su correo electrónico para asignarle o modificarle sus roles de acceso.
+                    Cargue todos los usuarios del sistema para ver y administrar sus roles. Los usuarios de la autenticación que no tengan un perfil en la base de datos se pueden crear desde aquí.
                 </CardDescription>
             </CardHeader>
-            <Form {...searchForm}>
-                <form onSubmit={searchForm.handleSubmit(handleSearchUser)}>
-                    <CardContent className="space-y-4">
-                        <FormField
-                            control={searchForm.control}
-                            name="email"
-                            render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Correo electrónico del usuario</FormLabel>
-                                <div className="flex items-center gap-2">
-                                <FormControl>
-                                <Input placeholder="usuario@ejemplo.com" {...field} />
-                                </FormControl>
-                                <Button type="submit" disabled={isSearching}>
-                                    {isSearching ? "Buscando..." : "Buscar Usuario"}
-                                </Button>
-                                </div>
-                                <FormMessage />
-                            </FormItem>
-                            )}
-                        />
-                    </CardContent>
-                </form>
-            </Form>
+            <CardContent>
+                 <Button onClick={handleFetchUsers} disabled={isFetching}>
+                    <Users className="mr-2 h-4 w-4" />
+                    {isFetching ? "Cargando..." : "Cargar todos los usuarios"}
+                </Button>
+            </CardContent>
 
-            {targetUser && (
+            {combinedUsers.length > 0 && (
                 <CardContent className="mt-6 border-t pt-6">
-                    <CardTitle className="text-xl">Roles para: {targetUser.email}</CardTitle>
-                    <CardDescription className="mb-4">Seleccione los roles que desea asignar al usuario.</CardDescription>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                        {allRoles.map((role) => (
-                             <div key={role.id} className="flex items-center space-x-2 rounded-md border p-4">
-                                <Checkbox
-                                    id={`role-${role.id}`}
-                                    checked={userRoles.includes(role.id)}
-                                    onCheckedChange={(checked) => handleRoleChange(role.id, checked)}
-                                />
-                                <Label htmlFor={`role-${role.id}`} className="flex flex-col gap-1 cursor-pointer">
-                                    <span className="font-semibold">{role.name}</span>
-                                    <span className="font-normal text-muted-foreground">{role.description}</span>
-                                </Label>
-                             </div>
-                        ))}
+                    <CardTitle className="text-xl mb-4">Usuarios del sistema</CardTitle>
+                    <div className="rounded-md border">
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead className="w-[250px]">Email</TableHead>
+                                    <TableHead>Roles Asignados</TableHead>
+                                    <TableHead className="text-right w-[200px]">Acciones</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {combinedUsers.map(({ auth, profile }) => (
+                                    <TableRow key={auth.uid}>
+                                        <TableCell className="font-medium">{auth.email}</TableCell>
+                                        <TableCell>
+                                            {profile ? (
+                                                <div className="flex flex-wrap gap-2">
+                                                    {allRoles.map(role => (
+                                                        <div key={role.id} className="flex items-center space-x-2">
+                                                            <Checkbox
+                                                                id={`role-${auth.uid}-${role.id}`}
+                                                                checked={(assignedRoles[auth.uid] || []).includes(role.id)}
+                                                                onCheckedChange={(checked) => handleRoleChange(auth.uid, role.id, checked)}
+                                                            />
+                                                            <Label htmlFor={`role-${auth.uid}-${role.id}`}>{role.name}</Label>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                <span className="text-sm text-muted-foreground">Perfil no creado en la base de datos</span>
+                                            )}
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                            {profile ? (
+                                                <Button onClick={() => handleSaveChanges(auth.uid)} disabled={isSaving === auth.uid || !!isSaving && isSaving !== auth.uid}>
+                                                    <Save className="mr-2 h-4 w-4" />
+                                                    {isSaving === auth.uid ? "Guardando..." : "Guardar"}
+                                                </Button>
+                                            ) : (
+                                                <AlertDialog>
+                                                    <AlertDialogTrigger asChild>
+                                                        <Button variant="outline" onClick={() => setUserToCreate(auth)}>Asignar Roles y Crear Perfil</Button>
+                                                    </AlertDialogTrigger>
+                                                    <AlertDialogContent>
+                                                        <AlertDialogHeader>
+                                                            <AlertDialogTitle>Asignar roles para {auth.email}</AlertDialogTitle>
+                                                            <AlertDialogDescription>
+                                                                Seleccione los roles para este usuario. Al guardar, se creará su perfil en la base de datos.
+                                                            </AlertDialogDescription>
+                                                        </AlertDialogHeader>
+                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
+                                                            {allRoles.map(role => (
+                                                                <div key={role.id} className="flex items-center space-x-2">
+                                                                    <Checkbox
+                                                                        id={`new-user-role-${role.id}`}
+                                                                        onCheckedChange={(checked) => handleNewUserRoleChange(role.id, checked)}
+                                                                    />
+                                                                    <Label htmlFor={`new-user-role-${role.id}`}>{role.name}</Label>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                        <AlertDialogFooter>
+                                                            <AlertDialogCancel onClick={() => {setUserToCreate(null); setRolesForNewUser([])}}>Cancelar</AlertDialogCancel>
+                                                            <AlertDialogAction onClick={handleCreateProfile} disabled={isSaving === auth.uid}>
+                                                                {isSaving === auth.uid ? "Creando..." : "Crear Perfil"}
+                                                            </AlertDialogAction>
+                                                        </AlertDialogFooter>
+                                                    </AlertDialogContent>
+                                                </AlertDialog>
+                                            )}
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
                     </div>
                 </CardContent>
             )}
-
-            {targetUser && (
-                 <CardFooter className="flex justify-end border-t mt-6 pt-6">
-                    <Button onClick={handleSaveChanges} disabled={isSaving}>
-                        <Save className="mr-2 h-4 w-4" />
-                        {isSaving ? "Guardando..." : "Guardar Cambios"}
-                    </Button>
-                </CardFooter>
-            )}
         </Card>
+        
       </main>
     </div>
   );

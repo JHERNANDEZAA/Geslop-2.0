@@ -5,6 +5,8 @@ import { initializeApp, getApps, App, cert } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import { serviceAccount } from '@/lib/service-account';
 import type { UserProfile } from '@/lib/types';
+import type { UserRecord } from 'firebase-admin/auth';
+
 
 let adminApp: App;
 if (!getApps().some(app => app.name === 'admin')) {
@@ -45,4 +47,14 @@ export const createUserAction = async (email: string, password: string,roleIds: 
     }
     return { success: false, message: 'Ocurrió un error al crear el usuario.' };
   }
+};
+
+export const getAllAuthUsers = async (): Promise<UserRecord[]> => {
+    try {
+        const listUsersResult = await adminAuth.listUsers(1000); // 1000 is the max limit per page
+        return listUsersResult.users;
+    } catch (error) {
+        console.error("Error fetching all auth users:", error);
+        throw new Error("No se pudo obtener la lista de usuarios de Authentication.");
+    }
 };
