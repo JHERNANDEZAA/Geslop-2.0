@@ -8,16 +8,6 @@ export const getOrCreateUserProfile = async (uid: string, email: string): Promis
 
     if (userSnap.exists()) {
         const userProfile = userSnap.data() as UserProfile;
-        
-        // TEMPORARY: Assign admin role to specific user for bootstrap
-        if (email === 'jhernandeza@lopesan.com') {
-          if (!userProfile.roles || !userProfile.roles.includes('1')) {
-            const updatedRoles = userProfile.roles ? [...userProfile.roles, '1'] : ['1'];
-            await updateDoc(userRef, { roles: updatedRoles });
-            return { ...userProfile, roles: updatedRoles };
-          }
-        }
-        
         return userProfile;
     } else {
         const newUserProfile: UserProfile = {
@@ -25,10 +15,6 @@ export const getOrCreateUserProfile = async (uid: string, email: string): Promis
             email,
             roles: [],
         };
-        // TEMPORARY: Assign admin role to specific user for bootstrap
-        if (email === 'jhernandeza@lopesan.com') {
-            newUserProfile.roles.push('1');
-        }
         await setDoc(userRef, newUserProfile);
         return newUserProfile;
     }
