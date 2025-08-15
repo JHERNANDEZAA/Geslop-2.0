@@ -1,9 +1,9 @@
 import { db } from './firebase';
-import { doc, setDoc, collection, getDocs, deleteDoc, getDoc, runTransaction } from 'firebase/firestore';
+import { doc, setDoc, collection, getDocs, deleteDoc, getDoc, runTransaction, updateDoc } from 'firebase/firestore';
 import type { Role } from './types';
 import { format } from 'date-fns';
 
-export const saveRole = async (roleData: Omit<Role, 'id' | 'createdAt'>, userEmail: string): Promise<{ success: boolean; message?: string }> => {
+export const saveRole = async (roleData: Omit<Role, 'id' | 'createdAt' | 'createdBy'>, userEmail: string): Promise<{ success: boolean; message?: string }> => {
   const counterRef = doc(db, 'counters', 'roles_counter');
   
   try {
@@ -58,3 +58,17 @@ export const deleteRole = async (roleId: string): Promise<void> => {
         throw new Error("No se pudo eliminar el rol.");
     }
 };
+
+export const updateRoleStatus = async (roleId: string, isActive: boolean): Promise<void> => {
+    const roleRef = doc(db, 'roles', roleId);
+    try {
+        await updateDoc(roleRef, {
+            isActive: isActive
+        });
+    } catch (error: any) {
+        console.error("Error updating role status: ", error);
+        throw new Error("No se pudo actualizar el estado del rol.");
+    }
+};
+
+    

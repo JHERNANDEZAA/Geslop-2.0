@@ -16,7 +16,7 @@ import { Switch } from '@/components/ui/switch';
 import { Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import type { Role } from '@/lib/types';
-import { saveRole, getAllRoles, deleteRole } from '@/lib/roles';
+import { saveRole, getAllRoles, deleteRole, updateRoleStatus } from '@/lib/roles';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
@@ -121,6 +121,27 @@ export default function AdminRolesPage() {
         });
     } finally {
         setRoleToDelete(null);
+    }
+  };
+
+  const handleToggleActive = async (role: Role, isActive: boolean) => {
+    // Optimistic update
+    setRoles(prevRoles => prevRoles.map(r => r.id === role.id ? { ...r, isActive } : r));
+    try {
+        await updateRoleStatus(role.id, isActive);
+        toast({
+            title: "Rol Actualizado",
+            description: `El rol "${role.name}" ahora está ${isActive ? 'activo' : 'inactivo'}.`,
+            variant: "default",
+        });
+    } catch (error: any) {
+        // Revert on error
+        setRoles(prevRoles => prevRoles.map(r => r.id === role.id ? { ...r, isActive: !isActive } : r));
+        toast({
+            title: "Error al actualizar",
+            description: error.message || "Ocurrió un error al actualizar el estado del rol.",
+            variant: "destructive",
+        });
     }
   };
 
@@ -237,7 +258,13 @@ export default function AdminRolesPage() {
                                         </TableCell>
                                         <TableCell>{role.name}</TableCell>
                                         <TableCell>{role.description}</TableCell>
-                                        <TableCell>{role.isActive ? 'Sí' : 'No'}</TableCell>
+                                        <TableCell>
+                                           <Switch
+                                                checked={role.isActive}
+                                                onCheckedChange={(isChecked) => handleToggleActive(role, isChecked)}
+                                                aria-label={`Activar o desactivar el rol ${role.name}`}
+                                            />
+                                        </TableCell>
                                         <TableCell>{role.createdAt}</TableCell>
                                         <TableCell>{role.createdBy}</TableCell>
                                     </TableRow>
@@ -281,3 +308,5 @@ export default function AdminRolesPage() {
     </div>
   );
 }
+
+    
