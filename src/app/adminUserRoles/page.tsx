@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import type { Role, UserProfile } from '@/lib/types';
 import { getAllRoles } from '@/lib/roles';
-import { getAllUsers, updateUserRoles, createProfileForUser } from '@/lib/users';
+import { getAllUsers, updateUserProfile, createProfileForUser } from '@/lib/users';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -178,11 +178,12 @@ export default function AdminUserRolesPage() {
   const handleSaveChanges = async () => {
     if (!userToManage) return;
 
-    if (!userToManage.profile && !fullNameForManagedUser.trim()) {
+    const needsFullName = !userToManage.profile || !userToManage.profile.fullName;
+    if (needsFullName && !fullNameForManagedUser.trim()) {
         setFullNameError("El nombre y apellidos son requeridos.");
         toast({
             title: "Campo obligatorio",
-            description: "Debe indicar el nombre y apellidos para crear el perfil.",
+            description: "Debe indicar el nombre y apellidos para crear o actualizar el perfil.",
             variant: "destructive",
         });
         return;
@@ -191,10 +192,14 @@ export default function AdminUserRolesPage() {
     setIsSaving(userToManage.auth.uid);
     try {
       if (userToManage.profile) {
-        await updateUserRoles(userToManage.auth.uid, rolesForManagedUser);
+        const updateData: Partial<UserProfile> = { roles: rolesForManagedUser };
+        if (needsFullName) {
+          updateData.fullName = fullNameForManagedUser;
+        }
+        await updateUserProfile(userToManage.auth.uid, updateData);
         toast({
-            title: "Roles actualizados",
-            description: `Los roles para ${userToManage.auth.email} han sido guardados.`,
+            title: "Perfil actualizado",
+            description: `El perfil para ${userToManage.auth.email} ha sido guardado.`,
             variant: "default",
             className: "bg-accent text-accent-foreground",
         });
@@ -409,14 +414,14 @@ export default function AdminUserRolesPage() {
                     <AlertDialogHeader>
                         <AlertDialogTitle>Asignar roles para {userToManage.auth.email}</AlertDialogTitle>
                         <AlertDialogDescription>
-                            {userToManage.profile 
-                                ? 'Seleccione los roles para este usuario. Al guardar, se actualizarán sus permisos.'
-                                : 'Este usuario no tiene perfil. Complete su nombre, seleccione sus roles y al guardar se creará su perfil en la base de datos.'
+                            {(!userToManage.profile || !userToManage.profile.fullName) 
+                                ? 'Este usuario no tiene perfil o nombre. Complete su nombre, seleccione sus roles y al guardar se creará o actualizará su perfil.'
+                                : 'Seleccione los roles para este usuario. Al guardar, se actualizarán sus permisos.'
                             }
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <div className="space-y-4 py-4">
-                        {!userToManage.profile && (
+                        {(!userToManage.profile || !userToManage.profile.fullName) && (
                              <div>
                                 <Label htmlFor="fullName" className={cn(fullNameError && "text-destructive")}>
                                   Nombre y Apellidos

@@ -75,17 +75,16 @@ export const getUserRoles = async (uid: string): Promise<string[]> => {
     }
 };
 
-export const updateUserRoles = async (uid: string, roles: string[]): Promise<void> => {
+export const updateUserProfile = async (uid: string, data: Partial<UserProfile>): Promise<void> => {
     const userRef = doc(db, 'users', uid);
     try {
-        await updateDoc(userRef, {
-            roles: roles
-        });
+        await updateDoc(userRef, data);
     } catch (error) {
-        console.error("Error updating user roles: ", error);
-        throw new Error("No se pudieron actualizar los roles del usuario.");
+        console.error("Error updating user profile: ", error);
+        throw new Error("No se pudo actualizar el perfil del usuario.");
     }
 };
+
 
 export const getAllUsers = async (): Promise<UserProfile[]> => {
     const usersRef = collection(db, 'users');
