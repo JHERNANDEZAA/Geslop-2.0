@@ -112,7 +112,7 @@ export default function AdminUserRolesPage() {
             results = results.filter(u => u.auth.email?.toLowerCase().includes(filters.email.toLowerCase()));
         }
         if (filters.fullName) {
-            results = results.filter(u => u.profile?.fullName.toLowerCase().includes(filters.fullName.toLowerCase()));
+            results = results.filter(u => u.profile && u.profile.fullName.toLowerCase().includes(filters.fullName.toLowerCase()));
         }
         if (filters.role && filters.role !== 'all-roles') {
             results = results.filter(u => u.profile?.roles.includes(filters.role));
