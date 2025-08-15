@@ -60,7 +60,7 @@ export default function AdminLayout({
                     <SidebarMenu>
                         {adminNavLinks.map(link => (
                             <SidebarMenuItem key={link.id}>
-                                <Link href={link.id} passHref legacyBehavior>
+                                <Link href={link.id}>
                                     <SidebarMenuButton
                                         isActive={pathname === link.id}
                                         tooltip={{
