@@ -1,7 +1,7 @@
 'use server';
 
 import { getAuth } from 'firebase-admin/auth';
-import { initializeApp, getApps, App } from 'firebase-admin/app';
+import { initializeApp, getApps, App, cert } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import { serviceAccount } from '@/lib/service-account';
 import type { UserProfile } from '@/lib/types';
@@ -9,11 +9,7 @@ import type { UserProfile } from '@/lib/types';
 let adminApp: App;
 if (!getApps().some(app => app.name === 'admin')) {
   adminApp = initializeApp({
-    credential: {
-      projectId: serviceAccount.project_id,
-      clientEmail: serviceAccount.client_email,
-      privateKey: serviceAccount.private_key,
-    },
+    credential: cert(serviceAccount),
   }, 'admin');
 } else {
   adminApp = getApps().find(app => app.name === 'admin')!;
