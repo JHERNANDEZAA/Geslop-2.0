@@ -10,25 +10,19 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import type { Role, AppDefinition } from '@/lib/types';
 import { getAllRoles, updateRoleApps, updateRoleAdministrator } from '@/lib/roles';
+import { getAllApps } from '@/lib/apps';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Switch } from '@/components/ui/switch';
 import { Save } from 'lucide-react';
 
-const availableApps: AppDefinition[] = [
-    { id: '/purchaseRequisition', name: 'Solicitud de productos', description: 'Permite a los usuarios crear y gestionar solicitudes de productos.' },
-    { id: '/adminPurchasing', name: 'Administración de compras', description: 'Permite gestionar catálogos, familias y destinatarios.' },
-    { id: '/adminRoles', name: 'Administración de Roles', description: 'Permite crear y gestionar los roles de usuario.' },
-    { id: '/adminRoleApps', name: 'Asignación de Aplicaciones', description: 'Permite asignar aplicaciones a los diferentes roles.' },
-    { id: '/adminUserRoles', name: 'Asignación de Roles a Usuarios', description: 'Permite asignar roles a los usuarios.' },
-    { id: '/adminUsers', name: 'Gestión de Usuarios', description: 'Permite crear y gestionar los usuarios del sistema.' },
-];
 
 export default function AdminRoleAppsPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
   const [roles, setRoles] = useState<Role[]>([]);
+  const [availableApps, setAvailableApps] = useState<AppDefinition[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [assignedApps, setAssignedApps] = useState<Record<string, string[]>>({});
@@ -40,11 +34,16 @@ export default function AdminRoleAppsPage() {
     }
   }, [user, loading, router]);
 
-  const fetchRoles = async () => {
+  const fetchInitialData = async () => {
     setIsLoading(true);
     try {
-      const allRoles = await getAllRoles();
+      const [allRoles, allApps] = await Promise.all([
+        getAllRoles(),
+        getAllApps()
+      ]);
+      
       setRoles(allRoles);
+      setAvailableApps(allApps);
       
       const initialAssignedApps: Record<string, string[]> = {};
       const initialAdminRoles: Record<string, boolean> = {};
@@ -59,7 +58,7 @@ export default function AdminRoleAppsPage() {
 
     } catch (error: any) {
       toast({
-        title: "Error al cargar roles",
+        title: "Error al cargar datos",
         description: error.message,
         variant: "destructive",
       });
@@ -69,7 +68,7 @@ export default function AdminRoleAppsPage() {
   };
   
   useEffect(() => {
-      fetchRoles();
+      fetchInitialData();
   }, [])
 
   const handleCheckboxChange = (roleId: string, appId: string, checked: boolean | 'indeterminate') => {
