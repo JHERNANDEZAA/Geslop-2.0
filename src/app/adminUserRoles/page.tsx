@@ -49,6 +49,7 @@ export default function AdminUserRolesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState<string | boolean>(false);
   const [isFetching, setIsFetching] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
   
   const [userToManage, setUserToManage] = useState<CombinedUser | null>(null);
   const [rolesForManagedUser, setRolesForManagedUser] = useState<string[]>([]);
@@ -84,10 +85,12 @@ export default function AdminUserRolesPage() {
     fetchAllRoles();
   }, []);
 
-  const handleFetchUsers = async () => {
+  const handleFilterSubmit = async (filters: typeof filterSchema) => {
     setIsFetching(true);
-    setFilteredUsers([]);
     setCurrentPage(0);
+    setFilteredUsers([]);
+    setHasSearched(true);
+
     try {
         const [authUsers, firestoreUsers] = await Promise.all([
             getAllAuthUsers(),
@@ -102,7 +105,20 @@ export default function AdminUserRolesPage() {
         }));
         
         setCombinedUsers(combined);
-        setFilteredUsers(combined);
+        
+        let results = combined;
+
+        if (filters.email) {
+            results = results.filter(u => u.auth.email?.toLowerCase().includes(filters.email.toLowerCase()));
+        }
+        if (filters.fullName) {
+            results = results.filter(u => u.profile?.fullName.toLowerCase().includes(filters.fullName.toLowerCase()));
+        }
+        if (filters.role && filters.role !== 'all-roles') {
+            results = results.filter(u => u.profile?.roles.includes(filters.role));
+        }
+        
+        setFilteredUsers(results);
         
     } catch (error: any) {
         toast({
@@ -110,26 +126,16 @@ export default function AdminUserRolesPage() {
             description: error.message,
             variant: "destructive",
         });
+        setFilteredUsers([]);
     } finally {
         setIsFetching(false);
     }
   };
 
-  const handleFilterSubmit = (filters: typeof filterSchema) => {
-    setCurrentPage(0);
-    let results = combinedUsers;
-
-    if (filters.email) {
-        results = results.filter(u => u.auth.email?.toLowerCase().includes(filters.email.toLowerCase()));
-    }
-    if (filters.fullName) {
-        results = results.filter(u => u.profile?.fullName.toLowerCase().includes(filters.fullName.toLowerCase()));
-    }
-    if (filters.role && filters.role !== 'all-roles') {
-        results = results.filter(u => u.profile?.roles.includes(filters.role));
-    }
-    
-    setFilteredUsers(results);
+  const refreshUsersAfterSave = async () => {
+    // This function re-fetches and re-applies the last used filters.
+    const currentFilters = form.getValues();
+    await handleFilterSubmit(currentFilters);
   };
   
   const paginatedUsers = useMemo(() => {
@@ -193,7 +199,7 @@ export default function AdminUserRolesPage() {
             variant: "default",
         });
       }
-      handleFetchUsers();
+      await refreshUsersAfterSave();
     } catch (error: any) {
          toast({
             title: "Error al guardar",
@@ -230,18 +236,10 @@ export default function AdminUserRolesPage() {
             <CardHeader>
                 <CardTitle>Asignación de Roles a Usuarios</CardTitle>
                 <CardDescription>
-                    Cargue todos los usuarios del sistema para ver y administrar sus roles. Los usuarios de la autenticación que no tengan un perfil en la base de datos se pueden crear desde aquí.
+                    Utilice los filtros para buscar usuarios y administrar sus roles. Los usuarios de la autenticación que no tengan un perfil en la base de datos se pueden crear desde aquí.
                 </CardDescription>
             </CardHeader>
             <CardContent>
-                 <Button onClick={handleFetchUsers} disabled={isFetching}>
-                    <Users className="mr-2 h-4 w-4" />
-                    {isFetching ? "Cargando..." : "Cargar todos los usuarios"}
-                </Button>
-            </CardContent>
-
-            {combinedUsers.length > 0 && (
-              <CardContent className="border-t pt-6">
                   <Form {...form}>
                     <form onSubmit={form.handleSubmit(handleFilterSubmit)} className="space-y-6">
                       <CardTitle className="text-xl">Filtros</CardTitle>
@@ -293,76 +291,83 @@ export default function AdminUserRolesPage() {
                           )}
                         />
                       </div>
-                       <Button type="submit">
+                       <Button type="submit" disabled={isFetching}>
                           <Filter className="mr-2 h-4 w-4" />
-                          Filtrar usuarios
+                          {isFetching ? "Filtrando..." : "Filtrar usuarios"}
                        </Button>
                     </form>
                   </Form>
-              </CardContent>
-            )}
+            </CardContent>
 
-
-            {filteredUsers.length > 0 && (
-                <CardContent className="mt-6 border-t pt-6">
-                    <CardTitle className="text-xl mb-4">Usuarios del sistema</CardTitle>
-                    <div className="rounded-md border">
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead className="w-[250px]">Email</TableHead>
-                                    <TableHead>Nombre y Apellidos</TableHead>
-                                    <TableHead>Roles Asignados</TableHead>
-                                    <TableHead className="text-right w-[250px]">Acciones</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {paginatedUsers.map((combinedUser) => (
-                                    <TableRow key={combinedUser.auth.uid}>
-                                        <TableCell className="font-medium">{combinedUser.auth.email}</TableCell>
-                                        <TableCell>{combinedUser.profile?.fullName || <span className="text-muted-foreground italic">N/A</span>}</TableCell>
-                                        <TableCell>
-                                            {combinedUser.profile ? (
-                                                <span className="text-sm text-foreground">
-                                                {combinedUser.profile.roles.length > 0
-                                                    ? combinedUser.profile.roles.map(roleId => allRoles.find(r => r.id === roleId)?.name || roleId).join(', ')
-                                                    : <span className="text-muted-foreground italic">Sin roles asignados</span>
-                                                }
-                                                </span>
-                                            ) : (
-                                                <span className="text-sm text-muted-foreground">Perfil no creado en la base de datos</span>
-                                            )}
-                                        </TableCell>
-                                        <TableCell className="text-right">
-                                            <Button variant="outline" onClick={() => openRoleManager(combinedUser)}>
-                                                 {combinedUser.profile ? 'Asignar Roles' : 'Asignar roles y crear perfil'}
-                                            </Button>
-                                        </TableCell>
+            {hasSearched && !isFetching && (
+              <>
+                {filteredUsers.length > 0 ? (
+                    <CardContent className="mt-6 border-t pt-6">
+                        <CardTitle className="text-xl mb-4">Usuarios del sistema</CardTitle>
+                        <div className="rounded-md border">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead className="w-[250px]">Email</TableHead>
+                                        <TableHead>Nombre y Apellidos</TableHead>
+                                        <TableHead>Roles Asignados</TableHead>
+                                        <TableHead className="text-right w-[250px]">Acciones</TableHead>
                                     </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </div>
-                     <div className="flex items-center justify-between mt-4">
-                        <p className="text-sm text-muted-foreground">
-                            Página {currentPage + 1} de {totalPages}
-                        </p>
-                        <div className="flex items-center gap-2">
-                            <Button variant="outline" onClick={() => setCurrentPage(p => Math.max(0, p - 1))} disabled={currentPage === 0}>
-                                Anterior
-                            </Button>
-                            <Button variant="outline" onClick={() => setCurrentPage(p => Math.min(totalPages - 1, p + 1))} disabled={currentPage >= totalPages - 1}>
-                                Siguiente
-                            </Button>
+                                </TableHeader>
+                                <TableBody>
+                                    {paginatedUsers.map((combinedUser) => (
+                                        <TableRow key={combinedUser.auth.uid}>
+                                            <TableCell className="font-medium">{combinedUser.auth.email}</TableCell>
+                                            <TableCell>{combinedUser.profile?.fullName || <span className="text-muted-foreground italic">N/A</span>}</TableCell>
+                                            <TableCell>
+                                                {combinedUser.profile ? (
+                                                    <span className="text-sm text-foreground">
+                                                    {combinedUser.profile.roles.length > 0
+                                                        ? combinedUser.profile.roles.map(roleId => allRoles.find(r => r.id === roleId)?.name || roleId).join(', ')
+                                                        : <span className="text-muted-foreground italic">Sin roles asignados</span>
+                                                    }
+                                                    </span>
+                                                ) : (
+                                                    <span className="text-sm text-muted-foreground">Perfil no creado en la base de datos</span>
+                                                )}
+                                            </TableCell>
+                                            <TableCell className="text-right">
+                                                <Button variant="outline" onClick={() => openRoleManager(combinedUser)}>
+                                                    {combinedUser.profile ? 'Asignar Roles' : 'Asignar roles y crear perfil'}
+                                                </Button>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
                         </div>
-                    </div>
-                </CardContent>
+                        <div className="flex items-center justify-between mt-4">
+                            <p className="text-sm text-muted-foreground">
+                                Página {currentPage + 1} de {totalPages}
+                            </p>
+                            <div className="flex items-center gap-2">
+                                <Button variant="outline" onClick={() => setCurrentPage(p => Math.max(0, p - 1))} disabled={currentPage === 0}>
+                                    Anterior
+                                </Button>
+                                <Button variant="outline" onClick={() => setCurrentPage(p => Math.min(totalPages - 1, p + 1))} disabled={currentPage >= totalPages - 1}>
+                                    Siguiente
+                                </Button>
+                            </div>
+                        </div>
+                    </CardContent>
+                ) : (
+                    <CardContent className="text-center py-10">
+                        <p className="text-muted-foreground">No se encontraron usuarios con los filtros especificados.</p>
+                    </CardContent>
+                )}
+              </>
             )}
-             {combinedUsers.length > 0 && filteredUsers.length === 0 && (
-                <CardContent className="text-center py-10">
-                    <p className="text-muted-foreground">No se encontraron usuarios con los filtros especificados.</p>
-                </CardContent>
+             {isFetching && (
+                 <CardContent className="text-center py-10">
+                     <Skeleton className="h-40 w-full" />
+                 </CardContent>
             )}
+
         </Card>
         
         {userToManage && (
