@@ -1,5 +1,3 @@
-'use server';
-
 import type { AppDefinition } from './types';
 
 export const availableApps: AppDefinition[] = [
