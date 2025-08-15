@@ -16,12 +16,13 @@ import { getAllUsers, updateUserRoles, createProfileForUser } from '@/lib/users'
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
-import { Save, Users, Filter } from 'lucide-react';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormDescription } from '@/components/ui/form';
+import { Save, Filter } from 'lucide-react';
 import { getAllAuthUsers, UserRecord } from '@/app/actions';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
+import { ChevronsUpDown } from 'lucide-react';
 
 type CombinedUser = {
   auth: UserRecord;
@@ -31,7 +32,7 @@ type CombinedUser = {
 const filterSchema = {
   email: '',
   fullName: '',
-  role: 'all-roles',
+  roles: [] as string[],
 };
 
 const USERS_PER_PAGE = 1;
@@ -112,10 +113,12 @@ export default function AdminUserRolesPage() {
             results = results.filter(u => u.auth.email?.toLowerCase().includes(filters.email.toLowerCase()));
         }
         if (filters.fullName) {
-            results = results.filter(u => u.profile?.fullName?.toLowerCase().includes(filters.fullName.toLowerCase()));
+           results = results.filter(u => u.profile && u.profile.fullName && u.profile.fullName.toLowerCase().includes(filters.fullName.toLowerCase()));
         }
-        if (filters.role && filters.role !== 'all-roles') {
-            results = results.filter(u => u.profile?.roles.includes(filters.role));
+        if (filters.roles && filters.roles.length > 0) {
+            results = results.filter(u => 
+                u.profile?.roles.some(userRole => filters.roles.includes(userRole))
+            );
         }
         
         setFilteredUsers(results);
@@ -133,7 +136,6 @@ export default function AdminUserRolesPage() {
   };
 
   const refreshUsersAfterSave = async () => {
-    // This function re-fetches and re-applies the last used filters.
     const currentFilters = form.getValues();
     await handleFilterSubmit(currentFilters);
   };
@@ -267,28 +269,53 @@ export default function AdminUserRolesPage() {
                             </FormItem>
                           )}
                         />
-                        <FormField
-                          control={form.control}
-                          name="role"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Rol</FormLabel>
-                              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Filtrar por rol..." />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  <SelectItem value="all-roles">Todos</SelectItem>
-                                  {allRoles.map(role => (
-                                    <SelectItem key={role.id} value={role.id}>{role.name}</SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </FormItem>
-                          )}
-                        />
+                         <FormField
+                            control={form.control}
+                            name="roles"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Rol</FormLabel>
+                                        <Popover>
+                                            <PopoverTrigger asChild>
+                                                <FormControl>
+                                                <Button
+                                                    variant="outline"
+                                                    role="combobox"
+                                                    className={cn(
+                                                    "w-full justify-between",
+                                                    !field.value.length && "text-muted-foreground"
+                                                    )}
+                                                >
+                                                    {field.value.length > 0
+                                                        ? `${field.value.length} roles seleccionados`
+                                                        : "Seleccionar roles..."
+                                                    }
+                                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                                </Button>
+                                                </FormControl>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-full p-0">
+                                                <div className="p-2 space-y-1">
+                                                    {allRoles.map((role) => (
+                                                         <div key={role.id} className="flex items-center space-x-2">
+                                                            <Checkbox
+                                                                id={`filter-role-${role.id}`}
+                                                                checked={field.value.includes(role.id)}
+                                                                onCheckedChange={(checked) => {
+                                                                    return checked
+                                                                    ? field.onChange([...field.value, role.id])
+                                                                    : field.onChange(field.value.filter((value) => value !== role.id));
+                                                                }}
+                                                            />
+                                                            <Label htmlFor={`filter-role-${role.id}`} className="font-normal">{role.name}</Label>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </PopoverContent>
+                                        </Popover>
+                                </FormItem>
+                            )}
+                            />
                       </div>
                        <Button type="submit" disabled={isFetching}>
                           <Filter className="mr-2 h-4 w-4" />
@@ -421,3 +448,5 @@ export default function AdminUserRolesPage() {
     </div>
   );
 }
+
+    
