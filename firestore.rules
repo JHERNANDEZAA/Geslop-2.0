@@ -1,43 +1,45 @@
+
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    // Default deny all reads and writes
+    // Default deny all
     match /{document=**} {
       allow read, write: if false;
     }
 
-    // Allow logged-in users to read roles and users collections
+    // Allow logged-in users to read roles and users for admin panels
     match /roles/{roleId} {
       allow read: if request.auth != null;
     }
 
     match /users/{userId} {
       allow read: if request.auth != null;
-    }
-    
-    // Allow logged-in users to manage their own favorites
-    match /favorites/{favoriteId} {
-      allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
+      // Allow creation of user profiles by any authenticated user (for admin purposes)
+      allow create: if request.auth != null;
+      // Allow users to update their own profile, or any authenticated user to update roles (for admins)
+      allow update: if request.auth != null;
     }
 
-    // Allow logged-in users to read/write to request headers and positions
-    match /request_headers/{headerId} {
+    // Allow read/write access to other collections only for authenticated users
+    // This is a general rule, you might want to make it more specific
+    match /catalogs_admin/{catalogId} {
         allow read, write: if request.auth != null;
     }
 
+    match /favorites/{favoriteId} {
+        allow read, write: if request.auth != null;
+    }
+    
+    match /request_headers/{headerId} {
+        allow read, write: if request.auth != null;
+    }
+    
     match /request_positions/{positionId} {
         allow read, write: if request.auth != null;
     }
     
-    // Allow read access to counters for logged-in users (e.g., for creating new roles/requests)
     match /counters/{counterId} {
-        allow read: if request.auth != null;
-    }
-    
-    // Admin catalogs can be read by any authenticated user
-    match /catalogs_admin/{catalogId} {
         allow read, write: if request.auth != null;
     }
   }
