@@ -3,6 +3,7 @@ import type { AppDefinition } from './types';
 export const availableApps: AppDefinition[] = [
     { id: '/purchaseRequisition', name: 'Solicitud de productos', description: 'Permite a los usuarios crear y gestionar solicitudes de productos.' },
     { id: '/adminPurchasing', name: 'Administración de compras', description: 'Permite gestionar catálogos, familias y destinatarios.' },
+    { id: '/adminCatalogRecipients', name: 'Asignación de catálogos a destinatarios', description: 'Permite asignar catálogos a los destinatarios.' },
     { id: '/adminRoles', name: 'Administración de Roles', description: 'Permite crear y gestionar los roles de usuario.' },
     { id: '/adminRoleApps', name: 'Asignación de Aplicaciones', description: 'Permite asignar aplicaciones a los diferentes roles.' },
     { id: '/adminUserRoles', name: 'Asignación de Roles a Usuarios', description: 'Permite asignar roles a los usuarios.' },
