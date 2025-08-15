@@ -37,8 +37,8 @@ export default function AdminUserRolesPage() {
   const [isSaving, setIsSaving] = useState<string | boolean>(false);
   const [isFetching, setIsFetching] = useState(false);
   
-  const [userToCreate, setUserToCreate] = useState<UserRecord | null>(null);
-  const [rolesForNewUser, setRolesForNewUser] = useState<string[]>([]);
+  const [userToManage, setUserToManage] = useState<CombinedUser | null>(null);
+  const [rolesForManagedUser, setRolesForManagedUser] = useState<string[]>([]);
 
 
   useEffect(() => {
@@ -83,14 +83,7 @@ export default function AdminUserRolesPage() {
         }));
         
         setCombinedUsers(combined);
-
-        const initialAssignedRoles: Record<string, string[]> = {};
-        combined.forEach(u => {
-            if (u.profile) {
-                initialAssignedRoles[u.auth.uid] = u.profile.roles;
-            }
-        });
-        setAssignedRoles(initialAssignedRoles);
+        // We no longer set assignedRoles here, as it's managed inside the dialog
 
     } catch (error: any) {
         toast({
@@ -103,30 +96,52 @@ export default function AdminUserRolesPage() {
     }
   };
 
-  const handleRoleChange = (uid: string, roleId: string, checked: boolean | 'indeterminate') => {
-    if (typeof checked !== 'boolean') return;
+  const openRoleManager = (user: CombinedUser) => {
+    setUserToManage(user);
+    setRolesForManagedUser(user.profile?.roles || []);
+  };
 
-    setAssignedRoles(prev => {
-        const currentRoles = prev[uid] || [];
+  const closeRoleManager = () => {
+    setUserToManage(null);
+    setRolesForManagedUser([]);
+  };
+
+  const handleRoleChange = (roleId: string, checked: boolean | 'indeterminate') => {
+    if (typeof checked !== 'boolean') return;
+    setRolesForManagedUser(prev => {
         if (checked) {
-            return { ...prev, [uid]: [...currentRoles, roleId] };
+            return [...prev, roleId];
         } else {
-            return { ...prev, [uid]: currentRoles.filter(id => id !== roleId) };
+            return prev.filter(id => id !== roleId);
         }
     });
   };
 
-  const handleSaveChanges = async (uid: string) => {
-    setIsSaving(uid);
+  const handleSaveChanges = async () => {
+    if (!userToManage) return;
+
+    setIsSaving(userToManage.auth.uid);
     try {
-        const rolesToSave = assignedRoles[uid] || [];
-        await updateUserRoles(uid, rolesToSave);
+      if (userToManage.profile) {
+        // User exists, update roles
+        await updateUserRoles(userToManage.auth.uid, rolesForManagedUser);
         toast({
             title: "Roles actualizados",
-            description: `Los roles para el usuario han sido guardados.`,
+            description: `Los roles para ${userToManage.auth.email} han sido guardados.`,
             variant: "default",
             className: "bg-accent text-accent-foreground",
         });
+      } else {
+        // User does not have a profile, create it
+        await createProfileForUser(userToManage.auth.uid, userToManage.auth.email!, rolesForManagedUser);
+        toast({
+            title: "Perfil Creado",
+            description: `El perfil para ${userToManage.auth.email} ha sido creado con los roles seleccionados.`,
+            variant: "default",
+        });
+      }
+      // Refetch all users to update the UI
+      handleFetchUsers();
     } catch (error: any) {
          toast({
             title: "Error al guardar",
@@ -135,44 +150,9 @@ export default function AdminUserRolesPage() {
         });
     } finally {
         setIsSaving(false);
+        closeRoleManager();
     }
   };
-
-  const handleCreateProfile = async () => {
-    if (!userToCreate) return;
-    setIsSaving(userToCreate.uid);
-    try {
-        await createProfileForUser(userToCreate.uid, userToCreate.email!, rolesForNewUser);
-        toast({
-            title: "Perfil Creado",
-            description: `El perfil para ${userToCreate.email} ha sido creado.`,
-            variant: "default",
-        });
-        // Refetch all users to update the UI
-        handleFetchUsers();
-    } catch (error: any) {
-        toast({
-            title: "Error al crear perfil",
-            description: error.message,
-            variant: "destructive",
-        });
-    } finally {
-        setIsSaving(false);
-        setUserToCreate(null);
-        setRolesForNewUser([]);
-    }
-  }
-  
-  const handleNewUserRoleChange = (roleId: string, checked: boolean | 'indeterminate') => {
-      if (typeof checked !== 'boolean') return;
-      setRolesForNewUser(prev => {
-          if (checked) {
-              return [...prev, roleId];
-          } else {
-              return prev.filter(id => id !== roleId);
-          }
-      });
-  }
 
 
   if (loading || isLoading) {
@@ -221,65 +201,25 @@ export default function AdminUserRolesPage() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {combinedUsers.map(({ auth, profile }) => (
-                                    <TableRow key={auth.uid}>
-                                        <TableCell className="font-medium">{auth.email}</TableCell>
+                                {combinedUsers.map((combinedUser) => (
+                                    <TableRow key={combinedUser.auth.uid}>
+                                        <TableCell className="font-medium">{combinedUser.auth.email}</TableCell>
                                         <TableCell>
-                                            {profile ? (
-                                                <div className="flex flex-wrap gap-2">
-                                                    {allRoles.map(role => (
-                                                        <div key={role.id} className="flex items-center space-x-2">
-                                                            <Checkbox
-                                                                id={`role-${auth.uid}-${role.id}`}
-                                                                checked={(assignedRoles[auth.uid] || []).includes(role.id)}
-                                                                onCheckedChange={(checked) => handleRoleChange(auth.uid, role.id, checked)}
-                                                            />
-                                                            <Label htmlFor={`role-${auth.uid}-${role.id}`}>{role.name}</Label>
-                                                        </div>
-                                                    ))}
-                                                </div>
+                                            {combinedUser.profile ? (
+                                                <span className="text-sm text-foreground">
+                                                {combinedUser.profile.roles.length > 0
+                                                    ? combinedUser.profile.roles.map(roleId => allRoles.find(r => r.id === roleId)?.name || roleId).join(', ')
+                                                    : <span className="text-muted-foreground italic">Sin roles asignados</span>
+                                                }
+                                                </span>
                                             ) : (
                                                 <span className="text-sm text-muted-foreground">Perfil no creado en la base de datos</span>
                                             )}
                                         </TableCell>
                                         <TableCell className="text-right">
-                                            {profile ? (
-                                                <Button onClick={() => handleSaveChanges(auth.uid)} disabled={isSaving === auth.uid || !!isSaving && isSaving !== auth.uid}>
-                                                    <Save className="mr-2 h-4 w-4" />
-                                                    {isSaving === auth.uid ? "Guardando..." : "Guardar"}
-                                                </Button>
-                                            ) : (
-                                                <AlertDialog>
-                                                    <AlertDialogTrigger asChild>
-                                                        <Button variant="outline" onClick={() => setUserToCreate(auth)}>Asignar Roles y Crear Perfil</Button>
-                                                    </AlertDialogTrigger>
-                                                    <AlertDialogContent>
-                                                        <AlertDialogHeader>
-                                                            <AlertDialogTitle>Asignar roles para {auth.email}</AlertDialogTitle>
-                                                            <AlertDialogDescription>
-                                                                Seleccione los roles para este usuario. Al guardar, se creará su perfil en la base de datos.
-                                                            </AlertDialogDescription>
-                                                        </AlertDialogHeader>
-                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
-                                                            {allRoles.map(role => (
-                                                                <div key={role.id} className="flex items-center space-x-2">
-                                                                    <Checkbox
-                                                                        id={`new-user-role-${role.id}`}
-                                                                        onCheckedChange={(checked) => handleNewUserRoleChange(role.id, checked)}
-                                                                    />
-                                                                    <Label htmlFor={`new-user-role-${role.id}`}>{role.name}</Label>
-                                                                </div>
-                                                            ))}
-                                                        </div>
-                                                        <AlertDialogFooter>
-                                                            <AlertDialogCancel onClick={() => {setUserToCreate(null); setRolesForNewUser([])}}>Cancelar</AlertDialogCancel>
-                                                            <AlertDialogAction onClick={handleCreateProfile} disabled={isSaving === auth.uid}>
-                                                                {isSaving === auth.uid ? "Creando..." : "Crear Perfil"}
-                                                            </AlertDialogAction>
-                                                        </AlertDialogFooter>
-                                                    </AlertDialogContent>
-                                                </AlertDialog>
-                                            )}
+                                            <Button variant="outline" onClick={() => openRoleManager(combinedUser)}>
+                                                Asignar Roles
+                                            </Button>
                                         </TableCell>
                                     </TableRow>
                                 ))}
@@ -290,6 +230,37 @@ export default function AdminUserRolesPage() {
             )}
         </Card>
         
+        {userToManage && (
+            <AlertDialog open={!!userToManage} onOpenChange={(open) => !open && closeRoleManager()}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Asignar roles para {userToManage.auth.email}</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Seleccione los roles para este usuario. Al guardar, se {userToManage.profile ? 'actualizarán sus permisos' : 'creará su perfil en la base de datos'}.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
+                        {allRoles.map(role => (
+                            <div key={role.id} className="flex items-center space-x-2">
+                                <Checkbox
+                                    id={`manage-role-${role.id}`}
+                                    checked={rolesForManagedUser.includes(role.id)}
+                                    onCheckedChange={(checked) => handleRoleChange(role.id, checked)}
+                                />
+                                <Label htmlFor={`manage-role-${role.id}`}>{role.name}</Label>
+                            </div>
+                        ))}
+                    </div>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel onClick={closeRoleManager}>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleSaveChanges} disabled={isSaving === userToManage.auth.uid}>
+                            {isSaving === userToManage.auth.uid ? "Guardando..." : "Guardar Cambios"}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+        )}
+
       </main>
     </div>
   );
