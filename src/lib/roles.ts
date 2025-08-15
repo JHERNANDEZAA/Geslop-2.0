@@ -24,6 +24,7 @@ export const saveRole = async (roleData: Omit<Role, 'id' | 'createdAt' | 'create
       id: newRoleId,
       createdAt: format(new Date(), 'dd-MM-yyyy'),
       createdBy: userEmail,
+      apps: [],
     };
 
     await setDoc(roleRef, newRole);
@@ -42,7 +43,8 @@ export const getAllRoles = async (): Promise<Role[]> => {
         querySnapshot.forEach((doc) => {
             results.push(doc.data() as Role);
         });
-        return results;
+        // Sort roles by name alphabetically
+        return results.sort((a, b) => a.name.localeCompare(b.name));
     } catch (error) {
         console.error("Error getting all roles: ", error);
         throw new Error("No se pudo obtener la lista de roles.");
@@ -71,4 +73,14 @@ export const updateRoleStatus = async (roleId: string, isActive: boolean): Promi
     }
 };
 
-    
+export const updateRoleApps = async (roleId: string, appIds: string[]): Promise<void> => {
+    const roleRef = doc(db, 'roles', roleId);
+    try {
+        await updateDoc(roleRef, {
+            apps: appIds
+        });
+    } catch (error: any) {
+        console.error("Error updating role apps: ", error);
+        throw new Error("No se pudo actualizar las aplicaciones del rol.");
+    }
+};

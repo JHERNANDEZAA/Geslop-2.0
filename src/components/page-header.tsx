@@ -2,7 +2,7 @@
 "use client";
 
 import { useAuth, signOutUser } from '@/lib/auth.tsx';
-import { Building2, LogOut, ShoppingCart, List, UserCog } from 'lucide-react';
+import { Building2, LogOut, ShoppingCart, List, UserCog, AppWindow } from 'lucide-react';
 import { Button } from './ui/button';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
@@ -22,6 +22,7 @@ export function PageHeader() {
     { href: '/purchaseRequisition', label: 'Solicitud de productos', icon: List },
     { href: '/adminPurchasing', label: 'Administración de compras', icon: ShoppingCart },
     { href: '/adminRoles', label: 'Administración de Roles', icon: UserCog },
+    { href: '/adminRoleApps', label: 'Asignación de Aplicaciones', icon: AppWindow },
   ]
 
   return (
@@ -47,12 +48,13 @@ export function PageHeader() {
       </div>
        {user && (
           <div className="border-t">
-              <nav className="mx-auto px-4 sm:px-6 lg:px-8 flex items-center space-x-2 h-12">
+              <nav className="mx-auto px-4 sm:px-6 lg:px-8 flex items-center space-x-2 h-12 overflow-x-auto">
                  {navLinks.map((link) => (
                     <Button 
                       key={link.href}
                       variant={pathname === link.href ? 'default' : 'ghost'}
                       asChild
+                      className="shrink-0"
                     >
                        <Link href={link.href}>
                         <link.icon className="mr-2 h-4 w-4" />

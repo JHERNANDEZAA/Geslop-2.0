@@ -95,4 +95,11 @@ export type Role = {
     createdAt: string; // DD-MM-YYYY
     createdBy: string;
     isActive: boolean;
+    apps?: string[];
+};
+
+export type AppDefinition = {
+  id: string;
+  name: string;
+  description: string;
 };
