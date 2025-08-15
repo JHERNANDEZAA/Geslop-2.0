@@ -31,7 +31,7 @@ type CombinedUser = {
 const filterSchema = {
   email: '',
   fullName: '',
-  role: '',
+  role: 'all-roles',
 };
 
 const USERS_PER_PAGE = 1;
@@ -125,7 +125,7 @@ export default function AdminUserRolesPage() {
     if (filters.fullName) {
         results = results.filter(u => u.profile?.fullName.toLowerCase().includes(filters.fullName.toLowerCase()));
     }
-    if (filters.role) {
+    if (filters.role && filters.role !== 'all-roles') {
         results = results.filter(u => u.profile?.roles.includes(filters.role));
     }
     
@@ -283,7 +283,7 @@ export default function AdminUserRolesPage() {
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                  <SelectItem value="">Todos</SelectItem>
+                                  <SelectItem value="all-roles">Todos</SelectItem>
                                   {allRoles.map(role => (
                                     <SelectItem key={role.id} value={role.id}>{role.name}</SelectItem>
                                   ))}
@@ -417,5 +417,3 @@ export default function AdminUserRolesPage() {
     </div>
   );
 }
-
-    
