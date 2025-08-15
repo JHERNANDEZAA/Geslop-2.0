@@ -90,9 +90,10 @@ export default function AdminRoleAppsPage() {
   const handleSave = async () => {
     setIsSaving(true);
     try {
+        const allAppIds = availableApps.map(app => app.id);
         const rolesToUpdate = roles.map(role => {
             const isAdministrator = adminRoles[role.id];
-            const appIds = isAdministrator ? [] : (assignedApps[role.id] || []);
+            const appIds = isAdministrator ? allAppIds : (assignedApps[role.id] || []);
             return {
                 roleId: role.id,
                 isAdministrator: isAdministrator,
@@ -113,6 +114,7 @@ export default function AdminRoleAppsPage() {
             variant: "default",
             className: "bg-accent text-accent-foreground"
         });
+        fetchInitialData();
     } catch (error: any) {
         toast({
             title: "Error al guardar",
@@ -186,12 +188,12 @@ export default function AdminRoleAppsPage() {
                                     </TableCell>
                                     {roles.map(role => {
                                         const isAdministrator = adminRoles[role.id];
-                                        const roleApps = isAdministrator ? availableApps.map(a => a.id) : (assignedApps[role.id] || []);
+                                        const roleApps = assignedApps[role.id] || [];
                                         return (
                                             <TableCell key={`${app.id}-${role.id}`} className="text-center">
                                                 <Checkbox
                                                     id={`checkbox-${role.id}-${app.id}`}
-                                                    checked={roleApps.includes(app.id)}
+                                                    checked={isAdministrator || roleApps.includes(app.id)}
                                                     onCheckedChange={(checked) => handleCheckboxChange(role.id, app.id, checked)}
                                                     aria-label={`Asignar ${app.name} a ${role.name}`}
                                                     disabled={isAdministrator}
