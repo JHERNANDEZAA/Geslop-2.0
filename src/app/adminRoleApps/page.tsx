@@ -158,20 +158,20 @@ export default function AdminRoleAppsPage() {
                             <TableRow>
                                 <TableHead className="font-medium w-[350px]">Aplicación</TableHead>
                                 {roles.map(role => (
-                                    <TableHead key={role.id} className="text-center">
-                                      <div className="flex flex-col items-center justify-center text-center">
-                                        <div className="font-bold">{role.name}</div>
-                                        <div className="flex items-center space-x-2 pt-2">
-                                            <Switch
-                                                id={`admin-switch-${role.id}`}
-                                                checked={adminRoles[role.id]}
-                                                onCheckedChange={(checked) => handleAdminSwitchChange(role.id, checked)}
-                                                aria-label={`Marcar ${role.name} como administrador`}
-                                            />
-                                            <Label htmlFor={`admin-switch-${role.id}`}>Administrador</Label>
-                                        </div>
-                                      </div>
-                                    </TableHead>
+                                    <TableHead key={role.id} className="text-center font-bold">{role.name}</TableHead>
+                                ))}
+                            </TableRow>
+                            <TableRow>
+                                <TableHead className="font-medium">Administrador</TableHead>
+                                {roles.map(role => (
+                                    <TableCell key={role.id} className="text-center">
+                                         <Switch
+                                            id={`admin-switch-${role.id}`}
+                                            checked={adminRoles[role.id]}
+                                            onCheckedChange={(checked) => handleAdminSwitchChange(role.id, checked)}
+                                            aria-label={`Marcar ${role.name} como administrador`}
+                                        />
+                                    </TableCell>
                                 ))}
                             </TableRow>
                         </TableHeader>
