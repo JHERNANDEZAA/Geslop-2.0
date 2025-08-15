@@ -2,7 +2,7 @@
 "use client";
 
 import { useAuth, signOutUser } from '@/lib/auth.tsx';
-import { Building2, LogOut, ShoppingCart, List } from 'lucide-react';
+import { Building2, LogOut, ShoppingCart, List, UserCog } from 'lucide-react';
 import { Button } from './ui/button';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
@@ -21,6 +21,7 @@ export function PageHeader() {
   const navLinks = [
     { href: '/purchaseRequisition', label: 'Solicitud de productos', icon: List },
     { href: '/adminPurchasing', label: 'Administración de compras', icon: ShoppingCart },
+    { href: '/adminRoles', label: 'Administración de Roles', icon: UserCog },
   ]
 
   return (

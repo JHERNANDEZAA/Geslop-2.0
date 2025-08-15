@@ -10,7 +10,8 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "load-materials": "tsx src/scripts/load-materials.ts"
+    "load-materials": "tsx src/scripts/load-materials.ts",
+    "load-roles": "tsx src/scripts/load-roles.ts"
   },
   "dependencies": {
     "@genkit-ai/googleai": "^1.14.1",

@@ -1927,3 +1927,15 @@ Dev App Server is now running.
 
 Issues? Report them at https://github.com/firebase/firebase-tools/issues and attach the *-debug.log files.
  
+[info] i  firestore: Change detected, updating rules... 
+[debug] [2025-08-15T19:14:51.949Z] >>> [apiv2][query] PUT http://127.0.0.1:8080/emulator/v1/projects/demo-app:securityRules [none]
+[debug] [2025-08-15T19:14:51.949Z] >>> [apiv2][body] PUT http://127.0.0.1:8080/emulator/v1/projects/demo-app:securityRules {"ignore_errors":true,"rules":{"files":[{"name":"security.rules","content":"rules_version = '2';\n\nservice cloud.firestore {\n  match /databases/{database}/documents {\n    \n    // Allow authenticated users to manage their requests\n    match /request_headers/{headerId} {\n      allow read, write: if request.auth != null;\n    }\n\n    match /request_positions/{positionId} {\n      allow read, write: if request.auth != null;\n    }\n    \n    // Allow authenticated users to manage their favorites\n    match /favorites/{favoriteId} {\n        allow read, write: if request.auth != null;\n    }\n    \n    // Allow authenticated users to manage admin catalogs\n    match /catalogs_admin/{catalogId} {\n        allow read, write: if request.auth != null;\n    }\n\n    // Allow authenticated users to manage roles\n    match /roles/{roleId} {\n        allow read, write: if request.auth != null;\n    }\n    \n    // Allow authenticated users to access counters\n    match /counters/{counterId} {\n        allow read, write: if request.auth != null;\n    }\n  }\n}\n"}]}}
+[debug] [2025-08-15T19:14:52.004Z] Aug 15, 2025 7:14:52 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 15, 2025 7:14:52 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected non-HTTP/2 connection.\n"}}
+[debug] [2025-08-15T19:14:53.330Z] Aug 15, 2025 7:14:53 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 15, 2025 7:14:53 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected HTTP/2 connection.\n"}}
+[debug] [2025-08-15T19:14:57.885Z] <<< [apiv2][status] PUT http://127.0.0.1:8080/emulator/v1/projects/demo-app:securityRules 200
+[debug] [2025-08-15T19:14:57.890Z] <<< [apiv2][body] PUT http://127.0.0.1:8080/emulator/v1/projects/demo-app:securityRules {}
+[info] ✔  firestore: Rules updated. 

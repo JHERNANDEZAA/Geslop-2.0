@@ -87,3 +87,12 @@ export type RequestInfo = {
   hasRequest: boolean;
   sentToSap: boolean;
 }
+
+export type Role = {
+    id: string;
+    name: string;
+    description: string;
+    createdAt: string; // DD-MM-YYYY
+    createdBy: string;
+    isActive: boolean;
+};
