@@ -36,7 +36,7 @@ const filterSchema = {
   roles: [] as string[],
 };
 
-const USERS_PER_PAGE = 1;
+const USERS_PER_PAGE = 10;
 
 export default function AdminUserRolesPage() {
   const { user, loading } = useAuth();
@@ -449,7 +449,3 @@ export default function AdminUserRolesPage() {
     </div>
   );
 }
-
-    
-
-    
