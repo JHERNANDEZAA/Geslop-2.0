@@ -31,7 +31,6 @@ export default function AdminUserRolesPage() {
   
   const [allRoles, setAllRoles] = useState<Role[]>([]);
   const [combinedUsers, setCombinedUsers] = useState<CombinedUser[]>([]);
-  const [assignedRoles, setAssignedRoles] = useState<Record<string, string[]>>({});
   
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState<string | boolean>(false);
@@ -83,8 +82,7 @@ export default function AdminUserRolesPage() {
         }));
         
         setCombinedUsers(combined);
-        // We no longer set assignedRoles here, as it's managed inside the dialog
-
+        
     } catch (error: any) {
         toast({
             title: "Error al cargar usuarios",
@@ -197,7 +195,7 @@ export default function AdminUserRolesPage() {
                                 <TableRow>
                                     <TableHead className="w-[250px]">Email</TableHead>
                                     <TableHead>Roles Asignados</TableHead>
-                                    <TableHead className="text-right w-[200px]">Acciones</TableHead>
+                                    <TableHead className="text-right w-[250px]">Acciones</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -218,7 +216,7 @@ export default function AdminUserRolesPage() {
                                         </TableCell>
                                         <TableCell className="text-right">
                                             <Button variant="outline" onClick={() => openRoleManager(combinedUser)}>
-                                                Asignar Roles
+                                                 {combinedUser.profile ? 'Asignar Roles' : 'Asignar roles y crear perfil'}
                                             </Button>
                                         </TableCell>
                                     </TableRow>
@@ -236,7 +234,7 @@ export default function AdminUserRolesPage() {
                     <AlertDialogHeader>
                         <AlertDialogTitle>Asignar roles para {userToManage.auth.email}</AlertDialogTitle>
                         <AlertDialogDescription>
-                            Seleccione los roles para este usuario. Al guardar, se {userToManage.profile ? 'actualizarán sus permisos' : 'creará su perfil en la base de datos'}.
+                            Seleccione los roles para este usuario. Al guardar, se {userToManage.profile ? 'actualizarán sus permisos' : 'creará su perfil en la base de datos con los roles seleccionados'}.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
