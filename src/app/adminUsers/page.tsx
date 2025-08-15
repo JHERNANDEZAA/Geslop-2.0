@@ -244,7 +244,6 @@ export default function AdminUsersPage() {
                                 <TableHead>Email</TableHead>
                                 <TableHead>Nombre y apellidos</TableHead>
                                 <TableHead>Roles</TableHead>
-                                <TableHead>UID</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -255,7 +254,6 @@ export default function AdminUsersPage() {
                                     <TableCell>
                                         {u.roles.map(roleId => allRoles.find(r => r.id === roleId)?.name).join(', ')}
                                     </TableCell>
-                                    <TableCell className="text-muted-foreground text-xs">{u.uid}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
