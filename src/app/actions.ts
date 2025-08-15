@@ -1,3 +1,4 @@
+
 'use server';
 
 import { getAuth } from 'firebase-admin/auth';
@@ -29,12 +30,13 @@ if (!getApps().some(app => app.name === 'admin')) {
 const adminAuth = getAuth(adminApp);
 const adminDb = getFirestore(adminApp);
 
-export const createUserAction = async (email: string, password: string,roleIds: string[]): Promise<{ success: boolean; message: string }> => {
+export const createUserAction = async (email: string, password: string, fullName: string, roleIds: string[]): Promise<{ success: boolean; message: string }> => {
   try {
     // 1. Create user in Firebase Authentication
     const userRecord = await adminAuth.createUser({
       email,
       password,
+      displayName: fullName,
       emailVerified: true,
       disabled: false,
     });
@@ -44,6 +46,7 @@ export const createUserAction = async (email: string, password: string,roleIds: 
     const newUserProfile: UserProfile = {
       uid: userRecord.uid,
       email: userRecord.email!,
+      fullName,
       roles: roleIds,
     };
     await userProfileRef.set(newUserProfile);

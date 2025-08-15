@@ -1,8 +1,9 @@
+
 import { db } from './firebase';
 import { doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import type { UserProfile } from './types';
 
-export const getOrCreateUserProfile = async (uid: string, email: string): Promise<UserProfile> => {
+export const getOrCreateUserProfile = async (uid: string, email: string, fullName: string): Promise<UserProfile> => {
     const userRef = doc(db, 'users', uid);
     const userSnap = await getDoc(userRef);
 
@@ -13,6 +14,7 @@ export const getOrCreateUserProfile = async (uid: string, email: string): Promis
         const newUserProfile: UserProfile = {
             uid,
             email,
+            fullName,
             roles: [],
         };
         await setDoc(userRef, newUserProfile);
@@ -20,7 +22,7 @@ export const getOrCreateUserProfile = async (uid: string, email: string): Promis
     }
 };
 
-export const createProfileForUser = async (uid: string, email: string, roles: string[]): Promise<void> => {
+export const createProfileForUser = async (uid: string, email: string, fullName: string, roles: string[]): Promise<void> => {
     const userRef = doc(db, 'users', uid);
     const userSnap = await getDoc(userRef);
 
@@ -31,6 +33,7 @@ export const createProfileForUser = async (uid: string, email: string, roles: st
     const newUserProfile: UserProfile = {
         uid,
         email,
+        fullName,
         roles,
     };
     await setDoc(userRef, newUserProfile);

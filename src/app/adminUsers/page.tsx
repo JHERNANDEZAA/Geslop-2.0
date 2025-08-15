@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -24,6 +25,7 @@ import { Label } from '@/components/ui/label';
 const userSchema = z.object({
   email: z.string().email('Debe ser un correo electrónico válido.'),
   password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres.'),
+  fullName: z.string().min(1, 'El nombre y apellidos son requeridos.'),
   roles: z.array(z.string()).min(1, 'Debe seleccionar al menos un rol.'),
 });
 
@@ -41,6 +43,7 @@ export default function AdminUsersPage() {
     defaultValues: {
       email: '',
       password: '',
+      fullName: '',
       roles: [],
     },
   });
@@ -75,7 +78,7 @@ export default function AdminUsersPage() {
 
 
   const onSubmit = async (values: z.infer<typeof userSchema>) => {
-    const result = await createUserAction(values.email, values.password, values.roles);
+    const result = await createUserAction(values.email, values.password, values.fullName, values.roles);
     if (result.success) {
       toast({
         title: "Usuario Creado",
@@ -123,7 +126,20 @@ export default function AdminUsersPage() {
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)}>
                     <CardContent className="space-y-6">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <FormField
+                                control={form.control}
+                                name="fullName"
+                                render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Nombre y apellidos</FormLabel>
+                                    <FormControl>
+                                    <Input placeholder="John Doe" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                                )}
+                            />
                             <FormField
                                 control={form.control}
                                 name="email"
@@ -226,6 +242,7 @@ export default function AdminUsersPage() {
                         <TableHeader>
                             <TableRow>
                                 <TableHead>Email</TableHead>
+                                <TableHead>Nombre y apellidos</TableHead>
                                 <TableHead>Roles</TableHead>
                                 <TableHead>UID</TableHead>
                             </TableRow>
@@ -234,6 +251,7 @@ export default function AdminUsersPage() {
                             {users.map((u) => (
                                 <TableRow key={u.uid}>
                                     <TableCell className="font-medium">{u.email}</TableCell>
+                                    <TableCell>{u.fullName}</TableCell>
                                     <TableCell>
                                         {u.roles.map(roleId => allRoles.find(r => r.id === roleId)?.name).join(', ')}
                                     </TableCell>

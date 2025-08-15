@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -13,6 +14,7 @@ import { getAllRoles } from '@/lib/roles';
 import { getAllUsers, updateUserRoles, createProfileForUser } from '@/lib/users';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import { Save, Users } from 'lucide-react';
 import { getAllAuthUsers, UserRecord } from '@/app/actions';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -38,6 +40,7 @@ export default function AdminUserRolesPage() {
   
   const [userToManage, setUserToManage] = useState<CombinedUser | null>(null);
   const [rolesForManagedUser, setRolesForManagedUser] = useState<string[]>([]);
+  const [fullNameForManagedUser, setFullNameForManagedUser] = useState('');
 
 
   useEffect(() => {
@@ -97,11 +100,13 @@ export default function AdminUserRolesPage() {
   const openRoleManager = (user: CombinedUser) => {
     setUserToManage(user);
     setRolesForManagedUser(user.profile?.roles || []);
+    setFullNameForManagedUser(user.profile?.fullName || '');
   };
 
   const closeRoleManager = () => {
     setUserToManage(null);
     setRolesForManagedUser([]);
+    setFullNameForManagedUser('');
   };
 
   const handleRoleChange = (roleId: string, checked: boolean | 'indeterminate') => {
@@ -118,6 +123,15 @@ export default function AdminUserRolesPage() {
   const handleSaveChanges = async () => {
     if (!userToManage) return;
 
+    if (!userToManage.profile && !fullNameForManagedUser) {
+        toast({
+            title: "Campo requerido",
+            description: "El nombre y apellidos son requeridos para crear un perfil.",
+            variant: "destructive",
+        });
+        return;
+    }
+
     setIsSaving(userToManage.auth.uid);
     try {
       if (userToManage.profile) {
@@ -131,7 +145,7 @@ export default function AdminUserRolesPage() {
         });
       } else {
         // User does not have a profile, create it
-        await createProfileForUser(userToManage.auth.uid, userToManage.auth.email!, rolesForManagedUser);
+        await createProfileForUser(userToManage.auth.uid, userToManage.auth.email!, fullNameForManagedUser, rolesForManagedUser);
         toast({
             title: "Perfil Creado",
             description: `El perfil para ${userToManage.auth.email} ha sido creado con los roles seleccionados.`,
@@ -194,6 +208,7 @@ export default function AdminUserRolesPage() {
                             <TableHeader>
                                 <TableRow>
                                     <TableHead className="w-[250px]">Email</TableHead>
+                                    <TableHead>Nombre y Apellidos</TableHead>
                                     <TableHead>Roles Asignados</TableHead>
                                     <TableHead className="text-right w-[250px]">Acciones</TableHead>
                                 </TableRow>
@@ -202,6 +217,7 @@ export default function AdminUserRolesPage() {
                                 {combinedUsers.map((combinedUser) => (
                                     <TableRow key={combinedUser.auth.uid}>
                                         <TableCell className="font-medium">{combinedUser.auth.email}</TableCell>
+                                        <TableCell>{combinedUser.profile?.fullName || <span className="text-muted-foreground italic">N/A</span>}</TableCell>
                                         <TableCell>
                                             {combinedUser.profile ? (
                                                 <span className="text-sm text-foreground">
@@ -234,20 +250,37 @@ export default function AdminUserRolesPage() {
                     <AlertDialogHeader>
                         <AlertDialogTitle>Asignar roles para {userToManage.auth.email}</AlertDialogTitle>
                         <AlertDialogDescription>
-                            Seleccione los roles para este usuario. Al guardar, se {userToManage.profile ? 'actualizarán sus permisos' : 'creará su perfil en la base de datos con los roles seleccionados'}.
+                            {userToManage.profile 
+                                ? 'Seleccione los roles para este usuario. Al guardar, se actualizarán sus permisos.'
+                                : 'Este usuario no tiene perfil. Complete su nombre, seleccione sus roles y al guardar se creará su perfil en la base de datos.'
+                            }
                         </AlertDialogDescription>
                     </AlertDialogHeader>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
-                        {allRoles.map(role => (
-                            <div key={role.id} className="flex items-center space-x-2">
-                                <Checkbox
-                                    id={`manage-role-${role.id}`}
-                                    checked={rolesForManagedUser.includes(role.id)}
-                                    onCheckedChange={(checked) => handleRoleChange(role.id, checked)}
+                    <div className="space-y-4 py-4">
+                        {!userToManage.profile && (
+                             <div>
+                                <Label htmlFor="fullName">Nombre y Apellidos</Label>
+                                <Input 
+                                    id="fullName"
+                                    value={fullNameForManagedUser}
+                                    onChange={(e) => setFullNameForManagedUser(e.target.value)}
+                                    placeholder="John Doe"
+                                    className="mt-2"
                                 />
-                                <Label htmlFor={`manage-role-${role.id}`}>{role.name}</Label>
                             </div>
-                        ))}
+                        )}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {allRoles.map(role => (
+                                <div key={role.id} className="flex items-center space-x-2">
+                                    <Checkbox
+                                        id={`manage-role-${role.id}`}
+                                        checked={rolesForManagedUser.includes(role.id)}
+                                        onCheckedChange={(checked) => handleRoleChange(role.id, checked)}
+                                    />
+                                    <Label htmlFor={`manage-role-${role.id}`}>{role.name}</Label>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                     <AlertDialogFooter>
                         <AlertDialogCancel onClick={closeRoleManager}>Cancelar</AlertDialogCancel>

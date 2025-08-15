@@ -108,6 +108,7 @@ export type AppDefinition = {
 export type UserProfile = {
   uid: string;
   email: string;
+  fullName: string;
   roles: string[]; // Array of role IDs
 };
 
