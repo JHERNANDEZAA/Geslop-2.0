@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -91,7 +90,10 @@ export default function AdminRoleAppsPage() {
     try {
         const rolesToUpdate = roles.map(role => {
             const isAdministrator = adminRoles[role.id];
-            const appIds = isAdministrator ? availableApps.map(app => app.id) : assignedApps[role.id];
+            // If the role is an administrator, we don't need to save the specific apps,
+            // as their access is all-encompassing. We pass an empty array for apps in this case.
+            // Access control logic elsewhere should handle the administrator check.
+            const appIds = isAdministrator ? [] : (assignedApps[role.id] || []);
             return {
                 roleId: role.id,
                 isAdministrator: isAdministrator,
