@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -157,35 +156,37 @@ export default function AdminRoleAppsPage() {
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead className="w-[350px]">Rol</TableHead>
-                                {availableApps.map(app => (
-                                    <TableHead key={app.id} className="text-center">{app.name}</TableHead>
+                                <TableHead className="font-medium w-[350px]">Aplicación</TableHead>
+                                {roles.map(role => (
+                                    <TableHead key={role.id} className="text-center">
+                                      <div className="flex flex-col items-center justify-center text-center">
+                                        <div className="font-bold">{role.name}</div>
+                                        <div className="flex items-center space-x-2 pt-2">
+                                            <Switch
+                                                id={`admin-switch-${role.id}`}
+                                                checked={adminRoles[role.id]}
+                                                onCheckedChange={(checked) => handleAdminSwitchChange(role.id, checked)}
+                                                aria-label={`Marcar ${role.name} como administrador`}
+                                            />
+                                            <Label htmlFor={`admin-switch-${role.id}`}>Administrador</Label>
+                                        </div>
+                                      </div>
+                                    </TableHead>
                                 ))}
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {roles.map((role) => {
-                                const isAdministrator = adminRoles[role.id];
-                                const roleApps = isAdministrator ? availableApps.map(a => a.id) : (assignedApps[role.id] || []);
-
-                                return (
-                                <TableRow key={role.id}>
-                                    <TableCell className="font-medium">
-                                        <div className="flex flex-col gap-2">
-                                            <div className="font-bold">{role.name}</div>
-                                            <div className="text-xs text-muted-foreground">{role.description}</div>
-                                            <div className="flex items-center space-x-2 pt-2">
-                                                <Switch
-                                                    id={`admin-switch-${role.id}`}
-                                                    checked={isAdministrator}
-                                                    onCheckedChange={(checked) => handleAdminSwitchChange(role.id, checked)}
-                                                    aria-label={`Marcar ${role.name} como administrador`}
-                                                />
-                                                <Label htmlFor={`admin-switch-${role.id}`}>Administrador</Label>
-                                            </div>
-                                        </div>
+                            {availableApps.map((app) => (
+                                <TableRow key={app.id}>
+                                    <TableCell>
+                                      <div className="flex flex-col">
+                                        <div className="font-bold">{app.name}</div>
+                                        <div className="text-xs text-muted-foreground">{app.description}</div>
+                                      </div>
                                     </TableCell>
-                                    {availableApps.map(app => {
+                                    {roles.map(role => {
+                                        const isAdministrator = adminRoles[role.id];
+                                        const roleApps = isAdministrator ? availableApps.map(a => a.id) : (assignedApps[role.id] || []);
                                         return (
                                             <TableCell key={`${app.id}-${role.id}`} className="text-center">
                                                 <Checkbox
@@ -199,7 +200,7 @@ export default function AdminRoleAppsPage() {
                                         )
                                     })}
                                 </TableRow>
-                            )})}
+                            ))}
                         </TableBody>
                     </Table>
                 </div>
