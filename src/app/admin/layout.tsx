@@ -1,9 +1,10 @@
+
 "use client";
 
 import React, { useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { useAuth } from '@/lib/auth';
+import { useAuth, signOutUser } from '@/lib/auth';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   SidebarProvider,
@@ -14,8 +15,11 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
   SidebarInset,
+  SidebarFooter,
 } from '@/components/ui/sidebar';
 import { availableApps } from '@/lib/apps';
+import { LogOut } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 export default function AdminLayout({
   children,
@@ -34,6 +38,11 @@ export default function AdminLayout({
         router.push('/purchaseRequisition'); 
     }
   }, [user, isAdministrator, loading, router]);
+
+  const handleSignOut = async () => {
+    await signOutUser();
+    router.push('/login');
+  };
 
   if (loading || !isAdministrator) {
     return (
@@ -76,6 +85,22 @@ export default function AdminLayout({
                         ))}
                     </SidebarMenu>
                 </SidebarContent>
+                <SidebarFooter>
+                    <SidebarMenu>
+                       <SidebarMenuItem>
+                            <SidebarMenuButton
+                                onClick={handleSignOut}
+                                tooltip={{
+                                    children: 'Salir',
+                                    side: 'right',
+                                }}
+                            >
+                                <LogOut />
+                                <span>Salir</span>
+                            </SidebarMenuButton>
+                       </SidebarMenuItem>
+                    </SidebarMenu>
+                </SidebarFooter>
             </Sidebar>
             <SidebarInset>
                 <main className="flex-1 p-4 md:p-6">
