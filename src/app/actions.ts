@@ -5,7 +5,16 @@ import { initializeApp, getApps, App, cert } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import { serviceAccount } from '@/lib/service-account';
 import type { UserProfile } from '@/lib/types';
-import type { UserRecord } from 'firebase-admin/auth';
+import type { UserRecord as AdminUserRecord } from 'firebase-admin/auth';
+
+// Define a serializable UserRecord type
+export type UserRecord = {
+  uid: string;
+  email: string | undefined;
+  displayName: string | undefined;
+  photoURL: string | undefined;
+  disabled: boolean;
+};
 
 
 let adminApp: App;
@@ -52,7 +61,15 @@ export const createUserAction = async (email: string, password: string,roleIds: 
 export const getAllAuthUsers = async (): Promise<UserRecord[]> => {
     try {
         const listUsersResult = await adminAuth.listUsers(1000); // 1000 is the max limit per page
-        return listUsersResult.users;
+        // Convert complex AdminUserRecord to simple, serializable UserRecord objects
+        const plainUsers: UserRecord[] = listUsersResult.users.map((u: AdminUserRecord) => ({
+            uid: u.uid,
+            email: u.email,
+            displayName: u.displayName,
+            photoURL: u.photoURL,
+            disabled: u.disabled,
+        }));
+        return plainUsers;
     } catch (error) {
         console.error("Error fetching all auth users:", error);
         throw new Error("No se pudo obtener la lista de usuarios de Authentication.");

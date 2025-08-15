@@ -14,10 +14,10 @@ import { getAllUsers, updateUserRoles, createProfileForUser } from '@/lib/users'
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Save, Users } from 'lucide-react';
-import { getAllAuthUsers } from '@/app/actions';
+import { getAllAuthUsers, UserRecord } from '@/app/actions';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import type { UserRecord } from 'firebase-admin/auth';
+
 
 type CombinedUser = {
   auth: UserRecord;
