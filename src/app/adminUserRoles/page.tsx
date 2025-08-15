@@ -56,6 +56,7 @@ export default function AdminUserRolesPage() {
   const [userToManage, setUserToManage] = useState<CombinedUser | null>(null);
   const [rolesForManagedUser, setRolesForManagedUser] = useState<string[]>([]);
   const [fullNameForManagedUser, setFullNameForManagedUser] = useState('');
+  const [fullNameError, setFullNameError] = useState<string | null>(null);
   
   const form = useForm({
     defaultValues: filterSchema,
@@ -153,12 +154,14 @@ export default function AdminUserRolesPage() {
     setUserToManage(user);
     setRolesForManagedUser(user.profile?.roles || []);
     setFullNameForManagedUser(user.profile?.fullName || user.auth.displayName || '');
+    setFullNameError(null);
   };
 
   const closeRoleManager = () => {
     setUserToManage(null);
     setRolesForManagedUser([]);
     setFullNameForManagedUser('');
+    setFullNameError(null);
   };
 
   const handleRoleChange = (roleId: string, checked: boolean | 'indeterminate') => {
@@ -175,10 +178,11 @@ export default function AdminUserRolesPage() {
   const handleSaveChanges = async () => {
     if (!userToManage) return;
 
-    if (!userToManage.profile && !fullNameForManagedUser) {
+    if (!userToManage.profile && !fullNameForManagedUser.trim()) {
+        setFullNameError("El nombre y apellidos son requeridos.");
         toast({
-            title: "Campo requerido",
-            description: "El nombre y apellidos son requeridos para crear un perfil.",
+            title: "Campo obligatorio",
+            description: "Debe indicar el nombre y apellidos para crear el perfil.",
             variant: "destructive",
         });
         return;
@@ -203,6 +207,7 @@ export default function AdminUserRolesPage() {
         });
       }
       await refreshUsersAfterSave();
+      closeRoleManager();
     } catch (error: any) {
          toast({
             title: "Error al guardar",
@@ -211,7 +216,6 @@ export default function AdminUserRolesPage() {
         });
     } finally {
         setIsSaving(false);
-        closeRoleManager();
     }
   };
 
@@ -330,7 +334,9 @@ export default function AdminUserRolesPage() {
               <>
                 {filteredUsers.length > 0 ? (
                     <CardContent className="mt-6 border-t pt-6">
-                        <CardTitle className="text-xl mb-4">Usuarios del sistema</CardTitle>
+                        <CardDescription className="mb-4">
+                            Mostrando {filteredUsers.length} de {combinedUsers.length} usuarios.
+                        </CardDescription>
                         <div className="rounded-md border">
                             <Table>
                                 <TableHeader>
@@ -412,14 +418,22 @@ export default function AdminUserRolesPage() {
                     <div className="space-y-4 py-4">
                         {!userToManage.profile && (
                              <div>
-                                <Label htmlFor="fullName">Nombre y Apellidos</Label>
+                                <Label htmlFor="fullName" className={cn(fullNameError && "text-destructive")}>
+                                  Nombre y Apellidos
+                                </Label>
                                 <Input 
                                     id="fullName"
                                     value={fullNameForManagedUser}
-                                    onChange={(e) => setFullNameForManagedUser(e.target.value)}
+                                    onChange={(e) => {
+                                        setFullNameForManagedUser(e.target.value);
+                                        if (e.target.value.trim()) {
+                                            setFullNameError(null);
+                                        }
+                                    }}
                                     placeholder="John Doe"
-                                    className="mt-2"
+                                    className={cn("mt-2", fullNameError && "border-destructive focus-visible:ring-destructive")}
                                 />
+                                {fullNameError && <p className="text-sm font-medium text-destructive mt-2">{fullNameError}</p>}
                             </div>
                         )}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -449,3 +463,4 @@ export default function AdminUserRolesPage() {
     </div>
   );
 }
+
