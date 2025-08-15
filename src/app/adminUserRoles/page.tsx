@@ -1,8 +1,9 @@
 
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
 import { useAuth } from '@/lib/auth';
 import { PageHeader } from '@/components/page-header';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -15,16 +16,25 @@ import { getAllUsers, updateUserRoles, createProfileForUser } from '@/lib/users'
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Save, Users } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
+import { Save, Users, Filter } from 'lucide-react';
 import { getAllAuthUsers, UserRecord } from '@/app/actions';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-
 
 type CombinedUser = {
   auth: UserRecord;
   profile: UserProfile | null;
 };
+
+const filterSchema = {
+  email: '',
+  fullName: '',
+  role: '',
+};
+
+const USERS_PER_PAGE = 1;
 
 export default function AdminUserRolesPage() {
   const { user, loading } = useAuth();
@@ -33,6 +43,8 @@ export default function AdminUserRolesPage() {
   
   const [allRoles, setAllRoles] = useState<Role[]>([]);
   const [combinedUsers, setCombinedUsers] = useState<CombinedUser[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<CombinedUser[]>([]);
+  const [currentPage, setCurrentPage] = useState(0);
   
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState<string | boolean>(false);
@@ -41,7 +53,10 @@ export default function AdminUserRolesPage() {
   const [userToManage, setUserToManage] = useState<CombinedUser | null>(null);
   const [rolesForManagedUser, setRolesForManagedUser] = useState<string[]>([]);
   const [fullNameForManagedUser, setFullNameForManagedUser] = useState('');
-
+  
+  const form = useForm({
+    defaultValues: filterSchema,
+  });
 
   useEffect(() => {
     if (!loading && !user) {
@@ -71,6 +86,8 @@ export default function AdminUserRolesPage() {
 
   const handleFetchUsers = async () => {
     setIsFetching(true);
+    setFilteredUsers([]);
+    setCurrentPage(0);
     try {
         const [authUsers, firestoreUsers] = await Promise.all([
             getAllAuthUsers(),
@@ -85,6 +102,7 @@ export default function AdminUserRolesPage() {
         }));
         
         setCombinedUsers(combined);
+        setFilteredUsers(combined);
         
     } catch (error: any) {
         toast({
@@ -97,10 +115,35 @@ export default function AdminUserRolesPage() {
     }
   };
 
+  const handleFilterSubmit = (filters: typeof filterSchema) => {
+    setCurrentPage(0);
+    let results = combinedUsers;
+
+    if (filters.email) {
+        results = results.filter(u => u.auth.email?.toLowerCase().includes(filters.email.toLowerCase()));
+    }
+    if (filters.fullName) {
+        results = results.filter(u => u.profile?.fullName.toLowerCase().includes(filters.fullName.toLowerCase()));
+    }
+    if (filters.role) {
+        results = results.filter(u => u.profile?.roles.includes(filters.role));
+    }
+    
+    setFilteredUsers(results);
+  };
+  
+  const paginatedUsers = useMemo(() => {
+    const start = currentPage * USERS_PER_PAGE;
+    const end = start + USERS_PER_PAGE;
+    return filteredUsers.slice(start, end);
+  }, [filteredUsers, currentPage]);
+
+  const totalPages = Math.ceil(filteredUsers.length / USERS_PER_PAGE);
+
   const openRoleManager = (user: CombinedUser) => {
     setUserToManage(user);
     setRolesForManagedUser(user.profile?.roles || []);
-    setFullNameForManagedUser(user.profile?.fullName || '');
+    setFullNameForManagedUser(user.profile?.fullName || user.auth.displayName || '');
   };
 
   const closeRoleManager = () => {
@@ -135,7 +178,6 @@ export default function AdminUserRolesPage() {
     setIsSaving(userToManage.auth.uid);
     try {
       if (userToManage.profile) {
-        // User exists, update roles
         await updateUserRoles(userToManage.auth.uid, rolesForManagedUser);
         toast({
             title: "Roles actualizados",
@@ -144,7 +186,6 @@ export default function AdminUserRolesPage() {
             className: "bg-accent text-accent-foreground",
         });
       } else {
-        // User does not have a profile, create it
         await createProfileForUser(userToManage.auth.uid, userToManage.auth.email!, fullNameForManagedUser, rolesForManagedUser);
         toast({
             title: "Perfil Creado",
@@ -152,7 +193,6 @@ export default function AdminUserRolesPage() {
             variant: "default",
         });
       }
-      // Refetch all users to update the UI
       handleFetchUsers();
     } catch (error: any) {
          toast({
@@ -201,6 +241,69 @@ export default function AdminUserRolesPage() {
             </CardContent>
 
             {combinedUsers.length > 0 && (
+              <CardContent className="border-t pt-6">
+                  <Form {...form}>
+                    <form onSubmit={form.handleSubmit(handleFilterSubmit)} className="space-y-6">
+                      <CardTitle className="text-xl">Filtros</CardTitle>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <FormField
+                          control={form.control}
+                          name="email"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Email</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Filtrar por email..." {...field} />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="fullName"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Nombre y Apellidos</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Filtrar por nombre..." {...field} />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="role"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Rol</FormLabel>
+                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Filtrar por rol..." />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="">Todos</SelectItem>
+                                  {allRoles.map(role => (
+                                    <SelectItem key={role.id} value={role.id}>{role.name}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                       <Button type="submit">
+                          <Filter className="mr-2 h-4 w-4" />
+                          Filtrar usuarios
+                       </Button>
+                    </form>
+                  </Form>
+              </CardContent>
+            )}
+
+
+            {filteredUsers.length > 0 && (
                 <CardContent className="mt-6 border-t pt-6">
                     <CardTitle className="text-xl mb-4">Usuarios del sistema</CardTitle>
                     <div className="rounded-md border">
@@ -214,7 +317,7 @@ export default function AdminUserRolesPage() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {combinedUsers.map((combinedUser) => (
+                                {paginatedUsers.map((combinedUser) => (
                                     <TableRow key={combinedUser.auth.uid}>
                                         <TableCell className="font-medium">{combinedUser.auth.email}</TableCell>
                                         <TableCell>{combinedUser.profile?.fullName || <span className="text-muted-foreground italic">N/A</span>}</TableCell>
@@ -240,6 +343,24 @@ export default function AdminUserRolesPage() {
                             </TableBody>
                         </Table>
                     </div>
+                     <div className="flex items-center justify-between mt-4">
+                        <p className="text-sm text-muted-foreground">
+                            Página {currentPage + 1} de {totalPages}
+                        </p>
+                        <div className="flex items-center gap-2">
+                            <Button variant="outline" onClick={() => setCurrentPage(p => Math.max(0, p - 1))} disabled={currentPage === 0}>
+                                Anterior
+                            </Button>
+                            <Button variant="outline" onClick={() => setCurrentPage(p => Math.min(totalPages - 1, p + 1))} disabled={currentPage >= totalPages - 1}>
+                                Siguiente
+                            </Button>
+                        </div>
+                    </div>
+                </CardContent>
+            )}
+             {combinedUsers.length > 0 && filteredUsers.length === 0 && (
+                <CardContent className="text-center py-10">
+                    <p className="text-muted-foreground">No se encontraron usuarios con los filtros especificados.</p>
                 </CardContent>
             )}
         </Card>
@@ -296,3 +417,5 @@ export default function AdminUserRolesPage() {
     </div>
   );
 }
+
+    
