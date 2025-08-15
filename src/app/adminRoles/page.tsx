@@ -216,7 +216,6 @@ export default function AdminRolesPage() {
                             <TableHeader>
                                 <TableRow>
                                     <TableHead className="w-[50px]"></TableHead>
-                                    <TableHead>ID</TableHead>
                                     <TableHead>Nombre</TableHead>
                                     <TableHead>Descripción</TableHead>
                                     <TableHead>Activo</TableHead>
@@ -236,7 +235,6 @@ export default function AdminRolesPage() {
                                                 </AlertDialogTrigger>
                                             </AlertDialog>
                                         </TableCell>
-                                        <TableCell>{role.id}</TableCell>
                                         <TableCell>{role.name}</TableCell>
                                         <TableCell>{role.description}</TableCell>
                                         <TableCell>{role.isActive ? 'Sí' : 'No'}</TableCell>
