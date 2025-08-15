@@ -1,14 +1,15 @@
 "use client";
 
 import { useAuth, signOutUser } from '@/lib/auth.tsx';
-import { Building2, LogOut, ShoppingCart, List, UserCog, AppWindow, UserCheck, Users, Users2, Library, Beaker } from 'lucide-react';
+import { Building2, LogOut, ShoppingCart, List, Shield, LayoutDashboard } from 'lucide-react';
 import { Button } from './ui/button';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import { availableApps } from '@/lib/apps';
 
 export function PageHeader() {
-  const { user } = useAuth();
+  const { user, isAdministrator } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -17,16 +18,7 @@ export function PageHeader() {
     router.push('/login');
   };
 
-  const navLinks = [
-    { href: '/purchaseRequisition', label: 'Solicitud de productos', icon: List },
-    { href: '/adminPurchasing', label: 'Administración de compras', icon: ShoppingCart },
-    { href: '/adminCatalogFamilies', label: 'Asignación de catálogos a familias', icon: Library },
-    { href: '/adminRoles', label: 'Administración de Roles', icon: UserCog },
-    { href: '/adminRoleApps', label: 'Asignación de Aplicaciones', icon: AppWindow },
-    { href: '/adminUserRoles', label: 'Asignación de Roles a Usuarios', icon: UserCheck },
-    { href: '/adminUsers', label: 'Gestión de Usuarios', icon: Users },
-    { href: '/prueba', label: 'Prueba', icon: Beaker },
-  ]
+  const navLinks = availableApps.filter(app => !app.isAdmin);
 
   return (
     <header className="bg-card border-b shadow-sm sticky top-0 z-10">
@@ -41,6 +33,14 @@ export function PageHeader() {
           {user && (
             <div className="flex items-center space-x-4">
                 <span className="text-sm text-muted-foreground hidden sm:inline-block">{user.email}</span>
+                {isAdministrator && (
+                    <Button variant={pathname.startsWith('/admin') ? 'default' : 'ghost'} asChild>
+                        <Link href="/admin">
+                            <Shield className="mr-2 h-4 w-4" />
+                            Panel de Administración
+                        </Link>
+                    </Button>
+                )}
                 <Button variant="ghost" size="icon" onClick={handleSignOut}>
                     <LogOut className="h-5 w-5" />
                     <span className="sr-only">Cerrar sesión</span>
@@ -49,19 +49,19 @@ export function PageHeader() {
           )}
         </div>
       </div>
-       {user && (
+       {user && !pathname.startsWith('/admin') && (
           <div className="border-t">
               <nav className="mx-auto px-4 sm:px-6 lg:px-8 flex items-center space-x-2 h-12 overflow-x-auto">
                  {navLinks.map((link) => (
                     <Button 
-                      key={link.href}
-                      variant={pathname === link.href ? 'default' : 'ghost'}
+                      key={link.id}
+                      variant={pathname === link.id ? 'default' : 'ghost'}
                       asChild
                       className="shrink-0"
                     >
-                       <Link href={link.href}>
+                       <Link href={link.id}>
                         <link.icon className="mr-2 h-4 w-4" />
-                        {link.label}
+                        {link.name}
                       </Link>
                     </Button>
                   ))}

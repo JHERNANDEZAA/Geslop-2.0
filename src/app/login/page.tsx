@@ -22,28 +22,13 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       await signInWithEmail(email, password);
-      router.push('/adminPurchasing');
+      router.push('/purchaseRequisition');
     } catch (error: any) {
-      // Try to sign up if sign in fails (user not found)
-      if (error.code === 'auth/user-not-found') {
-        try {
-          await signUpWithEmail(email, password);
-          router.push('/adminPurchasing');
-        } catch (signupError: any)
-{
-          toast({
-            title: 'Error',
-            description: signupError.message,
-            variant: 'destructive',
-          });
-        }
-      } else {
         toast({
-          title: 'Error',
-          description: error.message,
+          title: 'Error de inicio de sesión',
+          description: "El correo electrónico o la contraseña son incorrectos. Por favor, inténtelo de nuevo.",
           variant: 'destructive',
         });
-      }
     } finally {
       setIsLoading(false);
     }
@@ -57,7 +42,7 @@ export default function LoginPage() {
             <CardHeader>
                 <CardTitle className="text-2xl">Login</CardTitle>
                 <CardDescription>
-                Introduce tu correo electrónico para iniciar sesión en tu cuenta. Si no existe, se creará una.
+                 Introduce tu correo electrónico y contraseña para iniciar sesión.
                 </CardDescription>
             </CardHeader>
             <CardContent>

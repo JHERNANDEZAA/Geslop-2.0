@@ -1,14 +1,34 @@
-
 import { db } from './firebase';
 import { doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import type { UserProfile } from './types';
+import { getRoleByIds } from './roles';
 
-export const getOrCreateUserProfile = async (uid: string, email: string, fullName: string): Promise<UserProfile> => {
+export const getUserProfile = async (uid: string): Promise<UserProfile | null> => {
     const userRef = doc(db, 'users', uid);
     const userSnap = await getDoc(userRef);
 
     if (userSnap.exists()) {
         const userProfile = userSnap.data() as UserProfile;
+        
+        // Check if any of the user's roles are administrator roles
+        if (userProfile.roles && userProfile.roles.length > 0) {
+            const roles = await getRoleByIds(userProfile.roles);
+            userProfile.isAdministrator = roles.some(role => role.isAdministrator);
+        } else {
+            userProfile.isAdministrator = false;
+        }
+        
+        return userProfile;
+    } else {
+        return null;
+    }
+};
+
+
+export const getOrCreateUserProfile = async (uid: string, email: string, fullName: string): Promise<UserProfile> => {
+    const userProfile = await getUserProfile(uid);
+
+    if (userProfile) {
         return userProfile;
     } else {
         const newUserProfile: UserProfile = {
@@ -17,8 +37,9 @@ export const getOrCreateUserProfile = async (uid: string, email: string, fullNam
             fullName,
             roles: [],
         };
+        const userRef = doc(db, 'users', uid);
         await setDoc(userRef, newUserProfile);
-        return newUserProfile;
+        return { ...newUserProfile, isAdministrator: false };
     }
 };
 

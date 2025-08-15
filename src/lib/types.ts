@@ -1,4 +1,3 @@
-
 export type Center = {
   id: string;
   name: string;
@@ -103,6 +102,8 @@ export type AppDefinition = {
   id: string;
   name: string;
   description: string;
+  icon: React.ElementType;
+  isAdmin?: boolean;
 };
 
 export type UserProfile = {
@@ -110,6 +111,7 @@ export type UserProfile = {
   email: string;
   fullName: string;
   roles: string[]; // Array of role IDs
+  isAdministrator?: boolean;
 };
 
 export interface ServiceAccount {

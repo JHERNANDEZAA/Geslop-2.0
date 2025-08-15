@@ -1,5 +1,5 @@
 import { db } from './firebase';
-import { doc, setDoc, collection, getDocs, deleteDoc, getDoc, runTransaction, updateDoc } from 'firebase/firestore';
+import { doc, setDoc, collection, getDocs, deleteDoc, getDoc, runTransaction, updateDoc, query, where } from 'firebase/firestore';
 import type { Role } from './types';
 import { format } from 'date-fns';
 
@@ -51,6 +51,25 @@ export const getAllRoles = async (): Promise<Role[]> => {
         throw new Error("No se pudo obtener la lista de roles.");
     }
 };
+
+export const getRoleByIds = async (roleIds: string[]): Promise<Role[]> => {
+    if (!roleIds || roleIds.length === 0) {
+        return [];
+    }
+    const rolesRef = collection(db, 'roles');
+    const q = query(rolesRef, where('id', 'in', roleIds));
+    try {
+        const querySnapshot = await getDocs(q);
+        const results: Role[] = [];
+        querySnapshot.forEach((doc) => {
+            results.push(doc.data() as Role);
+        });
+        return results;
+    } catch (error) {
+        console.error("Error getting roles by IDs: ", error);
+        throw new Error("No se pudieron obtener los roles.");
+    }
+}
 
 export const deleteRole = async (roleId: string): Promise<void> => {
     const roleRef = doc(db, 'roles', roleId);
