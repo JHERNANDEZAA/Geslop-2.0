@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth, signOutUser } from '@/lib/auth.tsx';
-import { Building2, LogOut, ShoppingCart, List, UserCog, AppWindow, UserCheck } from 'lucide-react';
+import { Building2, LogOut, ShoppingCart, List, UserCog, AppWindow, UserCheck, Users } from 'lucide-react';
 import { Button } from './ui/button';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
@@ -23,6 +23,7 @@ export function PageHeader() {
     { href: '/adminRoles', label: 'Administración de Roles', icon: UserCog },
     { href: '/adminRoleApps', label: 'Asignación de Aplicaciones', icon: AppWindow },
     { href: '/adminUserRoles', label: 'Asignación de Roles a Usuarios', icon: UserCheck },
+    { href: '/adminUsers', label: 'Gestión de Usuarios', icon: Users },
   ]
 
   return (

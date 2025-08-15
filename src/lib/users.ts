@@ -44,7 +44,11 @@ export const findUserByEmail = async (email: string): Promise<UserProfile | null
             return null;
         }
         // Assuming email is unique, return the first found user
-        return querySnapshot.docs[0].data() as UserProfile;
+        const userDoc = querySnapshot.docs[0];
+        return {
+            uid: userDoc.id,
+            ...userDoc.data()
+        } as UserProfile;
     } catch (error) {
         console.error("Error finding user by email: ", error);
         throw new Error("No se pudo buscar el usuario.");
@@ -76,3 +80,21 @@ export const updateUserRoles = async (uid: string, roles: string[]): Promise<voi
         throw new Error("No se pudieron actualizar los roles del usuario.");
     }
 };
+
+export const getAllUsers = async (): Promise<UserProfile[]> => {
+    const usersRef = collection(db, 'users');
+    try {
+        const querySnapshot = await getDocs(usersRef);
+        const users: UserProfile[] = [];
+        querySnapshot.forEach((doc) => {
+            users.push({
+                uid: doc.id,
+                ...doc.data()
+            } as UserProfile);
+        });
+        return users;
+    } catch (error) {
+        console.error("Error getting all users: ", error);
+        throw new Error("No se pudo obtener la lista de usuarios.");
+    }
+}
