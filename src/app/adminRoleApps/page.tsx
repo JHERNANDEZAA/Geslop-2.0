@@ -158,39 +158,48 @@ export default function AdminRoleAppsPage() {
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead className="font-bold text-lg text-foreground w-[250px]">Rol</TableHead>
-                                <TableHead className="text-center w-[150px]">Administrador</TableHead>
-                                {availableApps.map(app => (
-                                    <TableHead key={app.id} className="text-center">{app.name}</TableHead>
+                                <TableHead className="font-bold text-lg text-foreground w-[350px]">Aplicación</TableHead>
+                                {roles.map(role => (
+                                    <TableHead key={role.id} className="text-center">{role.name}</TableHead>
                                 ))}
                             </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {roles.map((role) => {
-                                const isAdministrator = adminRoles[role.id];
-                                const roleApps = isAdministrator ? availableApps.map(a => a.id) : (assignedApps[role.id] || []);
-                                
-                                return (
-                                <TableRow key={role.id}>
-                                    <TableCell className="font-medium">{role.name}</TableCell>
-                                    <TableCell className="text-center">
+                            <TableRow>
+                                <TableHead className="font-medium">Administrador</TableHead>
+                                {roles.map(role => (
+                                    <TableCell key={`${role.id}-admin`} className="text-center">
                                         <Switch
-                                            checked={isAdministrator}
+                                            checked={adminRoles[role.id]}
                                             onCheckedChange={(checked) => handleAdminSwitchChange(role.id, checked)}
                                             aria-label={`Marcar ${role.name} como administrador`}
                                         />
                                     </TableCell>
-                                    {availableApps.map(app => (
-                                        <TableCell key={app.id} className="text-center">
-                                            <Checkbox
-                                                id={`checkbox-${role.id}-${app.id}`}
-                                                checked={roleApps.includes(app.id)}
-                                                onCheckedChange={(checked) => handleCheckboxChange(role.id, app.id, checked)}
-                                                aria-label={`Asignar ${app.name} a ${role.name}`}
-                                                disabled={isAdministrator}
-                                            />
-                                        </TableCell>
-                                    ))}
+                                ))}
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {availableApps.map((app) => {
+                                return (
+                                <TableRow key={app.id}>
+                                    <TableCell className="font-medium">
+                                        <div>{app.name}</div>
+                                        <div className="text-xs text-muted-foreground">{app.description}</div>
+                                    </TableCell>
+                                    {roles.map(role => {
+                                        const isAdministrator = adminRoles[role.id];
+                                        const roleApps = isAdministrator ? availableApps.map(a => a.id) : (assignedApps[role.id] || []);
+
+                                        return (
+                                            <TableCell key={`${app.id}-${role.id}`} className="text-center">
+                                                <Checkbox
+                                                    id={`checkbox-${role.id}-${app.id}`}
+                                                    checked={roleApps.includes(app.id)}
+                                                    onCheckedChange={(checked) => handleCheckboxChange(role.id, app.id, checked)}
+                                                    aria-label={`Asignar ${app.name} a ${role.name}`}
+                                                    disabled={isAdministrator}
+                                                />
+                                            </TableCell>
+                                        )
+                                    })}
                                 </TableRow>
                             )})}
                         </TableBody>
