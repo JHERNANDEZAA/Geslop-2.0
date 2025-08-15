@@ -159,14 +159,10 @@ export default function AdminRoleAppsPage() {
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead className="w-[350px]"></TableHead>
+                                <TableHead className="w-[350px]">Aplicación</TableHead>
                                 {roles.map(role => (
                                     <TableHead key={role.id} className="text-center">{role.name}</TableHead>
                                 ))}
-                            </TableRow>
-                            <TableRow>
-                                <TableCell colSpan={1} className="font-medium">Aplicación</TableCell>
-                                <TableCell colSpan={roles.length > 0 ? roles.length : 1}></TableCell>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
