@@ -10,8 +10,6 @@ export const availableApps: AppDefinition[] = [
     { id: '/admin/user-roles', name: 'Asignación de Roles a Usuarios', description: 'Permite asignar roles a los usuarios.', icon: UserCheck, isAdmin: true },
     { id: '/admin/users', name: 'Gestión de Usuarios', description: 'Permite crear y gestionar los usuarios del sistema.', icon: Users, isAdmin: true },
     { id: '/admin/catalog-families', name: 'Asignación catálogos a familias', description: 'Permite asignar catálogos a las familias de productos.', icon: Library, isAdmin: true },
-    { id: '/admin/prueba', name: 'Prueba', description: 'Página de prueba.', icon: Beaker, isAdmin: true },
-    { id: '/admin/prueba2', name: 'Prueba 2', description: 'Página de prueba 2.', icon: Beaker, isAdmin: true },
 ];
 
 export const getAllApps = async (): Promise<AppDefinition[]> => {
