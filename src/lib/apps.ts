@@ -5,14 +5,19 @@ import type { AppDefinition, AppDefinitionDB } from './types';
 import * as LucideIcons from 'lucide-react';
 
 // Admin apps are still hardcoded as they are essential for the system's administration.
-export const adminApps: AppDefinition[] = [
-    { id: '/admin/roles', name: 'Administración de Roles', description: 'Permite crear y gestionar los roles de usuario.', iconName: 'UserCog', isAdmin: true },
-    { id: '/admin/role-apps', name: 'Asignación de Aplicaciones', description: 'Permite asignar aplicaciones a los diferentes roles.', iconName: 'AppWindow', isAdmin: true },
-    { id: '/admin/user-roles', name: 'Asignación de Roles a Usuarios', description: 'Permite asignar roles a los usuarios.', iconName: 'UserCheck', isAdmin: true },
-    { id: '/admin/users', name: 'Gestión de Usuarios', description: 'Permite crear y gestionar los usuarios del sistema.', iconName: 'Users', isAdmin: true },
-    { id: '/admin/catalog-families', name: 'Asignación catálogos a familias', description: 'Permite asignar catálogos a las familias de productos.', iconName: 'Library', isAdmin: true },
-    { id: '/admin/apps', name: 'Gestión de Aplicaciones', description: 'Permite la gestión de las aplicaciones del sistema', iconName: 'AppWindow', isAdmin: true },
+const adminAppsConfig: Omit<AppDefinitionDB, 'id'>[] = [
+    { name: 'Administración de Roles', description: 'Permite crear y gestionar los roles de usuario.', iconName: 'UserCog', isAdmin: true, route: '/admin/roles' },
+    { name: 'Asignación de Aplicaciones', description: 'Permite asignar aplicaciones a los diferentes roles.', iconName: 'AppWindow', isAdmin: true, route: '/admin/role-apps' },
+    { name: 'Asignación de Roles a Usuarios', description: 'Permite asignar roles a los usuarios.', iconName: 'UserCheck', isAdmin: true, route: '/admin/user-roles' },
+    { name: 'Gestión de Usuarios', description: 'Permite crear y gestionar los usuarios del sistema.', iconName: 'Users', isAdmin: true, route: '/admin/users' },
+    { name: 'Asignación catálogos a familias', description: 'Permite asignar catálogos a las familias de productos.', iconName: 'Library', isAdmin: true, route: '/admin/catalog-families' },
+    { name: 'Gestión de Aplicaciones', description: 'Permite la gestión de las aplicaciones del sistema', iconName: 'AppWindow', isAdmin: true, route: '/admin/apps' },
 ];
+
+const adminApps: AppDefinitionDB[] = adminAppsConfig.map(app => ({
+    ...app,
+    id: app.route,
+}));
 
 const iconMap: Record<string, React.ElementType> = LucideIcons;
 
@@ -23,13 +28,9 @@ const mapAppDefinition = (app: AppDefinitionDB): AppDefinition => {
     };
 }
 
-export const getAppsFromDB = async (includeAdmin: boolean = false): Promise<AppDefinition[]> => {
+export const getAppsFromDB = async (): Promise<AppDefinition[]> => {
     const appsRef = collection(db, 'apps');
-    const constraints = [];
-    if (!includeAdmin) {
-        // This is not longer needed, we will return all apps
-    }
-    const q = query(appsRef, ...constraints);
+    const q = query(appsRef);
     
     try {
         const querySnapshot = await getDocs(q);
@@ -44,8 +45,8 @@ export const getAppsFromDB = async (includeAdmin: boolean = false): Promise<AppD
 
 export const getAllApps = async (): Promise<AppDefinition[]> => {
     try {
-        const dbApps = await getAppsFromDB(true);
-        const allApps = [...adminApps, ...dbApps];
+        const dbApps = await getAppsFromDB();
+        const allApps = [...adminApps.map(mapAppDefinition), ...dbApps];
         const uniqueApps = Array.from(new Map(allApps.map(app => [app.id, app])).values());
         return uniqueApps.sort((a,b) => a.name.localeCompare(b.name));
     } catch (error) {
@@ -55,7 +56,8 @@ export const getAllApps = async (): Promise<AppDefinition[]> => {
 }
 
 export const getAllAdminApps = async (): Promise<AppDefinition[]> => {
-    return Promise.resolve(adminApps.sort((a,b) => a.name.localeCompare(b.name)));
+    const mappedAdminApps = adminApps.map(mapAppDefinition);
+    return Promise.resolve(mappedAdminApps.sort((a,b) => a.name.localeCompare(b.name)));
 }
 
 export const getAppsForUser = async (userProfile: import('./types').UserProfile | null): Promise<AppDefinition[]> => {
@@ -119,3 +121,4 @@ export const deleteApp = async (appId: string): Promise<void> => {
         throw new Error("No se pudo eliminar la aplicación.");
     }
 };
+

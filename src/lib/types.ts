@@ -104,6 +104,11 @@ export type AppDefinition = {
   description: string;
   icon: React.ElementType;
   isAdmin?: boolean;
+  route: string;
+};
+
+export type AppDefinitionDB = Omit<AppDefinition, 'icon'> & {
+    iconName: string;
 };
 
 export type UserProfile = {
