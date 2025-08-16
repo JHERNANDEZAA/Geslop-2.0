@@ -239,43 +239,59 @@ export default function AdminAppsPage() {
                     </form>
                 </Form>
             </Card>
-            <Card>
-                <CardHeader><CardTitle>Aplicaciones en Base de Datos</CardTitle></CardHeader>
-                <CardContent>
-                  {isLoading ? <Skeleton className="h-48 w-full" /> : (
-                    <div className="rounded-md border">
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Nombre</TableHead>
-                                    <TableHead>Ruta</TableHead>
-                                    <TableHead>Es Admin</TableHead>
-                                    <TableHead className="text-right">Acciones</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {dbApps.map((app) => (
-                                    <TableRow key={app.id}>
-                                        <TableCell className="font-medium flex flex-col">
-                                          {app.name}
-                                          {isInconsistent(app.route) && <Badge variant="destructive" className="w-fit mt-1">Inconsistente</Badge>}
-                                        </TableCell>
-                                        <TableCell>{app.route}</TableCell>
-                                        <TableCell>{app.isAdmin ? 'Sí' : 'No'}</TableCell>
-                                        <TableCell className="text-right space-x-2">
-                                            <Button variant="outline" size="icon" onClick={() => handleEdit(app)}><Pencil className="h-4 w-4" /></Button>
-                                            <AlertDialogTrigger asChild>
-                                                <Button variant="destructive" size="icon" onClick={() => setAppToDelete(app)}><Trash2 className="h-4 w-4" /></Button>
-                                            </AlertDialogTrigger>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </div>
-                  )}
-                </CardContent>
-            </Card>
+            <AlertDialog>
+              <Card>
+                  <CardHeader><CardTitle>Aplicaciones en Base de Datos</CardTitle></CardHeader>
+                  <CardContent>
+                    {isLoading ? <Skeleton className="h-48 w-full" /> : (
+                      <div className="rounded-md border">
+                          <Table>
+                              <TableHeader>
+                                  <TableRow>
+                                      <TableHead>Nombre</TableHead>
+                                      <TableHead>Ruta</TableHead>
+                                      <TableHead>Es Admin</TableHead>
+                                      <TableHead className="text-right">Acciones</TableHead>
+                                  </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                  {dbApps.map((app) => (
+                                      <TableRow key={app.id}>
+                                          <TableCell className="font-medium flex flex-col">
+                                            {app.name}
+                                            {isInconsistent(app.route) && <Badge variant="destructive" className="w-fit mt-1">Inconsistente</Badge>}
+                                          </TableCell>
+                                          <TableCell>{app.route}</TableCell>
+                                          <TableCell>{app.isAdmin ? 'Sí' : 'No'}</TableCell>
+                                          <TableCell className="text-right space-x-2">
+                                              <Button variant="outline" size="icon" onClick={() => handleEdit(app)}><Pencil className="h-4 w-4" /></Button>
+                                              <AlertDialogTrigger asChild>
+                                                  <Button variant="destructive" size="icon" onClick={() => setAppToDelete(app)}><Trash2 className="h-4 w-4" /></Button>
+                                              </AlertDialogTrigger>
+                                          </TableCell>
+                                      </TableRow>
+                                  ))}
+                              </TableBody>
+                          </Table>
+                      </div>
+                    )}
+                  </CardContent>
+              </Card>
+               {appToDelete && (
+                  <AlertDialogContent>
+                      <AlertDialogHeader>
+                          <AlertDialogTitle>¿Está seguro que desea eliminar esta aplicación?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                              Esta acción no se puede deshacer y eliminará permanentemente la aplicación <span className="font-bold">{appToDelete.name}</span>.
+                          </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                          <AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90">Eliminar</AlertDialogAction>
+                      </AlertDialogFooter>
+                  </AlertDialogContent>
+              )}
+            </AlertDialog>
         </div>
       </TabsContent>
       <TabsContent value="inconsistencies">
@@ -328,24 +344,6 @@ export default function AdminAppsPage() {
             </CardContent>
         </Card>
       </TabsContent>
-
-      {appToDelete && (
-          <AlertDialog open={!!appToDelete} onOpenChange={(open) => !open && setAppToDelete(null)}>
-              <AlertDialogContent>
-                  <AlertDialogHeader>
-                      <AlertDialogTitle>¿Está seguro que desea eliminar esta aplicación?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                          Esta acción no se puede deshacer y eliminará permanentemente la aplicación <span className="font-bold">{appToDelete.name}</span>.
-                      </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                      <AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90">Eliminar</AlertDialogAction>
-                  </AlertDialogFooter>
-              </AlertDialogContent>
-          </AlertDialog>
-      )}
     </Tabs>
   );
 }
-
