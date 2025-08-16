@@ -11,6 +11,11 @@ import { useToast } from '@/hooks/use-toast';
 import { getAllHardcodedApps, getAppsFromDB, saveApp } from '@/lib/apps';
 import type { AppDefinition, App } from '@/lib/types';
 
+// Function to create a Firestore-safe ID from a route
+const createAppId = (route: string) => {
+    return route.replace(/\//g, '-');
+}
+
 export default function AdminAppsPage() {
   const [hardcodedApps, setHardcodedApps] = useState<AppDefinition[]>([]);
   const [dbApps, setDbApps] = useState<App[]>([]);
@@ -46,10 +51,11 @@ export default function AdminAppsPage() {
     setIsSaving(app.id);
     try {
       const appToSave: App = {
-        id: app.route,
+        // The ID for the object to save is the original route from AppDefinition
+        id: app.id,
         name: app.name,
         description: app.description,
-        iconName: app.icon.displayName || 'AppWindow', 
+        iconName: (app.icon as any).displayName || 'AppWindow', 
         isAdmin: app.isAdmin || false,
         route: app.route,
       };
@@ -74,7 +80,9 @@ export default function AdminAppsPage() {
   };
 
   const isAppInDb = (appId: string) => {
-    return dbApps.some(dbApp => dbApp.id === appId);
+    // Convert route to Firestore-safe ID before checking
+    const firestoreSafeId = createAppId(appId);
+    return dbApps.some(dbApp => dbApp.id === firestoreSafeId);
   };
 
   if (isLoading) {

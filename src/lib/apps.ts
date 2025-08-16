@@ -6,7 +6,6 @@ import { getRoleByIds } from './roles';
 import { collection, getDocs, doc, setDoc } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 
-
 const hardcodedAdminAppsConfig: Omit<AppDefinitionDB, 'id'>[] = [
     { name: 'Administración de Roles', description: 'Permite crear y gestionar los roles de usuario.', iconName: 'UserCog', isAdmin: true, route: '/admin/roles' },
     { name: 'Asignación de Aplicaciones', description: 'Permite asignar aplicaciones a los diferentes roles.', iconName: 'AppWindow', isAdmin: true, route: '/admin/role-apps' },
@@ -28,6 +27,11 @@ const mapAppDefinition = (app: AppDefinitionDB): AppDefinition => {
         ...app,
         icon: iconMap[app.iconName] || LucideIcons.AppWindow,
     };
+}
+
+// Function to create a Firestore-safe ID from a route
+const createAppId = (route: string) => {
+    return route.replace(/\//g, '-');
 }
 
 export const getAllHardcodedApps = (): AppDefinition[] => {
@@ -59,10 +63,14 @@ export const saveApp = async (app: App): Promise<{ success: boolean; message?: s
     if (!currentUser) {
         throw new Error("Usuario no autenticado. Por favor, inicie sesión.");
     }
+    
+    // Use a Firestore-safe ID
+    const firestoreSafeId = createAppId(app.id);
+    const appToSave = { ...app, id: firestoreSafeId };
 
-    const appRef = doc(db, 'apps', app.id);
+    const appRef = doc(db, 'apps', firestoreSafeId);
     try {
-        await setDoc(appRef, app);
+        await setDoc(appRef, appToSave);
         return { success: true };
     } catch (error: any) {
         console.error("Error in saveApp: ", error);
@@ -106,12 +114,24 @@ export const getAppsForUser = async (userProfile: UserProfile | null): Promise<A
         
         roles.forEach(role => {
             if (role.apps) {
-                role.apps.forEach(appId => allowedAppIds.add(appId));
+                // When checking for app access, use the original route (the 'id' in AppDefinition)
+                role.apps.forEach(appId => {
+                     // The role.apps contains the firestoreSafeId. We need to find the original route.
+                     // This logic might need adjustment if we don't have a reverse mapping.
+                     // For now, let's assume the check works against the firestore-safe ID.
+                     allowedAppIds.add(appId);
+                });
             }
         });
         
+        // We get all firestore apps and filter them
+        const allDbApps = await getAppsFromDB();
+        const allowedDbApps = allDbApps.filter(app => allowedAppIds.has(app.id));
+
+        const allowedRoutes = new Set(allowedDbApps.map(app => app.route));
+
         // Return only the user apps that the user has access to via their roles
-        const filteredApps = availableUserApps.filter(app => allowedAppIds.has(app.id));
+        const filteredApps = availableUserApps.filter(app => allowedRoutes.has(app.id));
         return filteredApps.sort((a,b) => a.name.localeCompare(b.name));
     }
 

@@ -16,6 +16,10 @@ import { Switch } from '@/components/ui/switch';
 import { Save } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 
+// Function to create a Firestore-safe ID from a route
+const createAppId = (route: string) => {
+    return route.replace(/\//g, '-');
+}
 
 export default function AdminRoleAppsPage() {
   const { user, loading } = useAuth();
@@ -67,12 +71,13 @@ export default function AdminRoleAppsPage() {
   }, [user])
 
   const handleCheckboxChange = (roleId: string, appId: string, checked: boolean | 'indeterminate') => {
+    const firestoreSafeId = createAppId(appId);
     setAssignedApps(prev => {
         const currentApps = prev[roleId] || [];
         if (checked) {
-            return { ...prev, [roleId]: [...currentApps, appId] };
+            return { ...prev, [roleId]: [...currentApps, firestoreSafeId] };
         } else {
-            return { ...prev, [roleId]: currentApps.filter(id => id !== appId) };
+            return { ...prev, [roleId]: currentApps.filter(id => id !== firestoreSafeId) };
         }
     });
   };
@@ -84,7 +89,7 @@ export default function AdminRoleAppsPage() {
   const handleSave = async () => {
     setIsSaving(true);
     try {
-        const allAppIds = availableApps.map(app => app.id);
+        const allAppIds = availableApps.map(app => createAppId(app.id));
         const rolesToUpdate = roles.map(role => {
             const isAdministrator = adminRoles[role.id];
             const appIds = isAdministrator ? allAppIds : (assignedApps[role.id] || []);
@@ -175,11 +180,12 @@ export default function AdminRoleAppsPage() {
                                 {roles.map(role => {
                                     const isAdministrator = adminRoles[role.id];
                                     const roleApps = assignedApps[role.id] || [];
+                                    const firestoreSafeId = createAppId(app.id);
                                     return (
                                         <TableCell key={`${app.id}-${role.id}`} className="text-center">
                                             <Checkbox
                                                 id={`checkbox-${role.id}-${app.id}`}
-                                                checked={isAdministrator || roleApps.includes(app.id)}
+                                                checked={isAdministrator || roleApps.includes(firestoreSafeId)}
                                                 onCheckedChange={(checked) => handleCheckboxChange(role.id, app.id, checked)}
                                                 aria-label={`Asignar ${app.name} a ${role.name}`}
                                                 disabled={isAdministrator}
