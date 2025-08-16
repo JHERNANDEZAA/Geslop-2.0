@@ -1,24 +1,31 @@
 "use client";
 
 import { useAuth, signOutUser } from '@/lib/auth.tsx';
-import { Building2, LogOut, ShoppingCart, List, Shield, LayoutDashboard } from 'lucide-react';
+import { Building2, LogOut, Shield } from 'lucide-react';
 import { Button } from './ui/button';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { cn } from '@/lib/utils';
-import { availableApps } from '@/lib/apps';
+import { useEffect, useState } from 'react';
+import { getAppsForUser, AppDefinition } from '@/lib/apps';
 
 export function PageHeader() {
-  const { user, isAdministrator } = useAuth();
+  const { user, userProfile, isAdministrator } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+  const [navLinks, setNavLinks] = useState<AppDefinition[]>([]);
+
+  useEffect(() => {
+    if (user && userProfile) {
+      getAppsForUser(userProfile).then(setNavLinks);
+    } else {
+      setNavLinks([]);
+    }
+  }, [user, userProfile]);
 
   const handleSignOut = async () => {
     await signOutUser();
     router.push('/login');
   };
-
-  const navLinks = availableApps.filter(app => !app.isAdmin);
 
   return (
     <header className="bg-card border-b shadow-sm sticky top-0 z-10">
@@ -49,7 +56,7 @@ export function PageHeader() {
           )}
         </div>
       </div>
-       {user && !pathname.startsWith('/admin') && (
+       {user && !pathname.startsWith('/admin') && navLinks && navLinks.length > 0 && (
           <div className="border-t">
               <nav className="mx-auto px-4 sm:px-6 lg:px-8 flex items-center space-x-2 h-12 overflow-x-auto">
                  {navLinks.map((link) => (

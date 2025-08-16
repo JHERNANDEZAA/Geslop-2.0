@@ -15,5 +15,36 @@ export const availableApps: AppDefinition[] = [
 export const getAllApps = async (): Promise<AppDefinition[]> => {
     // In the future, this could fetch from a database or a configuration file.
     // For now, it returns the hardcoded list.
-    return Promise.resolve(availableApps);
+    const apps = availableApps.filter(app => !app.isAdmin);
+    return Promise.resolve(apps);
 }
+
+export const getAllAdminApps = async (): Promise<AppDefinition[]> => {
+    const apps = availableApps.filter(app => app.isAdmin);
+    return Promise.resolve(apps);
+}
+
+export const getAppsForUser = async (userProfile: import('./types').UserProfile | null): Promise<AppDefinition[]> => {
+    if (!userProfile) {
+        return [];
+    }
+
+    if (userProfile.isAdministrator) {
+        return availableApps.filter(app => !app.isAdmin);
+    }
+    
+    if (userProfile.roles && userProfile.roles.length > 0) {
+        const roles = await import('./roles').then(module => module.getRoleByIds(userProfile.roles));
+        const allowedAppIds = new Set<string>();
+        
+        roles.forEach(role => {
+            if (role.apps) {
+                role.apps.forEach(appId => allowedAppIds.add(appId));
+            }
+        });
+        
+        return availableApps.filter(app => allowedAppIds.has(app.id) && !app.isAdmin);
+    }
+
+    return [];
+};

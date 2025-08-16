@@ -22,7 +22,7 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       await signInWithEmail(email, password);
-      router.push('/purchaseRequisition');
+      router.push('/'); // Redirect to the central routing page
     } catch (error: any) {
         toast({
           title: 'Error de inicio de sesión',

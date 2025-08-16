@@ -1,6 +1,6 @@
 import { db } from './firebase';
 import { doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs } from 'firebase/firestore';
-import type { UserProfile } from './types';
+import type { UserProfile, Role } from './types';
 import { getRoleByIds } from './roles';
 
 export const getUserProfile = async (uid: string): Promise<UserProfile | null> => {
@@ -10,9 +10,9 @@ export const getUserProfile = async (uid: string): Promise<UserProfile | null> =
     if (userSnap.exists()) {
         const userProfile = userSnap.data() as UserProfile;
         
-        // Check if any of the user's roles are administrator roles
+        let roles: Role[] = [];
         if (userProfile.roles && userProfile.roles.length > 0) {
-            const roles = await getRoleByIds(userProfile.roles);
+            roles = await getRoleByIds(userProfile.roles);
             userProfile.isAdministrator = roles.some(role => role.isAdministrator);
         } else {
             userProfile.isAdministrator = false;

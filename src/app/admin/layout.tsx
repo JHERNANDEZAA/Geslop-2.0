@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth, signOutUser } from '@/lib/auth';
@@ -17,9 +17,8 @@ import {
   SidebarInset,
   SidebarFooter,
 } from '@/components/ui/sidebar';
-import { availableApps } from '@/lib/apps';
+import { getAllAdminApps, AppDefinition } from '@/lib/apps';
 import { LogOut } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 
 export default function AdminLayout({
   children,
@@ -29,15 +28,20 @@ export default function AdminLayout({
   const { user, isAdministrator, loading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+  const [adminNavLinks, setAdminNavLinks] = useState<AppDefinition[]>([]);
 
   useEffect(() => {
     if (!loading && !user) {
       router.push('/login');
     } else if (!loading && user && !isAdministrator) {
         // If the user is logged in but not an admin, redirect them away
-        router.push('/purchaseRequisition'); 
+        router.push('/'); 
     }
   }, [user, isAdministrator, loading, router]);
+  
+  useEffect(() => {
+    getAllAdminApps().then(setAdminNavLinks);
+  }, []);
 
   const handleSignOut = async () => {
     await signOutUser();
@@ -55,8 +59,6 @@ export default function AdminLayout({
       </div>
     );
   }
-
-  const adminNavLinks = availableApps.filter(app => app.isAdmin);
 
   return (
     <SidebarProvider>
