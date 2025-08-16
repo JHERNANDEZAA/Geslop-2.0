@@ -3,7 +3,7 @@ import { db } from './firebase';
 import type { AppDefinition, AppDefinitionDB, UserProfile, App, Role } from './types';
 import * as LucideIcons from '@/components/ui/lucide-icons';
 import { getRoleByIds } from './roles';
-import { collection, getDocs, doc, setDoc, deleteDoc, getDoc, writeBatch } from 'firebase/firestore';
+import { collection, getDocs, doc, setDoc, deleteDoc, writeBatch } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 
 const hardcodedAdminAppsConfig: Omit<AppDefinitionDB, 'id'>[] = [
@@ -11,6 +11,7 @@ const hardcodedAdminAppsConfig: Omit<AppDefinitionDB, 'id'>[] = [
     { name: 'Asignación de Aplicaciones', description: 'Permite asignar aplicaciones a los diferentes roles.', iconName: 'AppWindow', isAdmin: true, route: '/admin/role-apps' },
     { name: 'Asignación de Roles a Usuarios', description: 'Permite asignar roles a los usuarios.', iconName: 'UserCheck', isAdmin: true, route: '/admin/user-roles' },
     { name: 'Gestión de Usuarios', description: 'Permite crear y gestionar los usuarios del sistema.', iconName: 'Users', isAdmin: true, route: '/admin/users' },
+    { name: 'Gestión de Aplicaciones', description: 'Permite sincronizar y gestionar las aplicaciones del sistema.', iconName: 'Library', isAdmin: true, route: '/admin/apps' },
 ];
 
 const hardcodedUserAppsConfig: Omit<AppDefinitionDB, 'id'>[] = [
@@ -59,7 +60,7 @@ export const getAppsFromDB = async (): Promise<App[]> => {
     }
 }
 
-export const saveApp = async (app: App, isUpdate: boolean): Promise<{ success: boolean; message?: string }> => {
+export const saveApp = async (app: App): Promise<{ success: boolean; message?: string }> => {
     const auth = getAuth();
     const currentUser = auth.currentUser;
 
@@ -67,20 +68,18 @@ export const saveApp = async (app: App, isUpdate: boolean): Promise<{ success: b
         throw new Error("Usuario no autenticado. Por favor, inicie sesión.");
     }
     
-    const safeAppId = app.id.replace(/\//g, '-');
+    const safeAppId = app.id.replace(/\//g, '-').substring(1);
     const appRef = doc(db, 'apps', safeAppId);
     
     const appToSave = { ...app, id: safeAppId };
 
-    if (!isUpdate) {
-        const docSnap = await getDoc(appRef);
-        if (docSnap.exists()) {
-            throw new Error(`Ya existe una aplicación con el ID '${app.id}'.`);
-        }
+    const docSnap = await getDoc(appRef);
+    if (docSnap.exists()) {
+        throw new Error(`Ya existe una aplicación con el ID '${app.id}'.`);
     }
     
     try {
-        await setDoc(appRef, appToSave, { merge: isUpdate });
+        await setDoc(appRef, appToSave, { merge: true });
         return { success: true };
     } catch (error: any) {
         console.error("Error in saveApp: ", error);
