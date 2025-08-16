@@ -1,7 +1,7 @@
 
 import { db } from './firebase';
 import type { AppDefinition, AppDefinitionDB, UserProfile, App, Role } from './types';
-import * as LucideIcons from 'lucide-react';
+import * as LucideIcons from '@/components/ui/lucide-icons';
 import { getRoleByIds } from './roles';
 import { collection, getDocs, doc, setDoc, deleteDoc, getDoc, writeBatch } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
@@ -11,23 +11,24 @@ const hardcodedAdminAppsConfig: Omit<AppDefinitionDB, 'id'>[] = [
     { name: 'Asignación de Aplicaciones', description: 'Permite asignar aplicaciones a los diferentes roles.', iconName: 'AppWindow', isAdmin: true, route: '/admin/role-apps' },
     { name: 'Asignación de Roles a Usuarios', description: 'Permite asignar roles a los usuarios.', iconName: 'UserCheck', isAdmin: true, route: '/admin/user-roles' },
     { name: 'Gestión de Usuarios', description: 'Permite crear y gestionar los usuarios del sistema.', iconName: 'Users', isAdmin: true, route: '/admin/users' },
-    { name: 'Gestión de Aplicaciones', description: 'Permite gestionar las aplicaciones del sistema.', iconName: 'Library', isAdmin: true, route: '/admin/apps' },
-    { name: 'Asignación catálogos a familias', description: 'Permite asignar catálogos a las familias de productos.', iconName: 'Archive', isAdmin: true, route: '/admin/catalog-families' },
 ];
 
 const hardcodedUserAppsConfig: Omit<AppDefinitionDB, 'id'>[] = [
      { name: 'Solicitud de compra', description: 'Permite crear y gestionar las solicitudes de compra.', iconName: 'ShoppingCart', isAdmin: false, route: '/purchaseRequisition' },
      { name: 'Administración de compras', description: 'Permite administrar las compras.', iconName: 'Archive', isAdmin: false, route: '/adminPurchasing' },
+     { name: 'Prueba5', description: 'Página de prueba 5.', iconName: 'TestTube', isAdmin: false, route: '/prueba5' },
 ];
 
 const iconMap: Record<string, React.ElementType> = LucideIcons;
 
 const mapAppToAppDefinition = (app: App): AppDefinition => {
+    const IconComponent = iconMap[app.iconName] || LucideIcons.AppWindow;
     return {
         ...app,
-        icon: iconMap[app.iconName] || LucideIcons.AppWindow,
+        icon: IconComponent,
     };
 };
+
 
 const mapAppDefinitionDBToAppDefinition = (app: AppDefinitionDB): AppDefinition => {
     return {
@@ -37,8 +38,8 @@ const mapAppDefinitionDBToAppDefinition = (app: AppDefinitionDB): AppDefinition 
 }
 
 export const getAllHardcodedApps = (): AppDefinition[] => {
-    const adminApps: AppDefinitionDB[] = hardcodedAdminAppsConfig.map(app => ({ ...app, id: app.route }));
-    const userApps: AppDefinitionDB[] = hardcodedUserAppsConfig.map(app => ({ ...app, id: app.route }));
+    const adminApps: AppDefinitionDB[] = hardcodedAdminAppsConfig.map(app => ({ ...app, id: app.route.replace(/\//g, '-') }));
+    const userApps: AppDefinitionDB[] = hardcodedUserAppsConfig.map(app => ({ ...app, id: app.route.replace(/\//g, '-') }));
     const allApps = [...adminApps, ...userApps];
     return allApps.map(mapAppDefinitionDBToAppDefinition);
 };
@@ -66,8 +67,11 @@ export const saveApp = async (app: App, isUpdate: boolean): Promise<{ success: b
         throw new Error("Usuario no autenticado. Por favor, inicie sesión.");
     }
     
-    const appRef = doc(db, 'apps', app.id);
+    const safeAppId = app.id.replace(/\//g, '-');
+    const appRef = doc(db, 'apps', safeAppId);
     
+    const appToSave = { ...app, id: safeAppId };
+
     if (!isUpdate) {
         const docSnap = await getDoc(appRef);
         if (docSnap.exists()) {
@@ -76,7 +80,7 @@ export const saveApp = async (app: App, isUpdate: boolean): Promise<{ success: b
     }
     
     try {
-        await setDoc(appRef, app, { merge: isUpdate });
+        await setDoc(appRef, appToSave, { merge: isUpdate });
         return { success: true };
     } catch (error: any) {
         console.error("Error in saveApp: ", error);
@@ -91,10 +95,8 @@ export const deleteApp = async (appId: string): Promise<void> => {
     try {
         const batch = writeBatch(db);
         
-        // 1. Delete the app document
         batch.delete(appRef);
 
-        // 2. Remove the app from all roles that have it
         const rolesSnapshot = await getDocs(rolesRef);
         rolesSnapshot.forEach(doc => {
             const role = doc.data() as Role;
