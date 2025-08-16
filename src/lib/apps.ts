@@ -13,10 +13,8 @@ export const availableApps: AppDefinition[] = [
 ];
 
 export const getAllApps = async (): Promise<AppDefinition[]> => {
-    // In the future, this could fetch from a database or a configuration file.
-    // For now, it returns the hardcoded list.
-    const apps = availableApps.filter(app => !app.isAdmin);
-    return Promise.resolve(apps);
+    // Devuelve todas las aplicaciones, tanto de administrador como de no administrador, para que se puedan gestionar en la pantalla de asignación de roles.
+    return Promise.resolve(availableApps);
 }
 
 export const getAllAdminApps = async (): Promise<AppDefinition[]> => {
