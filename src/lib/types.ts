@@ -107,6 +107,15 @@ export type AppDefinition = {
   route: string;
 };
 
+export type App = {
+    id: string;
+    name: string;
+    description: string;
+    iconName: string;
+    isAdmin: boolean;
+    route: string;
+};
+
 export type AppDefinitionDB = Omit<AppDefinition, 'icon'> & {
     iconName: string;
 };
