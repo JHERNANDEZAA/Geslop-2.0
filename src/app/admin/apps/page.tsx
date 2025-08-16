@@ -1,8 +1,8 @@
 
 "use client";
 
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
+import { useState, useEffect, useMemo } from 'react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -10,16 +10,25 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { getAllHardcodedApps, getAppsFromDB, saveApp, deleteApp } from '@/lib/apps';
 import type { AppDefinition, App } from '@/lib/types';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Trash2 } from 'lucide-react';
+import { Trash2, PlusCircle } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
+type CombinedApp = {
+  id: string;
+  name: string;
+  description: string;
+  route: string;
+  isAdmin: boolean;
+  iconName: string;
+  inCode: boolean;
+  inDb: boolean;
+};
+
 export default function AdminAppsPage() {
-  const [hardcodedApps, setHardcodedApps] = useState<AppDefinition[]>([]);
-  const [dbApps, setDbApps] = useState<App[]>([]);
+  const [combinedApps, setCombinedApps] = useState<CombinedApp[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [appToDelete, setAppToDelete] = useState<App | null>(null);
+  const [appToDelete, setAppToDelete] = useState<CombinedApp | null>(null);
   const { toast } = useToast();
 
   const fetchApps = async () => {
@@ -29,8 +38,43 @@ export default function AdminAppsPage() {
         getAllHardcodedApps(),
         getAppsFromDB()
       ]);
-      setHardcodedApps(codedApps.sort((a, b) => a.name.localeCompare(b.name)));
-      setDbApps(databaseApps.sort((a, b) => a.name.localeCompare(b.name)));
+
+      const appsMap = new Map<string, CombinedApp>();
+
+      // Process hardcoded apps
+      codedApps.forEach(app => {
+        appsMap.set(app.route, {
+          id: app.id,
+          name: app.name,
+          description: app.description,
+          route: app.route,
+          isAdmin: app.isAdmin || false,
+          iconName: (app.icon as any)?.displayName || 'AppWindow',
+          inCode: true,
+          inDb: false // Assume not in DB until checked
+        });
+      });
+
+      // Process database apps and merge
+      databaseApps.forEach(dbApp => {
+        if (appsMap.has(dbApp.route)) {
+          // App exists in both code and DB
+          const existing = appsMap.get(dbApp.route)!;
+          existing.inDb = true;
+          existing.id = dbApp.id; // Use DB id
+        } else {
+          // App exists only in DB (inconsistent)
+          appsMap.set(dbApp.route, {
+            ...dbApp,
+            inCode: false,
+            inDb: true
+          });
+        }
+      });
+      
+      const sortedApps = Array.from(appsMap.values()).sort((a, b) => a.name.localeCompare(b.name));
+      setCombinedApps(sortedApps);
+
     } catch (error: any) {
       toast({
         title: "Error al cargar aplicaciones",
@@ -46,15 +90,15 @@ export default function AdminAppsPage() {
     fetchApps();
   }, []);
 
-  const handleAddToDb = async (appDef: AppDefinition) => {
+  const handleAddToDb = async (appDef: CombinedApp) => {
     setIsSaving(true);
     try {
       const appToSave: App = {
-        id: appDef.route.replace(/\//g, '-').substring(1), // Create a safe ID from route
+        id: appDef.id,
         name: appDef.name,
         description: appDef.description,
-        iconName: (appDef.icon as any).displayName || 'AppWindow', 
-        isAdmin: appDef.isAdmin || false,
+        iconName: appDef.iconName,
+        isAdmin: appDef.isAdmin,
         route: appDef.route,
       };
       await saveApp(appToSave);
@@ -98,128 +142,96 @@ export default function AdminAppsPage() {
         setAppToDelete(null);
     }
   }
-
-  const isAppInDb = (appRoute: string) => {
-    return dbApps.some(dbApp => dbApp.route === appRoute);
-  };
   
-  const isInconsistent = (appRoute: string) => {
-    return !hardcodedApps.some(hApp => hApp.route === appRoute);
-  };
-
+  const getStatus = (app: CombinedApp): { text: string; variant: "default" | "secondary" | "destructive" } => {
+      if (app.inDb && !app.inCode) return { text: "Inconsistente", variant: "destructive" };
+      if (app.inDb) return { text: "En BBDD", variant: "default" };
+      return { text: "No en BBDD", variant: "secondary" };
+  }
 
   return (
-    <Tabs defaultValue="inconsistencies">
-      <TabsList className="grid w-full grid-cols-2">
-        <TabsTrigger value="management">Gestión de Aplicaciones</TabsTrigger>
-        <TabsTrigger value="inconsistencies">Informe de Incoherencias</TabsTrigger>
-      </TabsList>
-      <TabsContent value="management">
-        <div className="flex flex-col gap-6">
-            <AlertDialog>
-              <Card>
-                  <CardHeader><CardTitle>Aplicaciones en Base de Datos</CardTitle></CardHeader>
-                  <CardContent>
-                    {isLoading ? <Skeleton className="h-48 w-full" /> : (
-                      <div className="rounded-md border">
-                          <Table>
-                              <TableHeader>
-                                  <TableRow>
-                                      <TableHead>Nombre</TableHead>
-                                      <TableHead>Ruta</TableHead>
-                                      <TableHead>Es Admin</TableHead>
-                                      <TableHead className="text-right">Acciones</TableHead>
-                                  </TableRow>
-                              </TableHeader>
-                              <TableBody>
-                                  {dbApps.map((app) => (
-                                      <TableRow key={app.id}>
-                                          <TableCell className="font-medium flex flex-col">
-                                            {app.name}
-                                            {isInconsistent(app.route) && <Badge variant="destructive" className="w-fit mt-1">Inconsistente</Badge>}
-                                          </TableCell>
-                                          <TableCell>{app.route}</TableCell>
-                                          <TableCell>{app.isAdmin ? 'Sí' : 'No'}</TableCell>
-                                          <TableCell className="text-right space-x-2">
-                                              <AlertDialogTrigger asChild>
-                                                  <Button variant="destructive" size="icon" onClick={() => setAppToDelete(app)}><Trash2 className="h-4 w-4" /></Button>
-                                              </AlertDialogTrigger>
-                                          </TableCell>
-                                      </TableRow>
-                                  ))}
-                              </TableBody>
-                          </Table>
-                      </div>
-                    )}
-                  </CardContent>
-              </Card>
-               {appToDelete && (
-                  <AlertDialogContent>
-                      <AlertDialogHeader>
-                          <AlertDialogTitle>¿Está seguro que desea eliminar esta aplicación?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                              Esta acción no se puede deshacer y eliminará permanentemente la aplicación <span className="font-bold">{appToDelete.name}</span>.
-                          </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                          <AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90">Eliminar</AlertDialogAction>
-                      </AlertDialogFooter>
-                  </AlertDialogContent>
-              )}
-            </AlertDialog>
-        </div>
-      </TabsContent>
-      <TabsContent value="inconsistencies">
-        <Card>
-            <CardHeader>
-            <CardTitle>Informe de Incoherencias</CardTitle>
-            <CardDescription>
-                Esta tabla muestra las aplicaciones definidas en el código. Puede detectar si falta alguna en la base de datos y añadirla.
-            </CardDescription>
-            </CardHeader>
-            <CardContent>
-            {isLoading ? <Skeleton className="h-48 w-full" /> : (
-                <div className="rounded-md border">
-                <Table>
-                    <TableHeader>
-                    <TableRow>
-                        <TableHead>Nombre</TableHead>
-                        <TableHead>Ruta</TableHead>
-                        <TableHead>Estado en BBDD</TableHead>
-                        <TableHead className="text-right">Acciones</TableHead>
-                    </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                    {hardcodedApps.map((app) => (
-                        <TableRow key={app.id}>
+    <AlertDialog>
+      <Card>
+        <CardHeader>
+          <CardTitle>Gestión de Aplicaciones</CardTitle>
+          <CardDescription>
+            Este informe unificado muestra todas las aplicaciones definidas en el código y las que se encuentran en la base de datos. 
+            Permite añadir, eliminar y detectar incoherencias.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? <Skeleton className="h-64 w-full" /> : (
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Nombre</TableHead>
+                    <TableHead>Ruta</TableHead>
+                    <TableHead>Origen</TableHead>
+                    <TableHead>Estado</TableHead>
+                    <TableHead className="text-right">Acciones</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {combinedApps.map((app) => {
+                    const status = getStatus(app);
+                    return (
+                      <TableRow key={app.route}>
                         <TableCell className="font-medium">{app.name}</TableCell>
                         <TableCell className="text-muted-foreground">{app.route}</TableCell>
                         <TableCell>
-                            {isAppInDb(app.route) ? (
-                            <Badge variant="default" className="bg-green-600">En BBDD</Badge>
-                            ) : (
-                            <Badge variant="secondary">No en BBDD</Badge>
-                            )}
+                          {app.inCode && app.inDb ? "Ambos" : app.inCode ? "Código" : "Base de Datos"}
                         </TableCell>
-                        <TableCell className="text-right">
+                        <TableCell>
+                          <Badge variant={status.variant} className={status.variant === 'default' ? 'bg-green-600' : ''}>
+                            {status.text}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right space-x-2">
+                          {app.inCode && !app.inDb && (
                             <Button
-                            onClick={() => handleAddToDb(app)}
-                            disabled={isAppInDb(app.route) || !!isSaving}
-                            size="sm"
+                              onClick={() => handleAddToDb(app)}
+                              disabled={isSaving}
+                              size="sm"
+                              variant="outline"
                             >
-                            {isSaving ? 'Añadiendo...' : 'Añadir a BBDD'}
+                              <PlusCircle className="mr-2 h-4 w-4" />
+                              {isSaving ? 'Añadiendo...' : 'Añadir a BBDD'}
                             </Button>
+                          )}
+                          {app.inDb && (
+                            <AlertDialogTrigger asChild>
+                              <Button variant="destructive" size="icon" onClick={() => setAppToDelete(app)}>
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                          )}
                         </TableCell>
-                        </TableRow>
-                    ))}
-                    </TableBody>
-                </Table>
-                </div>
-            )}
-            </CardContent>
-        </Card>
-      </TabsContent>
-    </Tabs>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+      
+      {appToDelete && (
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Está seguro que desea eliminar esta aplicación?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción no se puede deshacer y eliminará permanentemente la aplicación <span className="font-bold">{appToDelete.name}</span> de la base de datos.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90">Eliminar</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      )}
+    </AlertDialog>
   );
 }
+
