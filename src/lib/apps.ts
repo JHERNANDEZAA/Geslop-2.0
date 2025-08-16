@@ -22,12 +22,20 @@ const hardcodedUserAppsConfig: Omit<AppDefinitionDB, 'id'>[] = [
 
 const iconMap: Record<string, React.ElementType> = LucideIcons;
 
-const mapAppDefinition = (app: AppDefinitionDB): AppDefinition => {
+const mapAppToAppDefinition = (app: App): AppDefinition => {
+    return {
+        ...app,
+        icon: iconMap[app.iconName] || LucideIcons.AppWindow,
+    };
+};
+
+const mapAppDefinitionDBToAppDefinition = (app: AppDefinitionDB): AppDefinition => {
     return {
         ...app,
         icon: iconMap[app.iconName] || LucideIcons.AppWindow,
     };
 }
+
 
 // Function to create a Firestore-safe ID from a route
 const createAppId = (route: string) => {
@@ -38,7 +46,7 @@ export const getAllHardcodedApps = (): AppDefinition[] => {
     const adminApps: AppDefinitionDB[] = hardcodedAdminAppsConfig.map(app => ({ ...app, id: app.route }));
     const userApps: AppDefinitionDB[] = hardcodedUserAppsConfig.map(app => ({ ...app, id: app.route }));
     const allApps = [...adminApps, ...userApps];
-    return allApps.map(mapAppDefinition).sort((a, b) => a.name.localeCompare(b.name));
+    return allApps.map(mapAppDefinitionDBToAppDefinition).sort((a, b) => a.name.localeCompare(b.name));
 };
 
 export const getAppsFromDB = async (): Promise<App[]> => {
@@ -80,17 +88,17 @@ export const saveApp = async (app: App): Promise<{ success: boolean; message?: s
 
 export const getAllApps = async (): Promise<AppDefinition[]> => {
     try {
-        const hardcodedApps = getAllHardcodedApps();
-        return Promise.resolve(hardcodedApps);
+        const dbApps = await getAppsFromDB();
+        return dbApps.map(mapAppToAppDefinition).sort((a, b) => a.name.localeCompare(b.name));
     } catch (error) {
-        console.error("Error getting all apps: ", error);
+        console.error("Error getting all apps from DB: ", error);
         throw new Error("No se pudo obtener la lista completa de aplicaciones.");
     }
 }
 
 export const getAllAdminApps = async (): Promise<AppDefinition[]> => {
     const adminApps: AppDefinitionDB[] = hardcodedAdminAppsConfig.map(app => ({ ...app, id: app.route }));
-    const mappedAdminApps = adminApps.map(mapAppDefinition);
+    const mappedAdminApps = adminApps.map(mapAppDefinitionDBToAppDefinition);
     return Promise.resolve(mappedAdminApps.sort((a,b) => a.name.localeCompare(b.name)));
 }
 
@@ -100,7 +108,7 @@ export const getAppsForUser = async (userProfile: UserProfile | null): Promise<A
     }
     
     // Get all non-admin apps defined in the code
-    const availableUserApps = hardcodedUserAppsConfig.map(app => mapAppDefinition({ ...app, id: app.route }));
+    const availableUserApps = hardcodedUserAppsConfig.map(app => mapAppDefinitionDBToAppDefinition({ ...app, id: app.route }));
 
     // An admin gets all available user apps
     if (userProfile.isAdministrator) {
@@ -131,7 +139,7 @@ export const getAppsForUser = async (userProfile: UserProfile | null): Promise<A
         const allowedRoutes = new Set(allowedDbApps.map(app => app.route));
 
         // Return only the user apps that the user has access to via their roles
-        const filteredApps = availableUserApps.filter(app => allowedRoutes.has(app.id));
+        const filteredApps = availableUserApps.filter(app => allowedRoutes.has(app.route));
         return filteredApps.sort((a,b) => a.name.localeCompare(b.name));
     }
 
