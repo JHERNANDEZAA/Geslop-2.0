@@ -144,9 +144,10 @@ export default function AdminAppsPage() {
   }
   
   const getStatus = (app: CombinedApp): { text: string; variant: "default" | "secondary" | "destructive" } => {
-      if (app.inDb && !app.inCode) return { text: "Inconsistente", variant: "destructive" };
+      if (app.inDb && !app.inCode) return { text: "Incoherente", variant: "destructive" };
+      if (app.inCode && !app.inDb) return { text: "Incoherente", variant: "secondary" };
       if (app.inDb) return { text: "En BBDD", variant: "default" };
-      return { text: "No en BBDD", variant: "secondary" };
+      return { text: "Estado desconocido", variant: "secondary" };
   }
 
   return (
