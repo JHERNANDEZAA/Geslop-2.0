@@ -144,8 +144,8 @@ export default function AdminAppsPage() {
   }
   
   const getStatus = (app: CombinedApp): { text: string; variant: "default" | "secondary" | "destructive" } => {
-      if (app.inDb && !app.inCode) return { text: "Incoherente", variant: "destructive" };
       if (app.inCode && !app.inDb) return { text: "Incoherente", variant: "destructive" };
+      if (!app.inCode && app.inDb) return { text: "Incoherente", variant: "destructive" };
       if (app.inDb) return { text: "En BBDD", variant: "default" };
       return { text: "Estado desconocido", variant: "secondary" };
   }
@@ -184,7 +184,7 @@ export default function AdminAppsPage() {
                           {app.inCode && app.inDb ? "Ambos" : app.inCode ? "Código" : "Base de Datos"}
                         </TableCell>
                         <TableCell>
-                          <Badge variant={status.variant} className={status.variant === 'default' ? 'bg-green-600' : ''}>
+                          <Badge variant={status.variant} className={status.variant === 'destructive' ? 'bg-destructive text-destructive-foreground' : status.variant === 'default' ? 'bg-green-600' : ''}>
                             {status.text}
                           </Badge>
                         </TableCell>
