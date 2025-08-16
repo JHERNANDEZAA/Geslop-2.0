@@ -12,7 +12,7 @@ const hardcodedAdminAppsConfig: Omit<AppDefinitionDB, 'id'>[] = [
     { name: 'Asignación de Roles a Usuarios', description: 'Permite asignar roles a los usuarios.', iconName: 'UserCheck', isAdmin: true, route: '/admin/user-roles' },
     { name: 'Gestión de Usuarios', description: 'Permite crear y gestionar los usuarios del sistema.', iconName: 'Users', isAdmin: true, route: '/admin/users' },
     { name: 'Gestión de Aplicaciones', description: 'Permite sincronizar y gestionar las aplicaciones del sistema.', iconName: 'Library', isAdmin: true, route: '/admin/apps' },
-    { name: 'Asignación de catálogos a familias', description: 'Permite asignar catálogos a familias de productos.', iconName: 'Library', isAdmin: true, route: '/admin/catalog-families' },
+    { name: 'Asignación de catálogos a familias', description: 'Permite asignar catálogos a familias de productos.', iconName: 'FolderKanban', isAdmin: true, route: '/admin/catalog-families' },
 ];
 
 const hardcodedUserAppsConfig: Omit<AppDefinitionDB, 'id'>[] = [
