@@ -5,6 +5,7 @@ import { UserCog, AppWindow, UserCheck, Users, Library, Beaker, ShoppingCart, Li
 export const availableApps: AppDefinition[] = [
     { id: '/purchaseRequisition', name: 'Solicitud de productos', description: 'Permite a los usuarios crear y gestionar solicitudes de productos.', icon: List, isAdmin: false },
     { id: '/adminPurchasing', name: 'Administración de compras', description: 'Permite gestionar catálogos, familias y destinatarios.', icon: ShoppingCart, isAdmin: false },
+    { id: '/prueba3', name: 'Prueba 3', description: 'Página de prueba número 3.', icon: Beaker, isAdmin: false },
     { id: '/admin/roles', name: 'Administración de Roles', description: 'Permite crear y gestionar los roles de usuario.', icon: UserCog, isAdmin: true },
     { id: '/admin/role-apps', name: 'Asignación de Aplicaciones', description: 'Permite asignar aplicaciones a los diferentes roles.', icon: AppWindow, isAdmin: true },
     { id: '/admin/user-roles', name: 'Asignación de Roles a Usuarios', description: 'Permite asignar roles a los usuarios.', icon: UserCheck, isAdmin: true },
