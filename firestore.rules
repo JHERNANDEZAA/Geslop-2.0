@@ -1,37 +1,78 @@
-
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Admin collections: allow read/write for any authenticated user
-    match /users/{userId} {
-      allow read, write: if request.auth != null;
-    }
-    match /roles/{roleId} {
-      allow read, write: if request.auth != null;
-    }
-    match /apps/{appId} {
-      allow read, write: if request.auth != null;
-    }
-    match /counters/{counterId} {
-      allow read, write: if request.auth != null;
-    }
-    match /catalogs_admin/{catalogId} {
-        allow read, write: if request.auth != null;
-    }
-    
-    // User-specific collections
-    match /favorites/{favoriteId} {
-      // Users can only read and write their own favorites.
-      // The document ID is structured as `${userId}_${materialCode}`
-      allow read, write: if request.auth != null && request.auth.uid == favoriteId.split('_')[0];
+
+    // Helper functions
+    function isUserAuthenticated() {
+      return request.auth != null;
     }
 
-    // Request collections
-    match /request_headers/{headerId} {
-      allow read, write: if request.auth != null;
+    function isUserProfileOwner(userId) {
+      return request.auth.uid == userId;
     }
+    
+    function userHasRole(roleName) {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roles.hasAny(get(/databases/$(database)/documents/roles/roleName).data.id);
+    }
+    
+    function isAdministrator() {
+      // Get the user's profile
+      let userProfile = get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+      // Get the user's roles from their profile
+      let userRoleIds = userProfile.roles;
+      // Check if any of the roles have isAdministrator set to true
+      // Note: This requires roles to be separate documents that can be fetched.
+      // This rule structure might need to be adjusted based on actual data model.
+      // For simplicity, we assume we can check an 'isAdministrator' field on the user profile directly.
+      // Firestore rules cannot perform joins, so checking role properties requires direct access.
+      return userProfile.isAdministrator == true;
+    }
+    
+    // Rules for 'users' collection
+    match /users/{userId} {
+      allow read, write: if isUserProfileOwner(userId) || isAdministrator();
+      allow list: if isAdministrator();
+    }
+    
+    // Rules for 'roles' collection
+    match /roles/{roleId} {
+        allow read: if isUserAuthenticated();
+        allow write: if isAdministrator();
+    }
+    
+    // Rules for 'apps' collection
+    match /apps/{appId} {
+        allow read: if isUserAuthenticated();
+        allow write: if isUserAuthenticated();
+    }
+    
+    // Rules for 'request_positions' collection (assuming this is a top-level collection)
     match /request_positions/{positionId} {
-      allow read, write: if request.auth != null;
+      allow read, write: if isUserAuthenticated();
+    }
+    
+    // Rules for 'request_headers' collection
+    match /request_headers/{headerId} {
+      allow read, list, write: if isUserAuthenticated();
+    }
+    
+    // Rules for 'counters' collection (typically only for server-side access)
+    match /counters/{counterId} {
+      // No client access, should be managed by admin/backend logic
+      allow read, write: if false; 
+    }
+    
+    // Rules for 'catalogs_admin'
+    match /catalogs_admin/{catalogId} {
+      allow read, write: if isUserAuthenticated();
+    }
+    
+    // Rules for 'favorites'
+    match /favorites/{favoriteId} {
+      // Users can only manage their own favorites.
+      // The favoriteId should be structured like 'userId_materialCode'.
+      allow read, write: if isUserAuthenticated() && request.auth.uid == resource.data.userId;
     }
   }
 }
