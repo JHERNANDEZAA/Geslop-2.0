@@ -40,7 +40,7 @@ export default function AdminLayout({
   }, [user, isAdministrator, loading, router]);
   
   useEffect(() => {
-    getAllAdminApps().then(setAdminNavLinks);
+    setAdminNavLinks(getAllAdminApps());
   }, []);
 
   const handleSignOut = async () => {
@@ -71,9 +71,9 @@ export default function AdminLayout({
                     <SidebarMenu>
                         {adminNavLinks.map(link => (
                             <SidebarMenuItem key={link.id}>
-                                <Link href={link.id}>
+                                <Link href={link.route}>
                                     <SidebarMenuButton
-                                        isActive={pathname === link.id}
+                                        isActive={pathname === link.route}
                                         tooltip={{
                                             children: link.name,
                                             side: 'right',
