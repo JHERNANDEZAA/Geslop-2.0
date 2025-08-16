@@ -1,35 +1,73 @@
 
-import type { AppDefinition } from './types';
-import { UserCog, AppWindow, UserCheck, Users, Library, Beaker, ShoppingCart, List } from 'lucide-react';
+import { db } from './firebase';
+import { doc, getDoc, setDoc, collection, getDocs, query, where, deleteDoc } from 'firebase/firestore';
+import type { AppDefinition, AppDefinitionDB } from './types';
+import * as LucideIcons from 'lucide-react';
 
-export const availableApps: AppDefinition[] = [
-    { id: '/purchaseRequisition', name: 'Solicitud de productos', description: 'Permite a los usuarios crear y gestionar solicitudes de productos.', icon: List, isAdmin: false },
-    { id: '/adminPurchasing', name: 'Administración de compras', description: 'Permite gestionar catálogos, familias y destinatarios.', icon: ShoppingCart, isAdmin: false },
-    { id: '/prueba3', name: 'Prueba 3', description: 'Página de prueba número 3.', icon: Beaker, isAdmin: false },
-    { id: '/admin/roles', name: 'Administración de Roles', description: 'Permite crear y gestionar los roles de usuario.', icon: UserCog, isAdmin: true },
-    { id: '/admin/role-apps', name: 'Asignación de Aplicaciones', description: 'Permite asignar aplicaciones a los diferentes roles.', icon: AppWindow, isAdmin: true },
-    { id: '/admin/user-roles', name: 'Asignación de Roles a Usuarios', description: 'Permite asignar roles a los usuarios.', icon: UserCheck, isAdmin: true },
-    { id: '/admin/users', name: 'Gestión de Usuarios', description: 'Permite crear y gestionar los usuarios del sistema.', icon: Users, isAdmin: true },
-    { id: '/admin/catalog-families', name: 'Asignación catálogos a familias', description: 'Permite asignar catálogos a las familias de productos.', icon: Library, isAdmin: true },
+// Admin apps are still hardcoded as they are essential for the system's administration.
+export const adminApps: AppDefinition[] = [
+    { id: '/admin/roles', name: 'Administración de Roles', description: 'Permite crear y gestionar los roles de usuario.', iconName: 'UserCog', isAdmin: true },
+    { id: '/admin/role-apps', name: 'Asignación de Aplicaciones', description: 'Permite asignar aplicaciones a los diferentes roles.', iconName: 'AppWindow', isAdmin: true },
+    { id: '/admin/user-roles', name: 'Asignación de Roles a Usuarios', description: 'Permite asignar roles a los usuarios.', iconName: 'UserCheck', isAdmin: true },
+    { id: '/admin/users', name: 'Gestión de Usuarios', description: 'Permite crear y gestionar los usuarios del sistema.', iconName: 'Users', isAdmin: true },
+    { id: '/admin/catalog-families', name: 'Asignación catálogos a familias', description: 'Permite asignar catálogos a las familias de productos.', iconName: 'Library', isAdmin: true },
+    { id: '/admin/apps', name: 'Gestión de Aplicaciones', description: 'Permite la gestión de las aplicaciones del sistema', iconName: 'AppWindow', isAdmin: true },
 ];
 
+const iconMap: Record<string, React.ElementType> = LucideIcons;
+
+const mapAppDefinition = (app: AppDefinitionDB): AppDefinition => {
+    return {
+        ...app,
+        icon: iconMap[app.iconName] || LucideIcons.AppWindow,
+    };
+}
+
+export const getAppsFromDB = async (includeAdmin: boolean = false): Promise<AppDefinition[]> => {
+    const appsRef = collection(db, 'apps');
+    const constraints = [];
+    if (!includeAdmin) {
+        // This is not longer needed, we will return all apps
+    }
+    const q = query(appsRef, ...constraints);
+    
+    try {
+        const querySnapshot = await getDocs(q);
+        const apps = querySnapshot.docs.map(doc => mapAppDefinition(doc.data() as AppDefinitionDB));
+        return apps.sort((a, b) => a.name.localeCompare(b.name));
+    } catch (error) {
+        console.error("Error getting apps: ", error);
+        throw new Error("No se pudo obtener la lista de aplicaciones.");
+    }
+}
+
+
 export const getAllApps = async (): Promise<AppDefinition[]> => {
-    // Devuelve todas las aplicaciones, tanto de administrador como de no administrador, para que se puedan gestionar en la pantalla de asignación de roles.
-    return Promise.resolve(availableApps);
+    try {
+        const dbApps = await getAppsFromDB(true);
+        const allApps = [...adminApps, ...dbApps];
+        const uniqueApps = Array.from(new Map(allApps.map(app => [app.id, app])).values());
+        return uniqueApps.sort((a,b) => a.name.localeCompare(b.name));
+    } catch (error) {
+        console.error("Error getting all apps: ", error);
+        throw new Error("No se pudo obtener la lista completa de aplicaciones.");
+    }
 }
 
 export const getAllAdminApps = async (): Promise<AppDefinition[]> => {
-    const apps = availableApps.filter(app => app.isAdmin);
-    return Promise.resolve(apps);
+    return Promise.resolve(adminApps.sort((a,b) => a.name.localeCompare(b.name)));
 }
 
 export const getAppsForUser = async (userProfile: import('./types').UserProfile | null): Promise<AppDefinition[]> => {
     if (!userProfile) {
         return [];
     }
+    
+    const allApps = await getAllApps();
+    const userApps = allApps.filter(app => !app.isAdmin);
 
     if (userProfile.isAdministrator) {
-        return availableApps.filter(app => !app.isAdmin);
+        return userApps;
     }
     
     if (userProfile.roles && userProfile.roles.length > 0) {
@@ -42,8 +80,42 @@ export const getAppsForUser = async (userProfile: import('./types').UserProfile 
             }
         });
         
-        return availableApps.filter(app => allowedAppIds.has(app.id) && !app.isAdmin);
+        return userApps.filter(app => allowedAppIds.has(app.id));
     }
 
     return [];
+};
+
+export const saveApp = async (appData: Omit<AppDefinitionDB, 'id'>, id: string): Promise<{ success: boolean; message?: string }> => {
+    const appRef = doc(db, 'apps', id);
+    try {
+        const docSnap = await getDoc(appRef);
+        if (docSnap.exists()) {
+            return { success: false, message: `El ID de la aplicación '${id}' ya existe. Por favor, use uno diferente.` };
+        }
+
+        const newApp: AppDefinitionDB = {
+            id,
+            ...appData,
+        };
+
+        await setDoc(appRef, newApp);
+        return { success: true };
+    } catch (error: any) {
+        console.error("Error in saveApp: ", error);
+        throw error;
+    }
+}
+
+export const deleteApp = async (appId: string): Promise<void> => {
+    if (adminApps.some(app => app.id === appId)) {
+        throw new Error("No se pueden eliminar las aplicaciones de administración del sistema.");
+    }
+    const appRef = doc(db, 'apps', appId);
+    try {
+        await deleteDoc(appRef);
+    } catch (error: any) {
+        console.error("Error deleting app: ", error);
+        throw new Error("No se pudo eliminar la aplicación.");
+    }
 };
