@@ -4,6 +4,7 @@ import type { AppDefinition, AppDefinitionDB, UserProfile, App } from './types';
 import * as LucideIcons from 'lucide-react';
 import { getRoleByIds } from './roles';
 import { collection, getDocs, doc, setDoc } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
 
 
 const hardcodedAdminAppsConfig: Omit<AppDefinitionDB, 'id'>[] = [
@@ -52,13 +53,20 @@ export const getAppsFromDB = async (): Promise<App[]> => {
 }
 
 export const saveApp = async (app: App): Promise<{ success: boolean; message?: string }> => {
+    const auth = getAuth();
+    const currentUser = auth.currentUser;
+
+    if (!currentUser) {
+        throw new Error("Usuario no autenticado. Por favor, inicie sesión.");
+    }
+
     const appRef = doc(db, 'apps', app.id);
     try {
         await setDoc(appRef, app);
         return { success: true };
     } catch (error: any) {
         console.error("Error in saveApp: ", error);
-        throw error;
+        throw new Error(error.message || "No se pudo guardar la aplicación.");
     }
 };
 
@@ -88,7 +96,7 @@ export const getAppsForUser = async (userProfile: UserProfile | null): Promise<A
 
     // An admin gets all available user apps
     if (userProfile.isAdministrator) {
-        return availableUserApps;
+        return availableUserApps.sort((a,b) => a.name.localeCompare(b.name));
     }
     
     // For non-admins, filter apps based on their roles
@@ -103,7 +111,8 @@ export const getAppsForUser = async (userProfile: UserProfile | null): Promise<A
         });
         
         // Return only the user apps that the user has access to via their roles
-        return availableUserApps.filter(app => allowedAppIds.has(app.id));
+        const filteredApps = availableUserApps.filter(app => allowedAppIds.has(app.id));
+        return filteredApps.sort((a,b) => a.name.localeCompare(b.name));
     }
 
     return [];
