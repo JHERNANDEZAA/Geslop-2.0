@@ -1,6 +1,4 @@
 
-import { db } from './firebase';
-import { doc, getDoc, setDoc, collection, getDocs, query, where, deleteDoc } from 'firebase/firestore';
 import type { AppDefinition, AppDefinitionDB, UserProfile } from './types';
 import * as LucideIcons from 'lucide-react';
 import { getRoleByIds } from './roles';
@@ -34,27 +32,10 @@ export const getAllHardcodedApps = (): AppDefinition[] => {
     return allApps.map(mapAppDefinition).sort((a, b) => a.name.localeCompare(b.name));
 };
 
-export const getAppsFromDB = async (): Promise<AppDefinition[]> => {
-    const appsRef = collection(db, 'apps');
-    const q = query(appsRef);
-    
-    try {
-        const querySnapshot = await getDocs(q);
-        const apps = querySnapshot.docs.map(doc => mapAppDefinition(doc.data() as AppDefinitionDB));
-        return apps.sort((a, b) => a.name.localeCompare(b.name));
-    } catch (error) {
-        console.error("Error getting apps from DB: ", error);
-        throw new Error("No se pudo obtener la lista de aplicaciones de la base de datos.");
-    }
-}
-
 export const getAllApps = async (): Promise<AppDefinition[]> => {
     try {
         const hardcodedApps = getAllHardcodedApps();
-        const dbApps = await getAppsFromDB();
-        const allApps = [...hardcodedApps, ...dbApps];
-        const uniqueApps = Array.from(new Map(allApps.map(app => [app.id, app])).values());
-        return uniqueApps.sort((a,b) => a.name.localeCompare(b.name));
+        return Promise.resolve(hardcodedApps);
     } catch (error) {
         console.error("Error getting all apps: ", error);
         throw new Error("No se pudo obtener la lista completa de aplicaciones.");
@@ -72,10 +53,7 @@ export const getAppsForUser = async (userProfile: UserProfile | null): Promise<A
         return [];
     }
     
-    const dbApps = await getAppsFromDB();
-    const hardcodedNonAdminApps = hardcodedUserAppsConfig.map(app => mapAppDefinition({ ...app, id: app.route }));
-    
-    const availableUserApps = Array.from(new Map([...hardcodedNonAdminApps, ...dbApps].map(app => [app.id, app])).values());
+    const availableUserApps = hardcodedUserAppsConfig.map(app => mapAppDefinition({ ...app, id: app.route }));
 
     if (userProfile.isAdministrator) {
         return availableUserApps;
@@ -95,41 +73,4 @@ export const getAppsForUser = async (userProfile: UserProfile | null): Promise<A
     }
 
     return [];
-};
-
-
-export const saveApp = async (appData: Omit<AppDefinitionDB, 'id'>, id: string): Promise<{ success: boolean; message?: string }> => {
-    const appRef = doc(db, 'apps', id);
-    try {
-        const docSnap = await getDoc(appRef);
-        if (docSnap.exists()) {
-            return { success: false, message: `El ID de la aplicación '${id}' ya existe. Por favor, use uno diferente.` };
-        }
-
-        const newApp: AppDefinitionDB = {
-            id,
-            ...appData,
-        };
-
-        await setDoc(appRef, newApp);
-        return { success: true };
-    } catch (error: any) {
-        console.error("Error in saveApp: ", error);
-        throw new Error("No se pudo guardar la aplicación: " + error.message);
-    }
-}
-
-
-export const deleteApp = async (appId: string): Promise<void> => {
-    const allHardcodedApps = getAllHardcodedApps();
-    if (allHardcodedApps.some(app => app.id === appId)) {
-        throw new Error("No se pueden eliminar las aplicaciones definidas en el código.");
-    }
-    const appRef = doc(db, 'apps', appId);
-    try {
-        await deleteDoc(appRef);
-    } catch (error: any) {
-        console.error("Error deleting app: ", error);
-        throw new Error("No se pudo eliminar la aplicación.");
-    }
 };

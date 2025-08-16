@@ -1,14 +1,26 @@
+
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
     
+    function isAdministrator() {
+      return exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdministrator == true;
+    }
+
     match /users/{userId} {
-      allow read, write: if request.auth != null;
+      allow read, write: if request.auth.uid == userId || isAdministrator();
     }
 
     match /roles/{roleId} {
-      allow read, write: if request.auth != null;
+      allow read: if request.auth != null;
+      allow write: if isAdministrator();
+    }
+
+    match /apps/{appId} {
+      allow read: if request.auth != null;
+      allow write: if isAdministrator();
     }
     
     match /favorites/{favoriteId} {
@@ -16,7 +28,8 @@ service cloud.firestore {
     }
 
     match /counters/{counterId} {
-        allow read, write: if request.auth != null;
+      allow read: if request.auth != null;
+      allow write: if isAdministrator();
     }
 
     match /request_headers/{headerId} {
@@ -28,7 +41,8 @@ service cloud.firestore {
     }
 
     match /catalogs_admin/{catalogId} {
-        allow read, write: if request.auth != null;
+      allow read: if request.auth != null;
+      allow write: if isAdministrator();
     }
   }
 }
