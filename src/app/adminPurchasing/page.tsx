@@ -1,15 +1,16 @@
 "use client";
 
-import { useState, useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { useAuth } from '@/lib/auth';
 import { PageHeader } from '@/components/page-header';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from '@/hooks/use-toast';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -21,8 +22,8 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { saveAdminCatalog, searchAdminCatalogs, deleteAdminCatalog } from '@/lib/catalogs';
-import { useToast } from '@/hooks/use-toast';
 import type { CatalogAdmin } from '@/lib/types';
+import { useState, useRef } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
@@ -197,7 +198,7 @@ export default function AdminPurchasingPage() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <PageHeader />
-      <main className="flex-grow flex flex-col">
+       <main className="flex-grow flex flex-col">
         <Card className="shadow-none rounded-none border-x-0 border-t-0 border-b-0">
           <CardHeader>
             <CardTitle>Administración de compras</CardTitle>
